@@ -12,7 +12,12 @@ on branch `linkself-main`. The full upstream history is preserved and the `upstr
 - LinkSelf's own application is a separate program in a separate repository and talks to this service over HTTP with
   per-organization API keys. LinkSelf code is not copied into this repository.
 
+## Where the source lives
+Public repository: https://github.com/Noumenon-ai/linkself-social (branch `linkself-main`). The running service must link here once it
+serves users (AGPL-3.0 section 13).
+
 ## Modification log
+- 2026-10-26: published this fork publicly at the URL above on the owner's instruction.
 - 2026-10-26: added docker-compose.linkself.yaml (pinned image ghcr.io/gitroomhq/postiz-app:v2.25.3 by digest, all ports on
   127.0.0.1, env from a file outside the repository, no Spotlight; Elasticsearch kept because Temporal SQL visibility allows only 3 Text search attributes and the backend registers more, which makes it fail to start) and this document. No application code changed.
 
