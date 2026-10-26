@@ -1,0 +1,142 @@
+# LinkSelf staging stack for the Postiz-derived social service.
+# Pinned to the image built from upstream tag v2.25.3 (commit a5affe62), the revision this fork starts from.
+# All host ports bind to 127.0.0.1. Secrets come from an env file outside the repository (see docs/LINKSELF_FORK.md).
+services:
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app:v2.25.3@sha256:3e2facf0c1ffdfe07b31cebdc5b850767721cb40a7a389dd07485f8e381bb49f
+    container_name: linkself-social
+    restart: unless-stopped
+    env_file:
+      - ${LINKSELF_SOCIAL_ENV:?set LINKSELF_SOCIAL_ENV to the chmod 600 env file}
+    volumes:
+      - linkself-social-config:/config/
+      - linkself-social-uploads:/uploads/
+    ports:
+      - "127.0.0.1:4007:5000"
+    networks:
+      - linkself-social-network
+    depends_on:
+      postiz-postgres:
+        condition: service_healthy
+      postiz-redis:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+
+  postiz-postgres:
+    image: postgres:17-alpine
+    container_name: linkself-social-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_USER: postiz-user
+      POSTGRES_DB: postiz-db-local
+    volumes:
+      - linkself-social-postgres:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5471:5432"
+    networks:
+      - linkself-social-network
+    healthcheck:
+      test: pg_isready -U postiz-user -d postiz-db-local
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  postiz-redis:
+    image: redis:7.2
+    container_name: linkself-social-redis
+    restart: unless-stopped
+    volumes:
+      - linkself-social-redis:/data
+    ports:
+      - "127.0.0.1:6381:6379"
+    networks:
+      - linkself-social-network
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  temporal-elasticsearch:
+    image: elasticsearch:7.17.27
+    container_name: linkself-social-temporal-es
+    restart: unless-stopped
+    environment:
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=512mb
+      - cluster.routing.allocation.disk.watermark.high=256mb
+      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+    volumes:
+      - linkself-social-temporal-es:/usr/share/elasticsearch/data
+    networks:
+      - linkself-social-network
+    expose:
+      - 9200
+
+  temporal-postgresql:
+    image: postgres:16
+    container_name: linkself-social-temporal-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_USER: temporal
+    volumes:
+      - linkself-social-temporal-db:/var/lib/postgresql/data
+    networks:
+      - linkself-social-network
+
+  temporal:
+    image: temporalio/auto-setup:1.28.1
+    container_name: linkself-social-temporal
+    restart: unless-stopped
+    depends_on:
+      - temporal-postgresql
+      - temporal-elasticsearch
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=temporal-postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+      - TEMPORAL_NAMESPACE=default
+      - ENABLE_ES=true
+      - ES_SEEDS=temporal-elasticsearch
+      - ES_VERSION=v7
+    volumes:
+      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+    ports:
+      - "127.0.0.1:7233:7233"
+    networks:
+      - linkself-social-network
+
+  temporal-ui:
+    image: temporalio/ui:2.34.0
+    container_name: linkself-social-temporal-ui
+    restart: unless-stopped
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    ports:
+      - "127.0.0.1:8081:8080"
+    networks:
+      - linkself-social-network
+
+volumes:
+  linkself-social-config:
+  linkself-social-uploads:
+  linkself-social-postgres:
+  linkself-social-redis:
+  linkself-social-temporal-db:
+  linkself-social-temporal-es:
+
+networks:
+  linkself-social-network:
+    external: false
