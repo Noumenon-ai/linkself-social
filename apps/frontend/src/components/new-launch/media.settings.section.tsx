@@ -1,5 +1,7 @@
 'use client';
 
+import { APP_NAME } from '@gitroom/helpers/app-name';
+
 import { FC, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
@@ -84,7 +86,7 @@ export const MediaSettingsSection: FC = () => {
             data-tooltip-class-name="!max-w-[400px] break-words"
             data-tooltip-content={t(
               'media_settings_section_tooltip',
-              'Thumbnails apply to videos in the main post and are sent to every channel that supports them. YouTube may ignore them on videos it treats as Shorts (vertical, up to 3 minutes) without failing the publish, and requires a phone-verified channel for custom thumbnails. If YouTube rejects the thumbnail the video is still published, and Postiz cannot check eligibility in advance.'
+              `Thumbnails apply to videos in the main post and are sent to every channel that supports them. YouTube may ignore them on videos it treats as Shorts (vertical, up to 3 minutes) without failing the publish, and requires a phone-verified channel for custom thumbnails. If YouTube rejects the thumbnail the video is still published, and ${APP_NAME} cannot check eligibility in advance.`
             )}
             className="cursor-help text-[#A3A3A3]"
             xmlns="http://www.w3.org/2000/svg"

@@ -1,3 +1,4 @@
+import { APP_NAME } from '@gitroom/helpers/app-name';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import resourcesToBackend from 'i18next-resources-to-backend';
@@ -14,6 +15,7 @@ i18next
     })
   )
   .init({
+    interpolation: { defaultVariables: { appName: APP_NAME } },
     supportedLngs: languages,
     fallbackLng,
     lng: undefined,

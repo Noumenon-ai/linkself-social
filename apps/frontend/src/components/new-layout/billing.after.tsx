@@ -1,3 +1,4 @@
+import { APP_NAME } from '@gitroom/helpers/app-name';
 import { BillingComponent } from '@gitroom/frontend/components/billing/billing.component';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
@@ -23,7 +24,7 @@ export const BillingAfter = () => {
         <h1 className="text-3xl [@media(max-width:1024px)]:text-xl">
           {t(
             'join_10000_entrepreneurs_who_use_postiz',
-            'Join 10,000+ Entrepreneurs Who Use Postiz'
+            `Join 10,000+ Entrepreneurs Who Use ${APP_NAME}`
           )}
           <br />
           {t(

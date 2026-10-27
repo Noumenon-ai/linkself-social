@@ -1,5 +1,7 @@
 'use client';
 
+import { APP_NAME } from '@gitroom/helpers/app-name';
+
 import React, { FC, useCallback } from 'react';
 import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
@@ -8,7 +10,7 @@ import { setCookie } from '@gitroom/frontend/components/layout/layout.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
   const fetch = useFetch();
-  const { isGeneral, isSecured } = useVariables();
+  const { isGeneral, isSecured, linkselfUrl } = useVariables();
   const t = useT();
 
   const logout = useCallback(async () => {
@@ -23,14 +25,15 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
     ) {
       if (!isSecured) {
         setCookie('auth', '', -10);
+        setCookie('showorg', '', -10);
       } else {
         await fetch('/user/logout', {
           method: 'POST',
         });
       }
-      window.location.href = '/';
+      window.location.href = linkselfUrl ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social` : '/auth/login';
     }
-  }, []);
+  }, [fetch, isSecured, linkselfUrl, t]);
   return (
     <>
       <div className="cursor-pointer" onClick={logout}>
@@ -44,7 +47,7 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
             data-tooltip-id="tooltip"
             data-tooltip-content={`
             ${t('logout_from', 'Logout from')}${' '}
-            ${isGeneral ? ' Postiz' : ' Gitroom'}
+            ${' ' + APP_NAME}
             `}
           >
             <path
@@ -55,7 +58,7 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         ) : (
           <span className="text-red-400">
             {t('logout_from', 'Logout from')}
-            {isGeneral ? ' Postiz' : ' Gitroom'}
+            {' ' + APP_NAME}
           </span>
         )}
       </div>

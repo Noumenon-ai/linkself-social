@@ -3,7 +3,7 @@
   "provider": {
     "id": "openai",
     "model": "gpt-4.1",
-    "prompt": "Translate accurately from {source} to {target}, maintaining the original meaning.",
+    "prompt": "Translate accurately from {source} to {target}, maintaining the original meaning. Preserve {{appName}} placeholders exactly; they contain the configured product name.",
     "baseUrl": "https://api.openai.com/v1"
   },
   "locale": {

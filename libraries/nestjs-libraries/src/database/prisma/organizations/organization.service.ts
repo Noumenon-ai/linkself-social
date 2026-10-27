@@ -1,3 +1,4 @@
+import { APP_NAME } from '@gitroom/helpers/app-name';
 import { CreateOrgUserDto } from '@gitroom/nestjs-libraries/dtos/auth/create.org.user.dto';
 import { HttpException, Injectable } from '@nestjs/common';
 import { OrganizationRepository } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.repository';
@@ -57,6 +58,10 @@ export class OrganizationService {
 
   getAccountOverview(orgId: string) {
     return this._organizationRepository.getAccountOverview(orgId);
+  }
+
+  getOrganizationOwner(orgId: string) {
+    return this._organizationRepository.getOrganizationOwner(orgId);
   }
 
   getOrgByApiKey(api: string) {
@@ -143,7 +148,7 @@ export class OrganizationService {
       body.email
     );
     if (!users.length) {
-      throw new HttpException('No Postiz account found for this email', 400);
+      throw new HttpException(`No ${APP_NAME} account found for this email`, 400);
     }
 
     if (users.length > 1) {

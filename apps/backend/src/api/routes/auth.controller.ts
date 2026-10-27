@@ -1,3 +1,4 @@
+import { setSessionCookies } from '@gitroom/backend/services/auth/session';
 import {
   Body,
   Controller,
@@ -74,39 +75,11 @@ export class AuthController {
         return;
       }
 
-      response.cookie('auth', jwt, {
-        domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
-        ...(!process.env.NOT_SECURED
-          ? {
-              secure: true,
-              httpOnly: true,
-              sameSite: 'none',
-            }
-          : {}),
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      });
-
-      if (process.env.NOT_SECURED) {
-        response.header('auth', jwt);
-      }
-
-      if (typeof addedOrg !== 'boolean' && addedOrg?.organizationId) {
-        response.cookie('showorg', addedOrg.organizationId, {
-          domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
-          ...(!process.env.NOT_SECURED
-            ? {
-                secure: true,
-                httpOnly: true,
-                sameSite: 'none',
-              }
-            : {}),
-          expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-        });
-
-        if (process.env.NOT_SECURED) {
-          response.header('showorg', addedOrg.organizationId);
-        }
-      }
+      setSessionCookies(
+        response,
+        jwt,
+        typeof addedOrg !== 'boolean' ? addedOrg?.organizationId : undefined
+      );
 
       Sentry.metrics.count('new_user', 1);
       response.header('onboarding', 'true');
@@ -139,39 +112,11 @@ export class AuthController {
         getOrgFromCookie
       );
 
-      response.cookie('auth', jwt, {
-        domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
-        ...(!process.env.NOT_SECURED
-          ? {
-              secure: true,
-              httpOnly: true,
-              sameSite: 'none',
-            }
-          : {}),
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      });
-
-      if (process.env.NOT_SECURED) {
-        response.header('auth', jwt);
-      }
-
-      if (typeof addedOrg !== 'boolean' && addedOrg?.organizationId) {
-        response.cookie('showorg', addedOrg.organizationId, {
-          domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
-          ...(!process.env.NOT_SECURED
-            ? {
-                secure: true,
-                httpOnly: true,
-                sameSite: 'none',
-              }
-            : {}),
-          expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-        });
-
-        if (process.env.NOT_SECURED) {
-          response.header('showorg', addedOrg.organizationId);
-        }
-      }
+      setSessionCookies(
+        response,
+        jwt,
+        typeof addedOrg !== 'boolean' ? addedOrg?.organizationId : undefined
+      );
 
       response.header('reload', 'true');
       response.status(200).json({

@@ -7,12 +7,9 @@ import '@copilotkit/react-ui/styles.css';
 import LayoutContext from '@gitroom/frontend/components/layout/layout.context';
 import { ReactNode } from 'react';
 import { jakartaSans } from '@gitroom/frontend/fonts/plus-jakarta-sans/plus.jakarta.sans.font';
-import PlausibleProvider from 'next-plausible';
 import clsx from 'clsx';
 import { VariableContextComponent } from '@gitroom/react/helpers/variable.context';
-import { Fragment } from 'react';
 import UtmSaver from '@gitroom/helpers/utils/utm.saver';
-import { DubAnalytics } from '@gitroom/frontend/components/layout/dubAnalytics';
 import { FacebookComponent } from '@gitroom/frontend/components/layout/facebook.component';
 import { GoogleTagManagerComponent } from '@gitroom/frontend/components/layout/gtm.component';
 import { cookies } from 'next/headers';
@@ -27,21 +24,11 @@ import { ChangeDirClient } from '@gitroom/frontend/components/new-layout/change.
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
   const language = cookieStore.get(cookieName)?.value || fallbackLng;
-  const Plausible = !!process.env.STRIPE_PUBLISHABLE_KEY
-    ? PlausibleProvider
-    : Fragment;
   return (
     <html>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        {!!process.env.DATAFAST_WEBSITE_ID && (
-          <Script
-            data-website-id={process.env.DATAFAST_WEBSITE_ID}
-            data-domain="postiz.com"
-            src="https://datafa.st/js/script.js"
-            strategy="afterInteractive"
-          />
-        )}
+
       </head>
       <ChangeDirClient />
       <body
@@ -58,6 +45,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           isChatBase={!!process.env.CHATBASE_TOKEN}
           billingEnabled={!!process.env.STRIPE_PUBLISHABLE_KEY}
           discordUrl={process.env.NEXT_PUBLIC_DISCORD_SUPPORT!}
+          linkselfUrl={process.env.LINKSELF_URL || process.env.NEXT_PUBLIC_LINKSELF_URL || ''}
           frontEndUrl={process.env.FRONTEND_URL!}
           isGeneral={!!process.env.IS_GENERAL}
           genericOauth={!!process.env.POSTIZ_GENERIC_OAUTH}
@@ -67,7 +55,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           cloudflareUrl={process.env.CLOUDFLARE_BUCKET_URL || ''}
           mainUrl={process.env.MAIN_URL || ''}
           mcpUrl={process.env.MCP_URL}
-          dub={!!process.env.STRIPE_PUBLISHABLE_KEY}
+          dub={false}
           facebookPixel={process.env.NEXT_PUBLIC_FACEBOOK_PIXEL!}
           telegramBotName={process.env.TELEGRAM_BOT_NAME!}
           neynarClientId={process.env.NEYNAR_CLIENT_ID!}
@@ -97,17 +85,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         >
           <SentryComponent>
             <HtmlComponent />
-            <DubAnalytics />
             <FacebookComponent />
             <GoogleTagManagerComponent gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
-            <Plausible
-              domain={!!process.env.IS_GENERAL ? 'postiz.com' : 'gitroom.com'}
-            >
               <LayoutContext>
                 <UtmSaver />
                 {children}
               </LayoutContext>
-            </Plausible>
           </SentryComponent>
         </VariableContextComponent>
       </body>

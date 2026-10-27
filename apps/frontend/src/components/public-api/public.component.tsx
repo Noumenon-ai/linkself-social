@@ -1,5 +1,7 @@
 'use client';
 
+import { APP_NAME } from '@gitroom/helpers/app-name';
+
 import { useState, useCallback } from 'react';
 import { useSWRConfig } from 'swr';
 import { useUser } from '../layout/user.context';
@@ -21,7 +23,7 @@ export const remoteMcpClients = {
 } as const;
 
 // Official one-click connectors listed in the assistants' directories, they
-// point at the public MCP server: the hosted Postiz (billingEnabled), or a
+// point at the public MCP server: the hosted publishing desk (billingEnabled), or a
 // self-hosted install through "Use self-hosted" on its sign-in page.
 export const mcpConnectorUrls = {
   Claude: 'https://claude.ai/directory/postiz',
@@ -35,7 +37,7 @@ export const mcpConnectorUrls = {
 // the agent installs the CLI itself and asks you for the API key
 export const chatOnlyMcpClients = {
   'Grok Bot':
-    'Install the Postiz CLI with `npm install -g postiz`, then install the Postiz skill with `npx skills add gitroomhq/postiz-agent`. Ask me for my Postiz API key and set it as the POSTIZ_API_KEY environment variable before using the CLI.',
+    `Install the upstream CLI with \`npm install -g postiz\`, then install the upstream skill with \`npx skills add gitroomhq/postiz-agent\`. Ask me for my ${APP_NAME} API key and set it as the POSTIZ_API_KEY environment variable before using the CLI.`,
 } as const;
 
 export const mcpClients = [
@@ -57,7 +59,7 @@ export type ChatOnlyMcpClient = keyof typeof chatOnlyMcpClients;
 export type McpClient = (typeof mcpClients)[number];
 export type AnyMcpClient = RemoteMcpClient | ChatOnlyMcpClient | McpClient;
 
-// oauth: no API key, the client registers itself (DCR) and the user signs in to Postiz
+// oauth: no API key, the client registers itself (DCR) and the user signs in to the publishing desk
 // apikey: the organization API key, as a Bearer header (or inside the URL for remote clients)
 export type McpAuth = 'oauth' | 'apikey';
 
@@ -167,7 +169,7 @@ export const getMcpConfig = (
       case 'NanoClaw':
         return {
           config: `ncl groups config add-mcp-server --id <group-id> --name postiz --url ${oauthUrl}`,
-          hint: 'Run this in your terminal, replace <group-id> with the agent group that should get Postiz.',
+          hint: `Run this in your terminal, replace <group-id> with the agent group that should get ${APP_NAME}.`,
         };
     }
   }
@@ -266,7 +268,7 @@ export const getMcpConfig = (
       // No headers flag, the key travels inside the URL like remote clients
       return {
         config: `ncl groups config add-mcp-server --id <group-id> --name postiz --url ${mcpBase}/mcp/${apiKey}`,
-        hint: 'Run this in your terminal, replace <group-id> with the agent group that should get Postiz.',
+        hint: `Run this in your terminal, replace <group-id> with the agent group that should get ${APP_NAME}.`,
       };
   }
 };
@@ -354,7 +356,7 @@ const McpSection = ({
           <div className="text-[13px] text-customColor18 mt-[2px]">
             {t(
               'connect_your_mcp_client_to_postiz_to_schedule_your_posts_faster',
-              'Connect Postiz MCP server to your client (Http streaming) to schedule your posts faster.'
+              `Connect ${APP_NAME} MCP server to your client (Http streaming) to schedule your posts faster.`
             )}
           </div>
         </div>
@@ -411,7 +413,7 @@ const McpSection = ({
                   {m === 'official'
                     ? t('official_connector', 'Official connector')
                     : m === 'oauth'
-                    ? t('sign_in_no_api_key', 'Sign in with Postiz (no API key)')
+                    ? t('sign_in_no_api_key', `Sign in with ${APP_NAME} (no API key)`)
                     : t('api_key', 'API Key')}
                 </button>
               ))}
@@ -424,12 +426,12 @@ const McpSection = ({
               {isSelfHosted
                 ? t(
                     'connector_self_hosted_description',
-                    'The official connector works with self-hosted Postiz too. When asked to sign in, choose "Use self-hosted" and enter {{url}} with your API key.',
+                    `The official connector works with self-hosted ${APP_NAME} too. When asked to sign in, choose "Use self-hosted" and enter {{url}} with your API key.`,
                     { url: mcpBase, interpolation: { escapeValue: false } }
                   )
                 : t(
                     'connector_onboarding_description',
-                    'The fastest way: add Postiz with one click, you will be asked to sign in'
+                    `The fastest way: add ${APP_NAME} with one click, you will be asked to sign in`
                   )}
             </div>
             <div className="flex flex-wrap gap-[8px]">
@@ -490,7 +492,7 @@ const McpSection = ({
               !chatOnly &&
               ` ${t(
                 'oauth_sign_in_hint',
-                'Your agent will open a browser window to sign in to Postiz.'
+                `Your agent will open a browser window to sign in to ${APP_NAME}.`
               )}`}
           </div>
           <pre className="bg-newBgColorInner border border-newBorder rounded-[8px] p-[16px] text-[13px] whitespace-pre-wrap break-all overflow-x-auto leading-[1.6]">
@@ -582,7 +584,7 @@ export const localCliSteps = [
     code: 'postiz auth:login',
   },
   {
-    label: 'Install the Postiz skill for your AI agent',
+    label: 'Install the upstream skill for your AI agent',
     code: 'npx skills add gitroomhq/postiz-agent',
   },
 ] as const;
@@ -597,7 +599,7 @@ const ciCliSteps = [
     code: 'export POSTIZ_API_KEY="{API_KEY}"',
   },
   {
-    label: 'Install the Postiz skill for your AI agent',
+    label: 'Install the upstream skill for your AI agent',
     code: 'npx skills add gitroomhq/postiz-agent',
   },
 ] as const;
@@ -636,7 +638,7 @@ const CliSection = ({ apiKey }: { apiKey: string }) => {
           <div className="text-[13px] text-customColor18 mt-[2px]">
             {t(
               'cli_description',
-              'Use the Postiz CLI to automate posting from your terminal, or install the skill to let your AI agent schedule posts for you.'
+              'Use the upstream CLI to automate posting from your terminal, or install the skill to let your AI agent schedule posts for you.'
             )}
           </div>
         </div>
@@ -770,7 +772,7 @@ const PublicApiContent = () => {
         <br />
         {t(
           'api_auth_note_line2',
-          'If you are building a product that schedules posts on behalf of other Postiz users,'
+          `If you are building a product that schedules posts on behalf of other ${APP_NAME} users,`
         )}
         <br />
         {t(
@@ -792,7 +794,7 @@ const PublicApiContent = () => {
             <div className="text-[13px] text-customColor18 mt-[2px]">
               {t(
                 'use_postiz_api_to_integrate_with_your_tools',
-                'Use Postiz API to integrate with your tools.'
+                `Use ${APP_NAME} API to integrate with your tools.`
               )}
             </div>
           </div>

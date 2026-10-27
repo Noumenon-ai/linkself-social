@@ -1,4 +1,17 @@
-import { Body, Controller, Param, Post, Res } from '@nestjs/common';
+import { Response } from 'express';
+import {
+  createSessionToken,
+  setSessionCookies,
+} from '@gitroom/backend/services/auth/session';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import { ioRedis } from '@gitroom/nestjs-libraries/redis/redis.service';
@@ -20,7 +33,8 @@ export class EnterpriseController {
   private verifyEnterpriseToken<T extends object>(params: string): T {
     const payload = AuthService.verifyJWT(params) as any;
     if (
-      !payload || typeof payload !== 'object' ||
+      !payload ||
+      typeof payload !== 'object' ||
       'providerName' in payload || // login token (full User row)
       'orgId' in payload || // team invite token
       'expires' in payload // password reset token
@@ -29,6 +43,80 @@ export class EnterpriseController {
     }
 
     return payload as T;
+  }
+
+  private readonly logger = new Logger(EnterpriseController.name);
+
+  @Get('/login')
+  async login(
+    @Query('params') params: string,
+    @Res({ passthrough: false }) response: Response
+  ) {
+    // Only fixed reasons are logged: exceptions may contain credentials.
+    let reason = 'invalid token';
+    try {
+      const payload = this.verifyEnterpriseToken<{
+        apiKey: string;
+        jti: string;
+        exp: number;
+        iat: number;
+        redirect?: string;
+      }>(params);
+      reason = 'invalid claims';
+      const now = Math.floor(Date.now() / 1000);
+      if (
+        typeof payload.apiKey !== 'string' ||
+        !payload.apiKey ||
+        typeof payload.jti !== 'string' ||
+        !payload.jti ||
+        !Number.isFinite(payload.exp) ||
+        !Number.isFinite(payload.iat) ||
+        payload.exp <= now ||
+        payload.exp <= payload.iat ||
+        payload.iat > now ||
+        payload.exp - payload.iat > 60
+      )
+        throw new Error();
+
+      reason = 'replayed token or replay store unavailable';
+      if (
+        (await ioRedis.set(
+          `enterprise-login:${payload.jti}`,
+          '1',
+          'EX',
+          120,
+          'NX'
+        )) !== 'OK'
+      ) {
+        throw new Error();
+      }
+      reason = 'organization unavailable';
+      const org = await this._organizationService.getOrgByApiKey(
+        payload.apiKey
+      );
+      if (!org || org.deletedAt) throw new Error();
+      reason = 'organization owner unavailable';
+      const user = await this._organizationService.getOrganizationOwner(org.id);
+      if (!user || user.deletedAt || !user.activated) throw new Error();
+      reason = 'session creation failed';
+      setSessionCookies(response, createSessionToken(user), org.id);
+      const path = payload.redirect;
+      const redirect =
+        typeof path === 'string' &&
+        path.startsWith('/') &&
+        !path.startsWith('//') &&
+        path.length <= 200 &&
+        !/[\\\x00-\x1f\x7f]/.test(path)
+          ? path
+          : '/launches';
+      return response.redirect(302, `${process.env.FRONTEND_URL}${redirect}`);
+    } catch {
+      this.logger.warn(`Enterprise SSO rejected: ${reason}`);
+      return response.redirect(
+        302,
+        `${process.env.FRONTEND_URL}/auth/login?error=sso`
+      );
+    }
   }
 
   @Post('/create-user')

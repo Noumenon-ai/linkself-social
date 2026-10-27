@@ -8,7 +8,7 @@ import { ChatbaseComponent } from '@gitroom/frontend/components/layout/chatbase.
 export const supportEmitter = new EventEmitter();
 export const Support = () => {
   const [show, setShow] = useState(true);
-  const { discordUrl, isChatBase } = useVariables();
+  const { discordUrl, isChatBase, isGeneral } = useVariables();
   const t = useT();
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export const Support = () => {
   if (isChatBase) {
     return <ChatbaseComponent />;
   }
-  if (!discordUrl || !show) return null;
+  if (!isGeneral || !discordUrl || !show) return null;
   return (
     <div
       id="support-discord"

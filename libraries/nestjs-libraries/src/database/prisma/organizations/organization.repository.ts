@@ -75,6 +75,19 @@ export class OrganizationRepository {
     return this._organization.model.organization.count();
   }
 
+  async getOrganizationOwner(orgId: string) {
+    const membership = await this._userOrg.model.userOrganization.findFirst({
+      where: {
+        organizationId: orgId,
+        role: Role.SUPERADMIN,
+        disabled: false,
+        user: { deletedAt: null, activated: true },
+      },
+      include: { user: true },
+    });
+    return membership?.user;
+  }
+
   getSuperAdminUser(orgId: string) {
     return this._userOrg.model.userOrganization.findFirst({
       where: {

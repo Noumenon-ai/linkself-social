@@ -1,5 +1,7 @@
 'use client';
 
+import { APP_NAME } from '@gitroom/helpers/app-name';
+
 import React, { FC, Fragment, useCallback, useState } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
@@ -66,7 +68,8 @@ export const Webhooks: FC = () => {
       <div className="text-customColor18 mt-[4px]">
         {t(
           'webhooks_are_a_way_to_get_notified_when_something_happens_in_postiz_via_an_http_request',
-          'Webhooks are a way to get notified when something happens in Postiz via\n        an HTTP request.'
+          `Webhooks are a way to get notified when something happens in ${APP_NAME} via
+        an HTTP request.`
         )}
       </div>
       <div className="my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] flex gap-[24px]">

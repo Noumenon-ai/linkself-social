@@ -1,0 +1,8 @@
+# Override for the locally built, rebranded image. Use together with the staging file:
+#   docker compose -f docker-compose.linkself.yaml -f docker-compose.linkself.local.yaml up -d
+# Build the image first from this tree:
+#   docker build -f Dockerfile.dev -t linkself-social:p7a .
+services:
+  postiz:
+    image: linkself-social:p7a
+    pull_policy: never

@@ -1,3 +1,4 @@
+import { createSessionToken } from './session';
 import { Injectable } from '@nestjs/common';
 import { Provider, User } from '@prisma/client';
 import { CreateOrgUserDto } from '@gitroom/nestjs-libraries/dtos/auth/create.org.user.dto';
@@ -330,9 +331,6 @@ export class AuthService {
   }
 
   private async jwt(user: User) {
-    if (user.password) {
-      delete user.password;
-    }
-    return AuthChecker.signJWT(user);
+    return createSessionToken(user);
   }
 }

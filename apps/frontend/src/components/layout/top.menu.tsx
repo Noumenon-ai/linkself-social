@@ -241,7 +241,7 @@ export const TopMenu: FC = () => {
                 if (f.hide) {
                   return false;
                 }
-                if (f.requireBilling && !billingEnabled) {
+                if (f.requireBilling && (!billingEnabled || !isGeneral)) {
                   return false;
                 }
                 if (f.name === 'Billing' && user?.isLifetime) {
@@ -269,7 +269,7 @@ export const TopMenu: FC = () => {
             if (f.hide) {
               return false;
             }
-            if (f.requireBilling && !billingEnabled) {
+            if (f.requireBilling && (!billingEnabled || !isGeneral)) {
               return false;
             }
             if (f.name === 'Billing' && user?.isLifetime) {

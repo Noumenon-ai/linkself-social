@@ -1,9 +1,10 @@
+import { APP_NAME } from '@gitroom/helpers/app-name';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication } from '@nestjs/common';
 
 export const loadSwagger = (app: INestApplication) => {
   const config = new DocumentBuilder()
-    .setTitle('Postiz Swagger file')
+    .setTitle(`${APP_NAME} Swagger file`)
     .setDescription('API description')
     .setVersion('1.0')
     .build();

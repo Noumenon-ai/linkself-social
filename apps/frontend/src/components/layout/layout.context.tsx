@@ -23,7 +23,7 @@ export function setCookie(cname: string, cvalue: string, exdays: number) {
 }
 function LayoutContextInner(params: { children: ReactNode }) {
   const returnUrl = useReturnUrl();
-  const { backendUrl, isGeneral, isSecured } = useVariables();
+  const { backendUrl, isGeneral, isSecured, linkselfUrl } = useVariables();
   const afterRequest = useCallback(
     async (url: string, options: RequestInit, response: Response) => {
       if (
@@ -55,7 +55,7 @@ function LayoutContextInner(params: { children: ReactNode }) {
         setCookie('auth', '', -10);
         setCookie('showorg', '', -10);
         setCookie('impersonate', '', -10);
-        window.location.href = '/';
+        window.location.href = logout && linkselfUrl ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social` : '/auth/login';
         return true;
       }
       const reloadOrOnboarding =
@@ -86,7 +86,7 @@ function LayoutContextInner(params: { children: ReactNode }) {
           setCookie('showorg', '', -10);
           setCookie('impersonate', '', -10);
         }
-        window.location.href = '/';
+        window.location.href = logout && linkselfUrl ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social` : '/auth/login';
       }
       if (response.status === 406) {
         if (
