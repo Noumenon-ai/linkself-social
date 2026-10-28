@@ -26,6 +26,8 @@ serves users (AGPL-3.0 section 13).
   English translations, public/embedded logos and extension assets as LinkSelf Social; added source attribution and LinkSelf
   login/logout links, removed upstream analytics, and hid self-hosted marketing/support navigation. No upstream copyright
   or licence notices, provider integration logic, posting pipeline, Temporal workflows, Prisma schema or compose file changed.
+- 2026-10-27: removed .github/workflows/staging-conflicts.yml. Upstream runs it every 10 minutes against a staging branch
+  this fork does not have, so it failed on every run and emailed the owner. Also disabled on GitHub for the published branch.
 
 ## Running the staging stack
 ```
