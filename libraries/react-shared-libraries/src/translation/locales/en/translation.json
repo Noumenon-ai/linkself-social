@@ -284,6 +284,7 @@
   "create_account": "Create Account",
   "already_have_an_account": "Already Have An Account?",
   "sign_in": "Sign In",
+  "too_many_attempts": "Too many attempts, please try again later",
   "sign_in_1": "Sign in",
   "don_t_have_an_account": "Don't Have An Account?",
   "forgot_password": "Forgot password",

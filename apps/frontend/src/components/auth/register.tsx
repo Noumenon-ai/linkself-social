@@ -140,7 +140,13 @@ export function RegisterAfter({
           });
         } else {
           form.setError('email', {
-            message: await response.text(),
+            message:
+              response.status === 429
+                ? t(
+                    'too_many_attempts',
+                    'Too many attempts, please try again later'
+                  )
+                : await response.text(),
           });
         }
       })

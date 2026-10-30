@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { sign, verify } from 'jsonwebtoken';
 import { Response } from 'express';
 import { EnterpriseController } from './enterprise.controller';
@@ -216,5 +217,11 @@ describe('Enterprise browser login', () => {
       302,
       'https://social.linkself.net/launches'
     );
+  });
+
+  it('is not throttled by the sign-in form limit', () => {
+    expect(
+      Reflect.getMetadata(GUARDS_METADATA, EnterpriseController.prototype.login)
+    ).toBeUndefined();
   });
 });

@@ -54,6 +54,16 @@ export function Login() {
         provider: 'LOCAL',
       }),
     });
+    if (login.status === 429) {
+      form.setError('email', {
+        message: t(
+          'too_many_attempts',
+          'Too many attempts, please try again later'
+        ),
+      });
+      setLoading(false);
+      return;
+    }
     if (login.status === 400) {
       const errorMessage = await login.text();
       if (errorMessage === 'User is not activated') {

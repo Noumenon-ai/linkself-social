@@ -28,6 +28,13 @@ serves users (AGPL-3.0 section 13).
   or licence notices, provider integration logic, posting pipeline, Temporal workflows, Prisma schema or compose file changed.
 - 2026-10-27: removed .github/workflows/staging-conflicts.yml. Upstream runs it every 10 minutes against a staging branch
   this fork does not have, so it failed on every run and emailed the owner. Also disabled on GitHub for the published branch.
+- 2026-10-30: POST /auth/login and /auth/register allow 10 attempts per 15 minutes per client (ThrottlerSignInGuard, keyed
+  by cf-connecting-ip, else the last forwarded hop; IPv6 counted per /64), and the two forms show "Too many attempts" on
+  429. The guard assumes the backend is reachable only through Cloudflare. The reset and activation routes stay as
+  upstream. The LinkedIn personal provider requests only openid, profile and w_member_social, so it connects with
+  LinkedIn's self-serve products, and no longer calls /v2/me (it needs r_basicprofile), so personal channels have an empty
+  username. Company lookups and mentions in personal posts need the organization scopes and fail with a message until
+  LinkedIn grants them. LinkedIn Page keeps the organization scopes.
 
 ## Running the staging stack
 ```

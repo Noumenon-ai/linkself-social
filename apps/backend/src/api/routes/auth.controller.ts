@@ -11,7 +11,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { ThrottlerRealIpGuard } from '@gitroom/nestjs-libraries/throttler/throttler.provider';
+import {
+  ThrottlerRealIpGuard,
+  ThrottlerSignInGuard,
+} from '@gitroom/nestjs-libraries/throttler/throttler.provider';
 import { Response, Request } from 'express';
 
 import { CreateOrgUserDto } from '@gitroom/nestjs-libraries/dtos/auth/create.org.user.dto';
@@ -45,6 +48,8 @@ export class AuthController {
     };
   }
 
+  @UseGuards(ThrottlerSignInGuard)
+  @Throttle({ default: { limit: 10, ttl: 900000 } })
   @Post('/register')
   async register(
     @Req() req: Request,
@@ -91,6 +96,8 @@ export class AuthController {
     }
   }
 
+  @UseGuards(ThrottlerSignInGuard)
+  @Throttle({ default: { limit: 10, ttl: 900000 } })
   @Post('/login')
   async login(
     @Req() req: Request,

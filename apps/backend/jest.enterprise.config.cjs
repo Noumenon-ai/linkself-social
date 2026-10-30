@@ -6,6 +6,8 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: [
     '<rootDir>/apps/backend/src/api/routes/enterprise.controller.spec.ts',
+    '<rootDir>/apps/backend/src/api/routes/auth.throttle.spec.ts',
+    '<rootDir>/libraries/nestjs-libraries/src/integrations/social/linkedin.scopes.spec.ts',
   ],
   transform: {
     '^.+\\.tsx?$': [
