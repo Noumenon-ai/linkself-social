@@ -349,6 +349,8 @@ export class PublicIntegrationsController {
     @GetOrgFromRequest() org: Organization
   ) {
     Sentry.metrics.count('public_api-request', 1);
+    await this._integrationService.assertCanConnect(org.id, integration, refresh);
+
     if (
       !this._integrationManager
         .getAllowedSocialsIntegrations()
@@ -363,6 +365,10 @@ export class PublicIntegrationsController {
     const migrateTo = refresh
       ? this._integrationManager.getMigrationTarget(integration)
       : undefined;
+
+    if (migrateTo) {
+      await this._integrationService.assertCanConnect(org.id, migrateTo, refresh);
+    }
 
     const integrationProvider = this._integrationManager.getSocialIntegration(
       migrateTo || integration

@@ -186,10 +186,8 @@ export const FacebookPreview: FC<{
       <div className="flex text-textLinkedin text-[12px] font-[400] items-center">
         <div className="flex flex-1 gap-[10px] items-center">
           <Icons />
-          <div className="">You & 12 other</div>
         </div>
         <div className="gap-[9px] items-center flex">
-          <div>20 Comments</div>
         </div>
       </div>
       <div className="pt-[8px] flex text-[14px] font-[700] px-[32px] justify-between border-t border-borderLinkedin text-textLinkedin">
@@ -328,7 +326,6 @@ export const FacebookPreview: FC<{
                       <div className="font-[700]">Reply</div>
                     </div>
                     <div className="flex gap-[4px]">
-                      <div>2</div>
                       <div>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

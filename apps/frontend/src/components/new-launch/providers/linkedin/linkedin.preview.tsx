@@ -295,9 +295,6 @@ export const LinkedinPreview: FC<{
         </div>
         <div className="flex flex-col leading-[16px]">
           <div className="text-[14px] font-[500]">{integration?.name}</div>
-          <div className="text-[12px] font-[400] text-[#A3A3A3]">
-            2,871 followers
-          </div>
           <div className="text-[12px] font-[400] text-[#A3A3A3] flex gap-[4px] items-center">
             <span>30m •</span>
             <span>
@@ -341,14 +338,11 @@ export const LinkedinPreview: FC<{
       <div className="flex text-textLinkedin text-[12px] font-[400] items-center">
         <div className="flex flex-1 gap-[11px] items-center">
           <Icons />
-          <div className="">88</div>
         </div>
         <div className="gap-[9px] items-center flex">
-          <div>4 Comments</div>
           <div>
             <div className="w-[3px] h-[3px] bg-[#565C65] rounded-full" />
           </div>
-          <div>8 Reposts</div>
         </div>
       </div>
       <div className="pt-[8px] flex text-[14px] font-[700] px-[32px] justify-between border-t border-borderLinkedin text-textLinkedin">
@@ -498,11 +492,9 @@ export const LinkedinPreview: FC<{
                         />
                       </svg>
                     </div>
-                    <div>19</div>
                     <div>|</div>
                     <div className="font-[700]">Reply</div>
                     <div>•</div>
-                    <div>1 reply</div>
                   </div>
                 </div>
               </div>

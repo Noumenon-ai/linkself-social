@@ -80,6 +80,17 @@ export const socialIntegrationList: Array<SocialAbstract & SocialProvider> = [
 
 @Injectable()
 export class IntegrationManager {
+  isEnabledProvider(identifier: string) {
+    const configured = process.env.LINKSELF_ENABLED_PROVIDERS?.trim();
+    if (!configured) {
+      return true;
+    }
+    return configured
+      .split(',')
+      .map((provider) => provider.trim().toLowerCase())
+      .includes(identifier.toLowerCase());
+  }
+
   // Both are env-driven so cloud and self-hosted instances can differ:
   // HIDDEN_PROVIDERS ("tiktok,x") hides providers from the add-channel screen,
   // MIGRATE_PROVIDERS ("tiktok:tiktok-business") routes a reconnect of the old
@@ -129,7 +140,11 @@ export class IntegrationManager {
     return {
       social: await Promise.all(
         socialIntegrationList
-          .filter((p) => !this.isHiddenProvider(p.identifier))
+          .filter(
+            (p) =>
+              !this.isHiddenProvider(p.identifier) &&
+              this.isEnabledProvider(p.identifier)
+          )
           .map(async (p) => ({
             name: p.name,
             identifier: p.identifier,

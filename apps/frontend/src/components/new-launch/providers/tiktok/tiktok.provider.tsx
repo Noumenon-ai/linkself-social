@@ -361,7 +361,7 @@ const TikTokSettings: FC<{
       </Select>
       {isUploadMode && (
         <div className="-mt-[23px] mb-[23px] text-red-600">
-          After posting you fill find a notification inside your Inbox about
+          After posting you will find a notification inside your Inbox about
           your post (not content studio)
         </div>
       )}

@@ -121,7 +121,10 @@ const AnalyticsCard: FC<{
   );
 };
 
-const EmptyState: FC<{ onRefresh: () => void }> = ({ onRefresh }) => {
+const EmptyState: FC<{
+  onRefresh: () => void;
+  refreshNeeded: boolean;
+}> = ({ onRefresh, refreshNeeded }) => {
   const t = useT();
 
   return (
@@ -141,28 +144,32 @@ const EmptyState: FC<{ onRefresh: () => void }> = ({ onRefresh }) => {
         </svg>
       </div>
       <p className="text-[15px] text-newTableText text-center mb-[12px]">
-        {t(
-          'this_channel_needs_to_be_refreshed',
-          'This channel needs to be refreshed to display analytics'
-        )}
+        {refreshNeeded
+          ? t(
+              'this_channel_needs_to_be_refreshed',
+              'This channel needs to be refreshed to display analytics'
+            )
+          : t('no_analytics_data_yet', 'No data yet')}
       </p>
-      <button
-        onClick={onRefresh}
-        className="inline-flex items-center gap-[6px] px-[16px] py-[8px] text-[14px] font-medium text-white bg-[#612bd3] hover:bg-[#5023b8] rounded-[8px] transition-colors"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
+      {refreshNeeded && (
+        <button
+          onClick={onRefresh}
+          className="inline-flex items-center gap-[6px] px-[16px] py-[8px] text-[14px] font-medium text-white bg-[#612bd3] hover:bg-[#5023b8] rounded-[8px] transition-colors"
         >
-          <path d="M23 4v6h-6M1 20v-6h6" />
-          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-        </svg>
-        {t('refresh_channel', 'Refresh Channel')}
-      </button>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M23 4v6h-6M1 20v-6h6" />
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+          </svg>
+          {t('refresh_channel', 'Refresh Channel')}
+        </button>
+      )}
     </div>
   );
 };
@@ -239,7 +246,10 @@ export const RenderAnalytics: FC<{
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[16px]">
       {data?.length === 0 && (
-        <EmptyState onRefresh={refreshChannel(integration as any)} />
+        <EmptyState
+          onRefresh={refreshChannel(integration as any)}
+          refreshNeeded={!!integration.refreshNeeded}
+        />
       )}
       {data?.map((item: AnalyticsDataItem, index: number) => (
         <AnalyticsCard

@@ -106,7 +106,6 @@ export const InstagramPreview: FC<{
               strokeLinejoin="round"
             />
           </svg>
-          <div>121</div>
         </div>
         <div className="flex gap-[4px] items-center">
           <svg
@@ -124,7 +123,6 @@ export const InstagramPreview: FC<{
               strokeLinejoin="round"
             />
           </svg>
-          <div>32</div>
         </div>
         <div className="flex gap-[4px] items-center flex-1">
           <svg
@@ -210,7 +208,6 @@ export const InstagramPreview: FC<{
                   <div className="flex font-[400] text-[12px] text-textLinkedin items-center">
                     <div className="flex gap-[16px] flex-1">
                       <div className="font-[700]">30m</div>
-                      <div className="font-[700]">8 Likes</div>
                       <div className="font-[700]">Reply</div>
                     </div>
                   </div>

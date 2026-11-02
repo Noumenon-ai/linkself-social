@@ -1,15 +1,20 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useCallback } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 export const GoogleProvider = () => {
+  const { linkselfUrl } = useVariables();
   const fetch = useFetch();
   const t = useT();
   const gotoLogin = useCallback(async () => {
     const link = await (await fetch('/auth/oauth/GOOGLE')).text();
     window.location.href = link;
   }, []);
+  if (linkselfUrl) {
+    return null;
+  }
   return (
     <div
       onClick={gotoLogin}

@@ -7,6 +7,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
   Logger,
   Post,
   Query,
@@ -175,6 +176,12 @@ export class EnterpriseController {
         throw new Error('Organization not found');
       }
 
+      await this._integrationService.assertCanConnect(
+        org.id,
+        load.provider,
+        load.refreshId
+      );
+
       if (
         !this._integrationManager
           .getAllowedSocialsIntegrations()
@@ -200,7 +207,15 @@ export class EnterpriseController {
       await ioRedis.set(`login:${state}`, codeVerifier, 'EX', 3600);
 
       return url;
-    } catch (err) {}
+    } catch (err) {
+      if (
+        process.env.LINKSELF_ENABLED_PROVIDERS?.trim() &&
+        err instanceof HttpException &&
+        err.getStatus() === 403
+      ) {
+        throw err;
+      }
+    }
   }
 
   @Post('/delete-channel')

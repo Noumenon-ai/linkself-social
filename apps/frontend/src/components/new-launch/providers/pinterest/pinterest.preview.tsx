@@ -66,7 +66,6 @@ export const PinterestPreview: FC<{
                 strokeLinejoin="round"
               />
             </svg>
-            <div>80</div>
           </div>
           <div>
             <svg

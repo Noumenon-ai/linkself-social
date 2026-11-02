@@ -819,8 +819,12 @@ export class IntegrationRepository {
         id,
         organizationId: org,
       },
+      // The row is kept for post history; the network credentials are not.
       data: {
         deletedAt: new Date(),
+        token: '',
+        refreshToken: null,
+        tokenExpiration: null,
       },
     });
   }

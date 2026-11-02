@@ -150,6 +150,35 @@ export class IntegrationService {
     return this._integrationRepository.updateOnCustomerName(org, id, name);
   }
 
+  // Only connection entry points use this policy. Provider lookup stays
+  // unrestricted for posting, analytics, deletion and token refresh.
+  async assertCanConnect(org: string, identifier: string, refresh?: string) {
+    if (this._integrationManager.isEnabledProvider(identifier)) {
+      return;
+    }
+
+    if (refresh) {
+      const existing = await this.getIntegrationsList(org);
+      if (
+        existing.some(
+          (channel) =>
+            channel.internalId === refresh &&
+            (channel.providerIdentifier === identifier ||
+              this._integrationManager.getMigrationTarget(
+                channel.providerIdentifier
+              ) === identifier)
+        )
+      ) {
+        return;
+      }
+    }
+
+    throw new HttpException(
+      `Provider "${identifier}" is not enabled for new connections`,
+      HttpStatus.FORBIDDEN
+    );
+  }
+
   getIntegrationsList(org: string) {
     return this._integrationRepository.getIntegrationsList(org);
   }

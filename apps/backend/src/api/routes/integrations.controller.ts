@@ -224,6 +224,8 @@ export class IntegrationsController {
     @Query('onboarding') onboarding: string,
     @GetOrgFromRequest() org: Organization
   ) {
+    await this._integrationService.assertCanConnect(org.id, integration, refresh);
+
     if (
       !this._integrationManager
         .getAllowedSocialsIntegrations()
@@ -238,6 +240,10 @@ export class IntegrationsController {
     const migrateTo = refresh
       ? this._integrationManager.getMigrationTarget(integration)
       : undefined;
+
+    if (migrateTo) {
+      await this._integrationService.assertCanConnect(org.id, migrateTo, refresh);
+    }
 
     const integrationProvider = this._integrationManager.getSocialIntegration(
       migrateTo || integration

@@ -588,20 +588,24 @@ export class PinterestProvider
       .subtract(Math.min(date, 89), 'day')
       .format('YYYY-MM-DD');
 
+    const response = await fetch(
+      `${pinterestApi()}/v5/user_account/analytics?start_date=${since}&end_date=${until}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    const data = await response.json();
+    // Sandbox analytics are unavailable; reconnecting cannot enable them.
+    if (data.code === 3022) {
+      return [];
+    }
     const {
       all: { daily_metrics },
-    } = await (
-      await fetch(
-        `${pinterestApi()}/v5/user_account/analytics?start_date=${since}&end_date=${until}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-    ).json();
+    } = data;
 
     return daily_metrics.reduce(
       (acc: any, item: any) => {

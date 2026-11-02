@@ -52,6 +52,12 @@ export class NoAuthIntegrationsController {
         .getAllowedSocialsIntegrations()
         .includes(integration)
     ) {
+      if (!this._integrationManager.isEnabledProvider(integration)) {
+        throw new HttpException(
+          `Provider "${integration}" is not enabled for new connections`,
+          403
+        );
+      }
       throw new Error('Integration not allowed');
     }
 
@@ -76,6 +82,9 @@ export class NoAuthIntegrationsController {
 
     const org = await this._organizationService.getOrgById(organization);
 
+    const refresh = await ioRedis.get(`refresh:${body.state}`);
+    await this._integrationService.assertCanConnect(org.id, integration, refresh);
+
     if (!integrationProvider.customFields) {
       await ioRedis.del(`login:${body.state}`);
     }
@@ -88,7 +97,6 @@ export class NoAuthIntegrationsController {
       await ioRedis.del(`external:${body.state}`);
     }
 
-    const refresh = await ioRedis.get(`refresh:${body.state}`);
     if (refresh) {
       await ioRedis.del(`refresh:${body.state}`);
     }

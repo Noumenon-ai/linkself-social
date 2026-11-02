@@ -94,3 +94,29 @@ other locales through the configured service when authorized. Existing non-Engli
 upstream product name. No paid translation calls were made.
 
 P7a validation results and the complete changed-file list are in [P7A_REPORT.md](P7A_REPORT.md).
+
+## Studio fixes (2026-11-02; dispatcher commit pending)
+
+`LINKSELF_ENABLED_PROVIDERS` optionally limits new channel connections on the backend. For example,
+`LINKSELF_ENABLED_PROVIDERS=bluesky,mastodon,youtube,linkedin,telegram,discord` shows only those identifiers in Add Channel,
+onboarding and mobile. List entries ignore surrounding whitespace and case; an unset, empty or whitespace-only value keeps
+upstream behavior. Unknown identifiers enable nothing. `HIDDEN_PROVIDERS` still hides entries from the catalog.
+Disallowed new connections return HTTP 403 from studio/public URL routes, enterprise URL requests and OAuth/custom-field
+callbacks. Reconnect exemptions require an existing channel belonging to the organization and matching the provider (or its
+configured migration target). Provider lookup remains unrestricted for existing channels' posting, token refresh, analytics
+and deletion.
+
+The shared Google sign-in button is hidden on login and registration when `LINKSELF_URL` or its existing public counterpart
+is set. Public post previews use `/logo.svg`, the sidebar's LinkSelf mark, and replace the embedded upstream wordmark with the login's `LogoTextComponent`. The self-hosted OAuth placeholder and displayed MCP
+server aliases use LinkSelf; upstream package names, commands, protocol identifiers and documentation URLs remain functional.
+AGPL attribution and non-English translations are unchanged. The TikTok instruction now says "you will find".
+
+Invented counts were removed, retaining icons, from TikTok (likes, comments, saves, shares), Pinterest (likes), YouTube
+(subscribers, likes), LinkedIn (followers, reactions, comments, reposts and reply engagement), Facebook (reactions, comments
+and reply reactions), and Instagram (likes, comments and reply likes).
+
+Pinterest sandbox analytics code 3022 now explicitly returns an empty result. Previously the raw analytics response caused
+a metrics-destructuring error, which the service swallowed into an empty result; it did not set `refreshNeeded` or another
+posting-blocking flag. The Analytics empty state incorrectly treated every empty result as an expired connection. It now
+shows "No data yet" unless the channel's actual `refreshNeeded` flag is set. Existing failed token refresh handling still
+flags the channel and notifies the user.
