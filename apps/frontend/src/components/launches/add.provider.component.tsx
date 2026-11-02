@@ -171,12 +171,15 @@ export const CustomVariables: FC<{
   }>;
   close?: () => void;
   identifier: string;
+  refresh?: string;
   gotoUrl(url: string): void;
   onboarding?: boolean;
 }> = (props) => {
-  const { close, gotoUrl, identifier, variables, onboarding } = props;
+  const { close, gotoUrl, identifier, variables, onboarding, refresh } = props;
   const fetch = useFetch();
   const modals = useModals();
+  const toaster = useToaster();
+  const t = useT();
   const schema = useMemo(() => {
     return object({
       ...variables.reduce((aIcc, item) => {
@@ -211,15 +214,25 @@ export const CustomVariables: FC<{
   });
   const submit = useCallback(
     async (data: FieldValues) => {
+      const params = new URLSearchParams();
+      if (onboarding) params.set('onboarding', 'true');
+      if (refresh) params.set('refresh', refresh);
+      const query = params.toString();
       const response = await fetch(
-        `/integrations/social/${identifier}${
-          onboarding ? '?onboarding=true' : ''
-        }`
+        `/integrations/social/${identifier}${query ? `?${query}` : ''}`
       );
       if (response.status === 402) {
         return;
       }
-      const { url } = await response.json();
+      const { url, message } = await response.json();
+      if (!response.ok || !url) {
+        toaster.show(
+          message ||
+            t('could_not_connect_to_platform', 'Could not connect to the platform'),
+          'warning'
+        );
+        return;
+      }
       modals.closeAll();
       gotoUrl(
         `/integrations/social/${identifier}?state=${url}&code=${Buffer.from(
@@ -227,10 +240,8 @@ export const CustomVariables: FC<{
         ).toString('base64')}${onboarding ? '&onboarding=true' : ''}`
       );
     },
-    [variables, onboarding]
+    [fetch, identifier, onboarding, refresh, modals, gotoUrl, toaster, t]
   );
-
-  const t = useT();
 
   return (
     <div className="rounded-[4px] relative">

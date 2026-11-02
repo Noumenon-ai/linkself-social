@@ -600,7 +600,7 @@ export class PinterestProvider
     );
     const data = await response.json();
     // Sandbox analytics are unavailable; reconnecting cannot enable them.
-    if (data.code === 3022) {
+    if (!data || !data.all) {
       return [];
     }
     const {

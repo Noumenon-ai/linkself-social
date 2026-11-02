@@ -415,6 +415,8 @@ export class IntegrationRepository {
             not: upsert.id,
           },
           rootInternalId: rootId,
+          organizationId: org,
+          deletedAt: null,
         },
         data: {
           token,
@@ -825,6 +827,7 @@ export class IntegrationRepository {
         token: '',
         refreshToken: null,
         tokenExpiration: null,
+        customInstanceDetails: null,
       },
     });
   }

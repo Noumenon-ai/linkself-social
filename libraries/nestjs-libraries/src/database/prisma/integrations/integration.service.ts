@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { IntegrationRepository } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.repository';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
+import { ProviderNotEnabled } from '@gitroom/nestjs-libraries/integrations/provider.not.enabled';
 import {
   AnalyticsData,
   SocialProvider,
@@ -158,25 +159,22 @@ export class IntegrationService {
     }
 
     if (refresh) {
-      const existing = await this.getIntegrationsList(org);
+      const existing = await this._integrationRepository.getIntegrationByInternalId(
+        org,
+        refresh
+      );
       if (
-        existing.some(
-          (channel) =>
-            channel.internalId === refresh &&
-            (channel.providerIdentifier === identifier ||
-              this._integrationManager.getMigrationTarget(
-                channel.providerIdentifier
-              ) === identifier)
-        )
+        existing &&
+        (existing.providerIdentifier === identifier ||
+          this._integrationManager.getMigrationTarget(
+            existing.providerIdentifier
+          ) === identifier)
       ) {
         return;
       }
     }
 
-    throw new HttpException(
-      `Provider "${identifier}" is not enabled for new connections`,
-      HttpStatus.FORBIDDEN
-    );
+    throw new ProviderNotEnabled(identifier);
   }
 
   getIntegrationsList(org: string) {

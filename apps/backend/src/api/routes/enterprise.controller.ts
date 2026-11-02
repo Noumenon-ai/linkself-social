@@ -7,7 +7,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
   Logger,
   Post,
   Query,
@@ -17,6 +16,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import { ioRedis } from '@gitroom/nestjs-libraries/redis/redis.service';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
+import { ProviderNotEnabled } from '@gitroom/nestjs-libraries/integrations/provider.not.enabled';
 import { OrganizationService } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.service';
 import { IntegrationService } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.service';
 import { PostsService } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.service';
@@ -208,11 +208,7 @@ export class EnterpriseController {
 
       return url;
     } catch (err) {
-      if (
-        process.env.LINKSELF_ENABLED_PROVIDERS?.trim() &&
-        err instanceof HttpException &&
-        err.getStatus() === 403
-      ) {
+      if (err instanceof ProviderNotEnabled) {
         throw err;
       }
     }

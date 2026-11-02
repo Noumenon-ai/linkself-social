@@ -52,12 +52,6 @@ export class NoAuthIntegrationsController {
         .getAllowedSocialsIntegrations()
         .includes(integration)
     ) {
-      if (!this._integrationManager.isEnabledProvider(integration)) {
-        throw new HttpException(
-          `Provider "${integration}" is not enabled for new connections`,
-          403
-        );
-      }
       throw new Error('Integration not allowed');
     }
 

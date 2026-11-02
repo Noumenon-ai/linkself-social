@@ -400,12 +400,13 @@ export const Menu: FC<{
       children: (
         <CustomVariables
           identifier={findIntegration.identifier}
+          refresh={findIntegration.internalId}
           gotoUrl={(url: string) => router.push(url)}
           variables={findIntegration.customFields}
         />
       ),
     });
-  }, [t]);
+  }, [t, findIntegration, modal, router]);
 
   return (
     <div

@@ -28,11 +28,20 @@ export function Login() {
   const [notActivated, setNotActivated] = useState(false);
   const {
     isGeneral,
+    linkselfUrl,
     neynarClientId,
     appleClientId,
     billingEnabled,
     genericOauth,
   } = useVariables();
+  const hasSocialSignIn = !!(
+    !isGeneral ||
+    genericOauth ||
+    !linkselfUrl ||
+    appleClientId ||
+    neynarClientId ||
+    billingEnabled
+  );
   const resolver = useMemo(() => {
     return classValidatorResolver(LoginUserDto);
   }, []);
@@ -85,30 +94,35 @@ export function Login() {
               {t('sign_in', 'Sign In')}
             </h1>
           </div>
-          <div className="text-[14px] mt-[32px] mb-[12px]">
-            {t('continue_with', 'Continue With')}
-          </div>
+          {hasSocialSignIn && (
+            <div className="text-[14px] mt-[32px] mb-[12px]">
+              {t('continue_with', 'Continue With')}
+            </div>
+          )}
           <div className="flex flex-col">
-            {isGeneral && genericOauth ? (
-              <OauthProvider />
-            ) : !isGeneral ? (
-              <GithubProvider />
-            ) : (
-              <div className="gap-[8px] flex">
-                <GoogleProvider />
-                {!!appleClientId && <AppleProvider />}
-                {!!neynarClientId && <FarcasterProvider />}
-                {billingEnabled && <WalletProvider />}
+            {hasSocialSignIn &&
+              (isGeneral && genericOauth ? (
+                <OauthProvider />
+              ) : !isGeneral ? (
+                <GithubProvider />
+              ) : (
+                <div className="gap-[8px] flex">
+                  {!linkselfUrl && <GoogleProvider />}
+                  {!!appleClientId && <AppleProvider />}
+                  {!!neynarClientId && <FarcasterProvider />}
+                  {billingEnabled && <WalletProvider />}
+                </div>
+              ))}
+            {hasSocialSignIn && (
+              <div className="h-[20px] mb-[24px] mt-[24px] relative">
+                <div className="absolute w-full h-[1px] bg-fifth top-[50%] -translate-y-[50%]" />
+                <div
+                  className={`absolute z-[1] justify-center items-center w-full start-0 -top-[4px] flex`}
+                >
+                  <div className="px-[16px]">{t('or', 'or')}</div>
+                </div>
               </div>
             )}
-            <div className="h-[20px] mb-[24px] mt-[24px] relative">
-              <div className="absolute w-full h-[1px] bg-fifth top-[50%] -translate-y-[50%]" />
-              <div
-                className={`absolute z-[1] justify-center items-center w-full start-0 -top-[4px] flex`}
-              >
-                <div className="px-[16px]">{t('or', 'or')}</div>
-              </div>
-            </div>
             <div className="flex flex-col gap-[12px]">
               <div className="text-textColor">
                 <Input

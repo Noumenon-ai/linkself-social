@@ -1,4 +1,5 @@
 import { HttpException } from '@nestjs/common';
+import { ProviderNotEnabled } from './provider.not.enabled';
 import { sign } from 'jsonwebtoken';
 import {
   IntegrationManager,
@@ -89,6 +90,13 @@ describe('LinkSelf provider policy and analytics', () => {
     manager = new IntegrationManager();
     repository = {
       getIntegrationsList: jest.fn().mockResolvedValue([{ ...channel }]),
+      getIntegrationByInternalId: jest
+        .fn()
+        .mockImplementation(async (organizationId, internalId) =>
+          organizationId === org.id && internalId === channel.internalId
+            ? { ...channel }
+            : null
+        ),
       getIntegrationById: jest.fn().mockResolvedValue({ ...channel }),
       refreshNeeded: jest.fn(),
       disconnectChannel: jest.fn(),
@@ -238,7 +246,7 @@ describe('LinkSelf provider policy and analytics', () => {
     }
   );
 
-  it('returns 403 for unknown providers at every connection entry point', async () => {
+  it('returns 403 for unknown providers at URL entry points', async () => {
     process.env.LINKSELF_ENABLED_PROVIDERS = 'bluesky';
     const requests = [
       new IntegrationsController(
@@ -275,12 +283,6 @@ describe('LinkSelf provider policy and analytics', () => {
           process.env.JWT_SECRET!
         )
       ),
-      new NoAuthIntegrationsController(
-        manager,
-        service,
-        refresh,
-        orgs
-      ).connectSocialMedia('unknown', { state: 'state' } as any),
     ];
     await Promise.all(
       requests.map((request) =>
@@ -299,7 +301,8 @@ describe('LinkSelf provider policy and analytics', () => {
     await expect(
       service.assertCanConnect(org.id, 'youtube', 'account')
     ).rejects.toMatchObject({ status: 403 });
-    expect(repository.getIntegrationsList).toHaveBeenCalledWith(org.id);
+    expect(repository.getIntegrationByInternalId).toHaveBeenCalledWith(org.id, 'fake');
+    expect(repository.getIntegrationsList).not.toHaveBeenCalled();
   });
 
   it('allows an owned existing channel to reconnect while excluded from the catalog', async () => {
@@ -326,6 +329,127 @@ describe('LinkSelf provider policy and analytics', () => {
     );
     expect(manager.getAllowedSocialsIntegrations()).toContain('pinterest');
     expect(manager.getSocialIntegration('pinterest')).toBe(provider);
+  });
+
+  it.each([
+    'bluesky',
+    'wordpress',
+    'lemmy',
+    'listmonk',
+    'medium',
+    'devto',
+    'hashnode',
+    'nostr',
+  ])(
+    'allows an owned custom-field %s reconnect outside the allowlist',
+    async (identifier) => {
+      process.env.LINKSELF_ENABLED_PROVIDERS = 'youtube';
+      repository.getIntegrationByInternalId.mockResolvedValue({
+        ...channel,
+        providerIdentifier: identifier,
+      });
+      const provider = manager.getSocialIntegration(identifier);
+      expect(provider.customFields).toBeTruthy();
+      const generate = jest
+        .spyOn(provider, 'generateAuthUrl')
+        .mockResolvedValue({
+          url: 'state',
+          state: 'state',
+          codeVerifier: 'verifier',
+        });
+      const controller = new IntegrationsController(
+        manager,
+        service,
+        {} as never,
+        refresh
+      );
+      await expect(
+        controller.getIntegrationUrl(identifier, 'account', '', '', '', org)
+      ).resolves.toEqual({ url: 'state' });
+      expect(ioRedis.set).toHaveBeenCalledWith(
+        'refresh:state',
+        'account',
+        'EX',
+        3600
+      );
+      expect(repository.getIntegrationByInternalId).toHaveBeenCalledWith(
+        org.id,
+        'account'
+      );
+      expect(repository.getIntegrationsList).not.toHaveBeenCalled();
+
+      generate.mockClear();
+      await expect(
+        controller.getIntegrationUrl(identifier, '', '', '', '', org)
+      ).rejects.toBeInstanceOf(ProviderNotEnabled);
+      repository.getIntegrationByInternalId.mockResolvedValue(null);
+      await expect(
+        controller.getIntegrationUrl(identifier, 'not-owned', '', '', '', org)
+      ).rejects.toBeInstanceOf(ProviderNotEnabled);
+      repository.getIntegrationByInternalId.mockResolvedValue(channel);
+      await expect(
+        controller.getIntegrationUrl(identifier, 'account', '', '', '', org)
+      ).rejects.toBeInstanceOf(ProviderNotEnabled);
+      expect(generate).not.toHaveBeenCalled();
+    }
+  );
+
+  it('preserves the upstream unknown-provider callback error', async () => {
+    process.env.LINKSELF_ENABLED_PROVIDERS = 'bluesky';
+    const gate = jest.spyOn(service, 'assertCanConnect');
+    await expect(
+      new NoAuthIntegrationsController(
+        manager,
+        service,
+        refresh,
+        orgs
+      ).connectSocialMedia('unknown', { state: 'state' } as any)
+    ).rejects.toThrow('Integration not allowed');
+    expect(gate).not.toHaveBeenCalled();
+    expect(ioRedis.get).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('rethrows the dedicated enterprise policy exception without an env re-check', async () => {
+    const denied = new ProviderNotEnabled('bluesky');
+    jest.spyOn(service, 'assertCanConnect').mockRejectedValue(denied);
+    const controller = new EnterpriseController(
+      manager,
+      orgs,
+      service,
+      {} as never
+    );
+    await expect(
+      controller.redirectParams(
+        sign(
+          {
+            apiKey: 'key',
+            provider: 'bluesky',
+            redirectUrl: 'https://example.com',
+          },
+          process.env.JWT_SECRET!
+        )
+      )
+    ).rejects.toBe(denied);
+    expect(denied.getStatus()).toBe(403);
+    expect(ioRedis.set).not.toHaveBeenCalled();
+  });
+
+  it('does not refresh, flag or notify for a deleted integration', async () => {
+    const provider = manager.getSocialIntegration('pinterest');
+    const refreshToken = jest.spyOn(provider, 'refreshToken');
+    const lookup = jest.spyOn(manager, 'getSocialIntegration');
+    const update = jest.spyOn(service, 'createOrUpdateIntegration');
+    const inform = jest.spyOn(service, 'informAboutRefreshError');
+    await expect(
+      refresh.refresh({ ...channel, deletedAt: new Date() } as any)
+    ).resolves.toBe(false);
+    expect(lookup).not.toHaveBeenCalled();
+    expect(refreshToken).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(repository.refreshNeeded).not.toHaveBeenCalled();
+    expect(inform).not.toHaveBeenCalled();
+    expect(notifications.inAppNotification).not.toHaveBeenCalled();
   });
 
   it('keeps existing channel analytics and deletion available outside the allowlist', async () => {
@@ -430,12 +554,15 @@ describe('LinkSelf provider policy and analytics', () => {
     expect(notifications.inAppNotification).toHaveBeenCalledTimes(1);
   });
 
-  it('returns sandbox no-data directly from the Pinterest provider', async () => {
-    fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ code: 3022 }), { status: 400 })
-    );
-    await expect(
-      new PinterestProvider().analytics('id', 'token', 7)
-    ).resolves.toEqual([]);
-  });
+  it.each([null, {}, { code: 3022 }])(
+    'returns no-data for a missing Pinterest analytics payload: %p',
+    async (data) => {
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify(data), { status: 400 })
+      );
+      await expect(
+        new PinterestProvider().analytics('id', 'token', 7)
+      ).resolves.toEqual([]);
+    }
+  );
 });

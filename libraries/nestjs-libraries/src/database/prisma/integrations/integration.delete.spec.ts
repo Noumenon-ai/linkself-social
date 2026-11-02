@@ -25,6 +25,8 @@ describe('Disconnecting a channel', () => {
     expect(call.data.token).toBe('');
     expect(call.data.refreshToken).toBeNull();
     expect(call.data.tokenExpiration).toBeNull();
+    expect(call.data.customInstanceDetails).toBeNull();
+    expect(call.select).toEqual({ id: true });
   });
 
   it('only touches the channel inside the caller organization', async () => {

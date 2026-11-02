@@ -95,7 +95,7 @@ upstream product name. No paid translation calls were made.
 
 P7a validation results and the complete changed-file list are in [P7A_REPORT.md](P7A_REPORT.md).
 
-## Studio fixes (2026-11-02; dispatcher commit pending)
+## Studio fixes (2026-11-02; commit caf5fc74)
 
 `LINKSELF_ENABLED_PROVIDERS` optionally limits new channel connections on the backend. For example,
 `LINKSELF_ENABLED_PROVIDERS=bluesky,mastodon,youtube,linkedin,telegram,discord` shows only those identifiers in Add Channel,
@@ -115,8 +115,13 @@ Invented counts were removed, retaining icons, from TikTok (likes, comments, sav
 (subscribers, likes), LinkedIn (followers, reactions, comments, reposts and reply engagement), Facebook (reactions, comments
 and reply reactions), and Instagram (likes, comments and reply likes).
 
-Pinterest sandbox analytics code 3022 now explicitly returns an empty result. Previously the raw analytics response caused
-a metrics-destructuring error, which the service swallowed into an empty result; it did not set `refreshNeeded` or another
+Pinterest analytics without an `all` payload (including sandbox responses) explicitly return an empty result. Previously
+the raw analytics response caused a metrics-destructuring error, which the service swallowed into an empty result; it did not set `refreshNeeded` or another
 posting-blocking flag. The Analytics empty state incorrectly treated every empty result as an expired connection. It now
 shows "No data yet" unless the channel's actual `refreshNeeded` flag is set. Existing failed token refresh handling still
 flags the channel and notifies the user.
+
+Disconnecting a channel preserves its row for post history but clears `token`, `refreshToken`, `tokenExpiration` and
+`customInstanceDetails` (including stored custom-provider logins and cookies). Token refresh ignores soft-deleted channels
+without calling the provider, flagging them or notifying the user. One-time-token sibling updates only touch live channels
+in the same organization, so deleted channels cannot regain credentials through a sibling refresh or reconnect.

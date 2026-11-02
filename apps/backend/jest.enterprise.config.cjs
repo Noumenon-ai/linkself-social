@@ -7,6 +7,7 @@ module.exports = {
   testMatch: [
     '<rootDir>/libraries/nestjs-libraries/src/integrations/linkself.studio.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/database/prisma/integrations/integration.delete.spec.ts',
+    '<rootDir>/libraries/nestjs-libraries/src/database/prisma/integrations/integration.credentials.spec.ts',
     '<rootDir>/apps/backend/src/api/routes/enterprise.controller.spec.ts',
     '<rootDir>/apps/backend/src/api/routes/auth.throttle.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/integrations/social/linkedin.scopes.spec.ts',

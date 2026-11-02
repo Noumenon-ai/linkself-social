@@ -568,6 +568,7 @@ export const LaunchesComponent = () => {
             children: (
               <CustomVariables
                 identifier={integration.identifier}
+                refresh={integration.internalId}
                 gotoUrl={(url: string) => router.push(url)}
                 variables={integration.customFields || []}
               />
