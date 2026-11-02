@@ -25,7 +25,7 @@ const TrendIndicator: FC<{ value: number; average?: boolean }> = ({
   return (
     <div
       className={`flex items-center gap-[4px] text-[13px] font-medium ${
-        isPositive ? 'text-[#32d583]' : 'text-[#f97066]'
+        isPositive ? 'text-[var(--studio-success,#32d583)]' : 'text-[var(--studio-error,#f97066)]'
       }`}
     >
       <svg
@@ -59,7 +59,7 @@ const AnalyticsCard: FC<{
   const hasDataPoints = item.data.length >= 1;
 
   return (
-    <div className="group relative">
+    <div className="blueprint-frame group relative">
       <div
         className={`
           flex flex-col h-full
@@ -68,7 +68,7 @@ const AnalyticsCard: FC<{
           rounded-[12px]
           overflow-hidden
           transition-all duration-200
-          hover:border-[#612bd3]/50
+          hover:border-[var(--studio-accent,#612bd380)]
         `}
       >
         {/* Header */}
@@ -77,9 +77,9 @@ const AnalyticsCard: FC<{
             <div
               className={`
                 w-[8px] h-[8px] rounded-full
-                ${color === 'purple' ? 'bg-[#612bd3]' : ''}
-                ${color === 'green' ? 'bg-[#32d583]' : ''}
-                ${color === 'blue' ? 'bg-[#1d9bf0]' : ''}
+                ${color === 'purple' ? 'blueprint-accent bg-[var(--studio-accent,#612bd3)]' : ''}
+                ${color === 'green' ? 'bg-[var(--studio-success,#32d583)]' : ''}
+                ${color === 'blue' ? 'bg-[var(--studio-hover,#1d9bf0)]' : ''}
               `}
             />
             <span className="text-[15px] font-medium text-newTableText">
@@ -129,7 +129,7 @@ const EmptyState: FC<{
 
   return (
     <div className="col-span-full flex flex-col items-center justify-center py-[48px] px-[24px] bg-newTableHeader border border-newTableBorder rounded-[12px]">
-      <div className="w-[48px] h-[48px] mb-[16px] rounded-full bg-[#612bd3]/10 flex items-center justify-center">
+      <div className="w-[48px] h-[48px] mb-[16px] rounded-full bg-[var(--studio-marker,#612bd31a)] flex items-center justify-center">
         <svg
           width="24"
           height="24"
@@ -137,7 +137,7 @@ const EmptyState: FC<{
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
-          className="text-[#612bd3]"
+          className="text-[var(--studio-text,#612bd3)]"
         >
           <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           <path d="M12 8v4l2 2" />
@@ -154,7 +154,7 @@ const EmptyState: FC<{
       {refreshNeeded && (
         <button
           onClick={onRefresh}
-          className="inline-flex items-center gap-[6px] px-[16px] py-[8px] text-[14px] font-medium text-white bg-[#612bd3] hover:bg-[#5023b8] rounded-[8px] transition-colors"
+          className="inline-flex items-center gap-[6px] px-[16px] py-[8px] text-[14px] font-medium text-white blueprint-accent bg-[var(--studio-accent,#612bd3)] hover:bg-[var(--studio-hover,#5023b8)] rounded-[8px] transition-colors"
         >
           <svg
             width="16"

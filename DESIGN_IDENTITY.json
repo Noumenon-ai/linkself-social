@@ -1,0 +1,13 @@
+{
+  "product": "LinkSelf Social",
+  "audience": "Creators planning and publishing social posts from LinkSelf",
+  "universe": "Owner-approved LinkSelf Blueprint reference, 2026-11-02",
+  "palette_value": "dark",
+  "palette_topology": "functional-multicolor",
+  "typography_class": "mixed",
+  "composition": "dense-dashboard",
+  "imagery": "product-ui",
+  "motion": "none",
+  "signature": "Blue drafting grid with doubled square construction frames, Archivo UI, Space Mono metadata and short Architects Daughter notes.",
+  "rationale": "The studio retains its scheduling workflow and existing responsive navigation within the approved shared LinkSelf identity. Orange primary actions, outlined secondary controls and state colors distinguish publishing actions and feedback. The server selects Blueprint only in LinkSelf mode, while upstream themes and native network preview simulations retain their own appearance."
+}

@@ -89,15 +89,15 @@ export const BillingHistory: FC<{ modal?: boolean }> = ({ modal }) => {
       ({
         paid: {
           label: t('billing_status_paid', 'Paid'),
-          color: 'text-[#32D583]',
+          color: 'text-[var(--studio-success,#32D583)]',
         },
         pending: {
           label: t('billing_status_open', 'Pending'),
-          color: 'text-[#FFAC30]',
+          color: 'text-[var(--studio-warning,#FFAC30)]',
         },
         failed: {
           label: t('billing_status_failed', 'Failed'),
-          color: 'text-[#F97066]',
+          color: 'text-[var(--studio-error,#F97066)]',
         },
         void: {
           label: t('billing_status_void', 'Void'),
@@ -236,7 +236,7 @@ export const BillingHistory: FC<{ modal?: boolean }> = ({ modal }) => {
                 setVisible(PAGE_SIZE);
               }}
               placeholder={t('billing_search', 'Search...')}
-              className="w-full h-[42px] ps-[38px] pe-[12px] rounded-[8px] bg-newBgColorInner border border-newTableBorder text-[14px] outline-none focus:border-[#612BD3]"
+              className="w-full h-[42px] ps-[38px] pe-[12px] rounded-[8px] bg-newBgColorInner border border-newTableBorder text-[14px] outline-none focus:border-[var(--studio-accent,#612BD3)]"
             />
           </div>
           <div className="mobile:flex-1">
@@ -305,7 +305,7 @@ export const BillingHistory: FC<{ modal?: boolean }> = ({ modal }) => {
 
         {!filtered.length ? (
           <div className="flex flex-col items-center justify-center gap-[12px] py-[40px] px-[16px] text-center">
-            <div className="w-[48px] h-[48px] rounded-full bg-[#612bd3]/10 flex items-center justify-center text-[#612bd3]">
+            <div className="w-[48px] h-[48px] rounded-full bg-[var(--studio-marker,#612bd31a)] flex items-center justify-center text-[var(--studio-text,#612bd3)]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"

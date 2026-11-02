@@ -29,7 +29,7 @@ export const MenuItem: FC<{ label: string; icon: ReactNode; path: string; onClic
 
   if (onClick) {
     return (
-      <button onClick={onClick} title={label} className={className}>
+      <button aria-current={isActive ? 'page' : undefined} onClick={onClick} title={label} className={className}>
         {inner}
       </button>
     );
@@ -40,6 +40,7 @@ export const MenuItem: FC<{ label: string; icon: ReactNode; path: string; onClic
       prefetch={true}
       href={path}
       title={label}
+      aria-current={isActive ? 'page' : undefined}
       {...path.indexOf('http') === 0 && { target: '_blank' }}
       className={className}
     >

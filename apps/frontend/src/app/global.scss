@@ -870,3 +870,255 @@ html[dir='rtl'] [dir='ltr'] {
 .preview-comment-cursor {
   cursor: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2228%22 height%3D%2228%22 viewBox%3D%220 0 28 28%22%3E%3Cg fill%3D%22none%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M3 4h6M3 24h6M6 4v20%22 stroke%3D%22%23fff%22 stroke-width%3D%224%22%2F%3E%3Cpath d%3D%22M3 4h6M3 24h6M6 4v20%22 stroke%3D%22%23000%22 stroke-width%3D%221.6%22%2F%3E%3Cpath d%3D%22M14 4h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-6l-4 3v-3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z%22 fill%3D%22%23612bd3%22 stroke%3D%22%23fff%22 stroke-width%3D%221.5%22%2F%3E%3Cpath d%3D%22M17 8h6M17 11h4%22 stroke%3D%22%23fff%22 stroke-width%3D%221.5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 6 14, text;
 }
+
+// LinkSelf Blueprint. Keep every rule under the server-selected theme boundary.
+.blueprint-hours, .blueprint-brand, .blueprint-mobile-week { display: none; }
+html[data-linkself-theme='blueprint'] {
+  color-scheme: dark;
+  .blueprint-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding-block: 8px;
+    color: var(--studio-text);
+    font: 700 24px / 1.2 var(--font-blueprint-body), Arial, sans-serif;
+    svg [stroke] { stroke-width: 12; }
+  }
+  .blueprint-upstream-brand { display: none; }
+  scroll-behavior: auto;
+
+  body, .blueprint-auth, .blueprint-public-preview {
+    background-color: var(--studio-ground) !important;
+    background-image: linear-gradient(var(--studio-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--studio-grid) 1px, transparent 1px) !important;
+    background-size: 24px 24px !important;
+    color: var(--studio-text);
+    font: 400 16px / 1.65 var(--font-blueprint-body), Arial, sans-serif;
+  }
+
+  // Exclude the contents of network simulations, including their typography.
+  body :not(.network-preview, .network-preview *),
+  body :not(.network-preview, .network-preview *)::before,
+  body :not(.network-preview, .network-preview *)::after {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+    backdrop-filter: none !important;
+  }
+  :is(.blueprint-shell, button, input, select, textarea, .ProseMirror, .mantine-Paper-root):not(.network-preview *) {
+    font-family: var(--font-blueprint-body), Arial, sans-serif !important;
+  }
+  :is(h1, h2, h3, .blueprint-title):not(.network-preview *) {
+    font-family: var(--font-blueprint-body), Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+  h1, .blueprint-title { font-size: 32px; }
+  h2, h3 { max-width: 100%; }
+  :is(label, time, th, code, pre, input[type='number'], .blueprint-calendar, .mantine-Calendar-calendarHeaderLevel):not(.network-preview *) {
+    font-family: var(--font-blueprint-mono), monospace;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .blueprint-post { font-family: var(--font-blueprint-body), Arial, sans-serif; }
+  .blueprint-note {
+    font-family: var(--font-blueprint-note), cursive !important;
+    color: var(--studio-text);
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .blueprint-hours { display: inline; }
+
+  // The frame and its construction marks never affect layout or pointer input.
+  :is(.blueprint-frame, .mantine-Modal-modal, .swal2-popup) {
+    position: relative;
+    border: 1px solid var(--studio-line);
+    background-color: var(--studio-panel);
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+    }
+    &::after {
+      inset: 3px -4px -4px 3px;
+      border: 1px solid var(--studio-line);
+      opacity: 0.5;
+    }
+    &::before {
+      inset: -6px;
+      background:
+        linear-gradient(var(--studio-line), var(--studio-line)) 0 6px / 12px 1px,
+        linear-gradient(var(--studio-line), var(--studio-line)) 6px 0 / 1px 12px,
+        linear-gradient(var(--studio-line), var(--studio-line)) 100% calc(100% - 6px) / 12px 1px,
+        linear-gradient(var(--studio-line), var(--studio-line)) calc(100% - 6px) 100% / 1px 12px;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+    }
+  }
+  .blueprint-shell { gap: 8px; }
+  .blueprint-workspace { overflow: visible; background: transparent; }
+  #left-menu [aria-current='page'] { background: var(--studio-marker); color: var(--studio-text); border: 1px solid var(--studio-line); }
+  .blueprint-topbar { border-bottom: 1px solid var(--studio-line); }
+  .blueprint-channels { border-block: 0; }
+  .blueprint-calendar-panel { background: transparent; padding: 20px; }
+  .blueprint-calendar { min-width: 0; padding: 6px; }
+  .blueprint-week-grid {
+    grid-template-columns: 72px repeat(7, minmax(0, 1fr)) !important;
+    gap: 1px;
+    background: var(--studio-line);
+    > div { background-color: var(--studio-panel); }
+    > [data-today] { background-image: linear-gradient(var(--studio-marker), var(--studio-marker)); }
+  }
+  .blueprint-calendar-cell { min-height: 58px; }
+  .blueprint-post { background: var(--studio-panel); padding: 6px; }
+  .blueprint-content-panel { margin: 8px; }
+  .blueprint-empty-art { display: none; }
+  .blueprint-auth { gap: 24px; padding: 24px; }
+  .blueprint-public-preview { padding: 12px; }
+
+  :is(button, [role='button'], .blueprint-secondary, .bg-btnSimple):not(.network-preview *) {
+    min-height: 44px;
+    border: 1px solid var(--studio-line);
+    font-weight: 700;
+  }
+  :is(.blueprint-action, .blueprint-accent, .bg-btnPrimary, .bg-forth, .bg-ai, .swal2-confirm):not(.network-preview *) {
+    background: var(--studio-accent) !important;
+    color: var(--studio-ink) !important;
+    border: 1px solid var(--studio-line);
+    font-weight: 700;
+    // Explicit text utilities within buttons must also use the orange contrast color.
+    * { color: inherit !important; }
+  }
+  :is(button.blueprint-accent, .blueprint-accent.cursor-pointer, .blueprint-action, button.bg-btnPrimary, a.bg-forth, .swal2-confirm) {
+    min-height: 44px;
+    padding: 11px 20px;
+  }
+  :is(.blueprint-action, .blueprint-accent, .bg-btnPrimary, .bg-forth, .bg-ai) svg {
+    [stroke]:not([stroke='none']) { stroke: currentColor; }
+    [fill]:not([fill='none']) { fill: currentColor; }
+  }
+  :is(.blueprint-secondary, .swal2-cancel) {
+    background: transparent !important;
+    color: var(--studio-text) !important;
+  }
+  :is(button, [role='button'], .blueprint-action, .blueprint-accent.cursor-pointer, a.bg-forth, .bg-btnSimple, .dropdown-menu button):not(:disabled, [aria-disabled='true'], .network-preview *):hover {
+    background: var(--studio-hover) !important;
+    color: var(--studio-text) !important;
+    * { color: inherit !important; }
+  }
+  :is(button, [role='button']):not(:disabled, .network-preview *):active {
+    outline: 1px solid var(--studio-line) !important;
+    outline-offset: -5px;
+  }
+  :is(button:disabled, [aria-disabled='true']):not(.network-preview *) { opacity: 0.5; }
+  body :is(a, button, input, textarea, select, [tabindex], [contenteditable='true']):focus-visible {
+    outline: 3px solid var(--studio-accent, #FF7A45) !important;
+    outline-offset: 5px !important;
+  }
+  :is(input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea, .react-tags):not(.network-preview *) {
+    min-height: 44px;
+    background: var(--studio-panel) !important;
+    border: 1px solid var(--studio-line);
+    color: var(--studio-text) !important;
+  }
+  :is(h2, h3):not(.network-preview *) { font-size: 24px; }
+  :is(input, textarea)::placeholder { color: var(--studio-muted); opacity: 1; }
+  :is(input[type='checkbox'], input[type='radio'], input[type='range']) { accent-color: var(--studio-accent); }
+  :is(.ProseMirror .mention, .tiptap .mention) { color: var(--studio-text); background: var(--studio-marker); }
+  .tiptap p.is-editor-empty:first-child::before { color: var(--studio-muted); }
+  :is(table, .table1, .dropdown-menu, .react-tags__listbox, .mantine-Paper-root, .react-tooltip, .uppy-Dashboard-inner) {
+    background: var(--studio-panel) !important;
+    color: var(--studio-text) !important;
+    border: 1px solid var(--studio-line);
+  }
+  :is(th, td) { border-bottom: 1px solid var(--studio-line); }
+  :is(.mantine-DatePicker-day, .mantine-Calendar-day, .mantine-DatePickerInput-day, .mantine-Month-day) {
+    color: var(--studio-text);
+    &[data-selected] { background: var(--studio-accent); color: var(--studio-ink); }
+    &[data-outside] { color: var(--studio-muted); }
+  }
+  .editor .polonto * { color: var(--studio-text) !important; }
+  :is(.bp5-menu, .bp5-popover-content, .bp5-dialog, .bp5-card, .bp5-navbar, .bp5-input, .polotno-side-panel, .polotno-toolbar) {
+    background: var(--studio-panel) !important;
+    color: var(--studio-text) !important;
+    border: 1px solid var(--studio-line);
+  }
+  .bp5-button:not(.bp5-intent-primary) { background: var(--studio-panel); color: var(--studio-text); }
+  .bp5-button.bp5-intent-primary { background: var(--studio-accent); color: var(--studio-ink) !important; }
+  .bp5-button.bp5-intent-primary * { color: var(--studio-ink) !important; }
+  .bp5-menu-item:hover { background: var(--studio-hover); color: var(--studio-text); }
+  .group:hover [class*='group-hover:bg-btnPrimary'] { color: var(--studio-ink); }
+  .mantine-Overlay-root { background: var(--studio-ground) !important; }
+  .blueprint-toast {
+    background: var(--studio-panel);
+    border: 1px solid var(--studio-line);
+    border-inline-start: 3px solid var(--studio-warning);
+    height: auto;
+    min-height: 56px;
+    max-width: calc(100vw - 32px);
+    min-width: 0;
+    &[data-state='success'] { border-inline-start-color: var(--studio-success); }
+    > svg { display: none; }
+  }
+  :is(.react-tags.is-invalid, [aria-invalid='true']) { border-color: var(--studio-error); }
+  .react-tags__listbox-option-highlight { background: var(--studio-marker); color: var(--studio-text); }
+  .react-tags__tag { background: var(--studio-hover); color: var(--studio-text); }
+  :is(.blackGradBottomBg, .blackGradTopBg) { background: var(--studio-panel); }
+  .loading-shimmer { color: var(--studio-muted); &::before { display: none; } }
+  :is(.blur-xs, .blur-s) { filter: none; }
+  .forceChange .changeColor { color: var(--studio-ink) !important; }
+  .uppy-ProgressBar-percentage { color: var(--studio-text); }
+  svg [fill='white']:not(.network-preview *) { fill: var(--studio-text); }
+  svg [fill='black']:not(.network-preview *) { fill: var(--studio-ground); }
+  svg [stroke='white']:not(.network-preview *) { stroke: currentColor; }
+  [class*='drop-shadow']:not(.network-preview *) { filter: none; }
+  [class*='bg-[var(--studio-error,'],
+  [class*='bg-[var(--studio-success,'],
+  [class*='bg-[var(--studio-warning,'] { color: var(--studio-ink); }
+  [class*='hover:bg-']:not(:disabled, [aria-disabled='true'], .network-preview *):hover {
+    background-color: var(--studio-hover) !important;
+    color: var(--studio-text);
+    :is(.text-textItemBlur, .text-newTableText, .text-gray, [class*='text-[var(--studio-muted,']) { color: var(--studio-text); }
+  }
+  .uppy-ProgressBar-inner[style='width: 100%;'],
+  .uppy-ProgressBar-inner[style='width: 100%;'] + div { display: none; }
+  .box::after { background: var(--studio-hover); }
+  .fill-text-textColor { -webkit-text-fill-color: var(--studio-text) !important; }
+  :is(.text-newTableTextFocused, .text-forth, .text-seventh) { color: var(--studio-text); }
+  .bg-newTableTextFocused { color: var(--studio-ink); }
+  :is([class*='text-newTextColor/'], [class*='text-textColor/'], [class*='text-white/']):not(.network-preview *) { color: var(--studio-muted); }
+  :is([class*='bg-red-'], [class*='bg-green-'], [class*='bg-amber-'], [class*='bg-yellow-']):not(.network-preview *) { color: var(--studio-ink); }
+  :is([class*='bg-gradient-']):not(.network-preview *) { background-image: none; background-color: var(--studio-panel); }
+  svg [stroke]:not([stroke='none'], .network-preview *, .blueprint-brand *) { stroke-width: 1.25; }
+
+  @media (max-width: 1025px) {
+    .blueprint-topbar { flex-wrap: wrap; height: auto; min-height: 64px; padding-block: 12px; }
+    .blueprint-calendar-panel { padding: 12px; }
+    .blueprint-auth { padding: 12px; }
+    .blueprint-editor { max-width: 100vw; }
+    .blueprint-channels::before, .blueprint-channels::after { display: none; }
+  }
+  @media (max-width: 767px) {
+    .blueprint-week-desktop { display: none; }
+    .blueprint-mobile-week {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+      flex-direction: column;
+      gap: 16px;
+      padding: 8px;
+      section { border-bottom: 1px solid var(--studio-line); padding-bottom: 16px; }
+      [data-today] { background: var(--studio-marker); }
+      h2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 16px; padding-block: 12px; }
+      .blueprint-post { height: auto; margin-bottom: 12px; }
+    }
+    .blueprint-title { font-size: 28px; }
+    .blueprint-frame::before { inset: -3px; }
+    .blueprint-frame::after { inset: 3px -3px -3px 3px; }
+  }
+}

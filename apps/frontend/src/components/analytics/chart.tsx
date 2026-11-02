@@ -15,16 +15,20 @@ export const Chart: FC<{
   const ref = useRef<any>(null);
   const chart = useRef<null | DrawChart>(null);
   useEffect(() => {
+    const blueprint = document.documentElement.dataset.linkselfTheme === 'blueprint';
+    const tokens = getComputedStyle(document.body);
+    const studioColor = (name: string) => tokens.getPropertyValue(`--studio-${name}`).trim();
     const gradient = ref.current
       .getContext('2d')
       .createLinearGradient(0, 0, 0, ref.current.height);
-    gradient.addColorStop(0, 'rgba(114, 118, 137, 1)'); // Start color with some transparency
-    gradient.addColorStop(1, 'rgb(9, 11, 19, 1)');
+    gradient.addColorStop(0, blueprint ? studioColor('marker') : 'rgba(114, 118, 137, 1)'); // Start color with some transparency
+    gradient.addColorStop(1, blueprint ? studioColor('panel') : 'rgb(9, 11, 19, 1)');
     chart.current = new DrawChart(ref.current!, {
       type: 'line',
       options: {
         maintainAspectRatio: false,
         responsive: true,
+        ...(blueprint && { animation: false as const }),
         layout: {
           padding: {
             left: 0,
@@ -52,7 +56,7 @@ export const Chart: FC<{
         labels: list.map((row) => newDayjs(row.date).format('DD/MM/YYYY')),
         datasets: [
           {
-            borderColor: '#fff',
+            borderColor: blueprint ? studioColor('accent') : '#fff',
             // @ts-ignore
             label: list?.[0]?.totalForks ? 'Forks by date' : 'Stars by date',
             backgroundColor: gradient,
@@ -66,6 +70,6 @@ export const Chart: FC<{
     return () => {
       chart?.current?.destroy();
     };
-  }, []);
+  }, [list]);
   return <canvas className="w-full h-full" ref={ref} />;
 };

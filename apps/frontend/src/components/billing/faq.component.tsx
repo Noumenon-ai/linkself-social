@@ -123,7 +123,7 @@ export const FAQSection: FC<{
             >
               <path
                 d="M24 17H8C7.45333 17 7 16.5467 7 16C7 15.4533 7.45333 15 8 15H24C24.5467 15 25 15.4533 25 16C25 16.5467 24.5467 17 24 17Z"
-                fill="#ECECEC"
+                fill="var(--studio-text,#ECECEC)"
               />
             </svg>
           )}

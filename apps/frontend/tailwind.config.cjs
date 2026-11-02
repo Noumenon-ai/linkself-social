@@ -1,9 +1,42 @@
+// Resolve legacy and stock utilities through semantic Blueprint tokens. The
+// fallbacks preserve upstream themes; network preview roots unset these tokens.
+const blueprintPalette = (palette, kind, family = '') => Object.fromEntries(
+  Object.entries(palette).map(([name, value]) => {
+    if (typeof value === 'object') return [name, blueprintPalette(value, kind, name)];
+    if (typeof value !== 'string') return [name, value];
+    const legacy = /^var\(--color-custom/.test(value);
+    const literal = /^#([\da-f]{3}|[\da-f]{6})$/i.test(value);
+    if (!legacy && !literal) return [name, value];
+    const familyName = family || name;
+    let role = kind === 'bg' ? 'panel' : kind === 'border' ? 'line' : 'text';
+    if (/^(red|rose|pink)/.test(familyName)) role = 'error';
+    if (/^(green|emerald|teal|lime)/.test(familyName)) role = 'success';
+    if (/^(yellow|amber|orange)/.test(familyName)) role = 'warning';
+    if (/^(purple|violet|fuchsia|indigo|blue|cyan|sky)/.test(familyName)) role = kind === 'bg' ? 'hover' : 'text';
+    if (/^(gray|slate|zinc|neutral|stone)/.test(familyName)) role = kind === 'bg' ? 'panel' : kind === 'border' ? 'line' : 'muted';
+    if (typeof value === 'string' && legacy) return [name, `var(--studio-${role}, ${value})`];
+    let hex = value.slice(1);
+    if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
+    const rgb = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(' ');
+    return [name, `rgb(var(--studio-${role}-rgb, ${rgb}) / <alpha-value>)`];
+  })
+);
+
 const { join } = require('path');
 module.exports = {
   darkMode: 'class',
   content: ['./src/**/*.{ts,tsx,html}', '../../libraries/**/*.{ts,tsx,html}'],
   theme: {
     extend: {
+      backgroundColor: ({ theme }) => blueprintPalette(theme('colors'), 'bg'),
+      textColor: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
+      borderColor: ({ theme }) => blueprintPalette(theme('colors'), 'border'),
+      ringColor: ({ theme }) => blueprintPalette(theme('colors'), 'border'),
+      divideColor: ({ theme }) => blueprintPalette(theme('colors'), 'border'),
+      placeholderColor: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
+      gradientColorStops: ({ theme }) => blueprintPalette(theme('colors'), 'bg'),
+      fill: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
+      stroke: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
       colors: {
         primary: 'var(--color-primary)',
         secondary: 'var(--color-secondary)',
@@ -123,6 +156,9 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Helvetica Neue'],
+        blueprint: ['var(--font-blueprint-body)', 'Arial', 'sans-serif'],
+        blueprintMono: ['var(--font-blueprint-mono)', 'monospace'],
+        blueprintNote: ['var(--font-blueprint-note)', 'cursive'],
       },
       animation: {
         fade: 'fadeOut 0.5s ease-in-out',

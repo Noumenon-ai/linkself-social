@@ -139,7 +139,7 @@ export const PicksSocialsComponent: FC<{
                       (p) => p.integration.id === integration.id
                     ) === -1
                       ? 'grayscale border-transparent'
-                      : 'border-[#622FF6]'
+                      : 'border-[var(--studio-accent,#622FF6)]'
                   )}
                 >
                   <ImageWithFallback
@@ -151,7 +151,7 @@ export const PicksSocialsComponent: FC<{
                         (p) => p.integration.id === integration.id
                       ) === -1
                         ? 'border-transparent'
-                        : 'border-[#000]'
+                        : 'border-[var(--studio-line,#000)]'
                     )}
                     alt={integration.identifier}
                     width={42}

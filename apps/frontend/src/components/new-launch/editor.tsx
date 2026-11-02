@@ -430,7 +430,7 @@ export const EditorWrapper: FC<{
           onClick={goBackToGlobal}
         >
           <div className="flex gap-[6px] items-center mobile:hidden">
-            <div className="w-[8px] h-[8px] rounded-full bg-[#FC69FF]" />
+            <div className="w-[8px] h-[8px] rounded-full blueprint-accent bg-[var(--studio-accent,#FC69FF)]" />
             <div className="text-[14px] font-[600]">
               {t('editing_a_specific_network', 'Editing a Specific Network')}
             </div>
@@ -503,7 +503,7 @@ export const EditorWrapper: FC<{
               )}
             </div>
             <div>
-              <div className="text-white rounded-[8px] h-[44px] px-[20px] bg-[#D82D7E] cursor-pointer flex justify-center items-center">
+              <div className="text-white rounded-[8px] h-[44px] px-[20px] blueprint-accent bg-[var(--studio-accent,#D82D7E)] cursor-pointer flex justify-center items-center">
                 {t('edit_content', 'Edit content')}
               </div>
             </div>
@@ -589,7 +589,7 @@ export const EditorWrapper: FC<{
                       'delete_post_tooltip',
                       'Delete Post'
                     )}
-                    className="cursor-pointer text-[#FF3F3F]"
+                    className="cursor-pointer text-[var(--studio-error,#FF3F3F)]"
                   />
                 )}
                 {index > 0 && (
@@ -1328,7 +1328,7 @@ export const OnlyEditor = forwardRef<
         ? [
             EditorImage,
             Dropcursor.configure({
-              color: 'var(--new-btn-primary)',
+              color: 'var(--studio-text, var(--new-btn-primary))',
               width: 2,
             }),
             // a picture can't hold the cursor, keep a paragraph after a

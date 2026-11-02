@@ -1,5 +1,6 @@
 :root {
-  .dark {
+  .dark,
+  .dark .network-preview {
     --new-back-drop: #000;
     --new-settings: #242323;
     --new-border: #252525;
@@ -43,7 +44,8 @@
     --youtube-action-color: #272727;
     --youtube-svg-border: #A0A0A0;
   }
-  .light {
+  .light,
+  .light .network-preview {
     --new-back-drop: #2d1b57;
     --new-settings: #eceef1;
     --new-sep: #d5d9dd;
@@ -97,7 +99,8 @@
 }
 
 :root {
-  .dark {
+  .dark,
+  .dark .network-preview {
     --color-primary: #0e0e0e;
     --color-secondary: #090b13;
     --color-text: #ffffff;
@@ -167,7 +170,8 @@
     --color-custom55: #1b263b;
     --color-modalCustom: #000000;
   }
-  .light {
+  .light,
+  .light .network-preview {
     --color-primary: #f0f2f4;
     --color-secondary: #fff;
     --color-text: #000;
@@ -237,4 +241,107 @@
     --color-custom55: #d5d7e1;
     --color-modalCustom: transparent;
   }
+}
+
+// Blueprint is selected on the server, including auth and public post previews.
+// Both stored modes resolve identically. Network mocks retain their own tokens.
+html[data-linkself-theme='blueprint'] body,
+html[data-linkself-theme='blueprint'] :is(.dark, .light):not(.network-preview, .network-preview *) {
+  --studio-ground-rgb: 27 58 92;
+  --studio-panel-rgb: 20 48 73;
+  --studio-line-rgb: 234 242 250;
+  --studio-text-rgb: 234 242 250;
+  --studio-muted-rgb: 169 193 217;
+  --studio-hover-rgb: 46 83 121;
+  --studio-accent-rgb: 255 122 69;
+  --studio-ink-rgb: 18 22 28;
+  --studio-error-rgb: 255 155 143;
+  --studio-success-rgb: 143 227 184;
+  --studio-warning-rgb: 255 210 122;
+  --studio-shadow: none;
+  --studio-ground: #1B3A5C;
+  --studio-panel: #143049;
+  --studio-line: #EAF2FA;
+  --studio-text: #EAF2FA;
+  --studio-muted: #A9C1D9;
+  --studio-hover: #2E5379;
+  --studio-accent: #FF7A45;
+  --studio-ink: #12161C;
+  --studio-error: #FF9B8F;
+  --studio-success: #8FE3B8;
+  --studio-warning: #FFD27A;
+  --studio-marker: rgb(255 122 69 / 0.16);
+  --studio-grid: rgb(46 83 121 / 0.55);
+  --new-back-drop: var(--studio-ground);
+  --new-settings: var(--studio-panel);
+  --new-border: var(--studio-line);
+  --new-bgColor: var(--studio-ground);
+  --new-bgColorInner: var(--studio-panel);
+  --new-sep: var(--studio-line);
+  --new-bgLineColor: var(--studio-hover);
+  --new-textItemFocused: var(--studio-text);
+  --new-textItemBlur: var(--studio-muted);
+  --new-boxFocused: var(--studio-hover);
+  --new-textColor: 234 242 250;
+  --new-blockSeparator: var(--studio-line);
+  --new-btn-simple: transparent;
+  --new-btn-text: var(--studio-text);
+  --new-btn-primary: var(--studio-accent);
+  --new-ai-btn: var(--studio-accent);
+  --new-box-hover: var(--studio-hover);
+  --new-table-border: var(--studio-line);
+  --new-table-header: var(--studio-panel);
+  --new-table-text: var(--studio-muted);
+  --new-table-text-focused: var(--studio-accent);
+  --new-small-strips: var(--studio-panel);
+  --new-big-strips: var(--studio-panel);
+  --new-col-color: var(--studio-hover);
+  --new-menu-dots: var(--studio-muted);
+  --new-menu-hover: var(--studio-text);
+  --menu-shadow: none;
+  --popup-color: rgb(27 58 92 / 0.85);
+  --border-preview: var(--studio-line);
+  --preview-box-shadow: none;
+  --color-primary: var(--studio-ground);
+  --color-secondary: var(--studio-panel);
+  --color-text: var(--studio-text);
+  --color-third: var(--studio-panel);
+  --color-forth: var(--studio-accent);
+  --color-fifth: var(--studio-line);
+  --color-sixth: var(--studio-panel);
+  --color-seventh: var(--studio-hover);
+  --color-gray: var(--studio-muted);
+  --color-input: var(--studio-panel);
+  --color-input-text: var(--studio-muted);
+  --color-table-border: var(--studio-line);
+  --color-modalCustom: var(--studio-ground);
+}
+
+// An unset custom property uses the original utility fallback inside network mocks.
+html[data-linkself-theme='blueprint'] .network-preview {
+  --studio-ground-rgb: initial;
+  --studio-panel-rgb: initial;
+  --studio-line-rgb: initial;
+  --studio-text-rgb: initial;
+  --studio-muted-rgb: initial;
+  --studio-hover-rgb: initial;
+  --studio-accent-rgb: initial;
+  --studio-ink-rgb: initial;
+  --studio-error-rgb: initial;
+  --studio-success-rgb: initial;
+  --studio-warning-rgb: initial;
+  --studio-shadow: initial;
+  --studio-ground: initial;
+  --studio-panel: initial;
+  --studio-line: initial;
+  --studio-text: initial;
+  --studio-muted: initial;
+  --studio-hover: initial;
+  --studio-accent: initial;
+  --studio-ink: initial;
+  --studio-error: initial;
+  --studio-success: initial;
+  --studio-warning: initial;
+  --studio-marker: initial;
+  --studio-grid: initial;
 }

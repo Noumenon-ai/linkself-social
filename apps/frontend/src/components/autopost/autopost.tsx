@@ -335,7 +335,7 @@ export const AddOrEditWebhook: FC<{
                   <CopilotTextarea
                     disableBranding={true}
                     className={clsx(
-                      '!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[#612AD5] bg-customColor2 outline-none mb-[16px] border-fifth border rounded-[4px]'
+                      '!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[var(--studio-accent,#612AD5)] bg-customColor2 outline-none mb-[16px] border-fifth border rounded-[4px]'
                     )}
                     value={content}
                     onChange={(e) => {
@@ -349,7 +349,7 @@ export const AddOrEditWebhook: FC<{
                   />
                 ) : (
                   <textarea
-                    className="!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[#612AD5] bg-customColor2 outline-none mb-[16px] border-fifth border rounded-[4px]"
+                    className="!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[var(--studio-accent,#612AD5)] bg-customColor2 outline-none mb-[16px] border-fifth border rounded-[4px]"
                     value={content}
                     onChange={(e) => form.setValue('content', e.target.value)}
                     placeholder={t('write_your_post_placeholder', 'Write your post...')}

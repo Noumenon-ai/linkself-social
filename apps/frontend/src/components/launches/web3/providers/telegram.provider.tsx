@@ -74,7 +74,7 @@ export const TelegramProvider: FC<Web3ProviderInterface> = (props) => {
         {!step ? (
           <div className="w-full mt-[16px]" onClick={loadAll}>
             <div
-              className={`cursor-pointer bg-[#2EA6DD] h-[44px] rounded-[4px] flex justify-center items-center text-white gap-[4px]`}
+              className={`cursor-pointer bg-[var(--studio-hover,#2EA6DD)] h-[44px] rounded-[4px] flex justify-center items-center text-white gap-[4px]`}
             >
               <svg
                 width="51"
@@ -89,11 +89,11 @@ export const TelegramProvider: FC<Web3ProviderInterface> = (props) => {
                 />
                 <path
                   d="M39.0005 49.5147L28.7225 59.6367C28.7225 59.6367 28.2755 59.9817 27.6785 59.9967C27.4715 60.0027 27.2495 59.9697 27.0215 59.8677L29.9135 41.9727L39.0005 49.5147Z"
-                  fill="#B0BEC5"
+                  fill="var(--studio-muted,#B0BEC5)"
                 />
                 <path
                   d="M59.691 12.5877C59.184 11.9277 58.248 11.8077 57.588 12.3087L18 35.9997C18 35.9997 24.318 53.6757 25.281 56.7357C26.247 59.7987 27.021 59.8707 27.021 59.8707L29.913 41.9757L59.409 14.6877C60.069 14.1867 60.192 13.2477 59.691 12.5877Z"
-                  fill="#CFD8DC"
+                  fill="var(--studio-text,#CFD8DC)"
                 />
               </svg>
               <div>{t('connect_telegram', 'Connect Telegram')}</div>

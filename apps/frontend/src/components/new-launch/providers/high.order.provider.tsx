@@ -1,4 +1,5 @@
 'use client';
+import { jakartaSans } from '@gitroom/frontend/fonts/plus-jakarta-sans/plus.jakarta.sans.font';
 
 import React, {
   FC,
@@ -267,7 +268,7 @@ export const withProvider = function <T extends object>(params: {
         <FormProvider {...form}>
           <div
             className={clsx(
-              'border border-borderPreview rounded-[12px] shadow-previewShadow',
+              'blueprint-frame border border-borderPreview rounded-[12px] shadow-previewShadow',
               !current && 'hidden'
             )}
           >
@@ -286,7 +287,7 @@ export const withProvider = function <T extends object>(params: {
               (tab === 0 ||
                 (!SettingsComponent && !data?.internalPlugs?.length)) &&
               !!value?.[0]?.content?.length &&
-              (CustomPreviewComponent ? (
+              (<div className={clsx('network-preview', jakartaSans.className)}>{CustomPreviewComponent ? (
                 <CustomPreviewComponent
                   maximumCharacters={
                     typeof maximumCharacters === 'number'
@@ -312,7 +313,7 @@ export const withProvider = function <T extends object>(params: {
                         )
                   }
                 />
-              ))}
+              )}</div>)}
             {(SettingsComponent || !!data?.internalPlugs?.length) &&
               createPortal(
                 <div data-id={props.id} className={isGlobal ? 'bg-newSettings pb-[12px] px-[12px] mobile:bg-transparent mobile:px-[16px]' : 'hidden bg-newSettings px-[12px] pb-[12px] mobile:bg-transparent mobile:px-[16px]'}>

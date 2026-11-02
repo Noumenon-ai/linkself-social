@@ -517,6 +517,7 @@ export const DayView = () => {
   );
 };
 export const WeekView = () => {
+  const { linkselfUrl } = useVariables();
   const { startDate, endDate } = useCalendar();
   const t = useT();
 
@@ -539,13 +540,15 @@ export const WeekView = () => {
   }, [i18next.resolvedLanguage, startDate]);
 
   return (
-    <div className="flex flex-col text-textColor flex-1">
+    <>
+    <div className="blueprint-week-desktop flex flex-col text-textColor flex-1">
       <div className="flex-1 relative">
-        <div className="grid [grid-template-columns:136px_repeat(7,_minmax(0,_1fr))] tablet:[grid-template-columns:72px_repeat(7,_minmax(100px,_1fr))] gap-[4px] rounded-[10px] absolute h-full start-0 top-0 w-full overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
-          <div className="z-10 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0"></div>
+        <div className="blueprint-week-grid grid [grid-template-columns:136px_repeat(7,_minmax(0,_1fr))] tablet:[grid-template-columns:72px_repeat(7,_minmax(100px,_1fr))] gap-[4px] rounded-[10px] absolute h-full start-0 top-0 w-full overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
+          <div className="z-10 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0"><span className="blueprint-hours blueprint-note">{t('hours', 'hours')}</span></div>
           {localizedDays.map((day, index) => (
             <div
               key={day.name}
+              data-today={day.date.isSame(newDayjs(), 'day') || undefined}
               className="p-2 text-center bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 z-[20]"
             >
               <div className="text-[14px] font-[500] text-newTableText">
@@ -574,7 +577,7 @@ export const WeekView = () => {
                 <Fragment
                   key={`${startDate}-${day.date.format('YYYY-MM-DD')}-${hour}`}
                 >
-                  <div className="relative">
+                  <div className="blueprint-calendar-cell relative" data-today={day.date.isSame(newDayjs(), 'day') || undefined}>
                     <CalendarColumn
                       getDate={day.date.hour(hour).startOf('hour')}
                     />
@@ -586,6 +589,48 @@ export const WeekView = () => {
           <WeekNowLine days={localizedDays.map((day) => day.date)} />
         </div>
       </div>
+    </div>
+    {linkselfUrl && <BlueprintWeekAgenda days={localizedDays.map((day) => day.date)} />}
+    </>
+  );
+};
+
+// On phones, the same week's posts become the reference's single-column agenda.
+// Reuse the calendar actions and timezone-normalized occurrences without fetching.
+const BlueprintWeekAgenda: FC<{ days: dayjs.Dayjs[] }> = ({ days }) => {
+  const { posts, postDates, integrations, loading } = useCalendar();
+  const user = useUser();
+  const t = useT();
+  const { editPost, deletePost, copyDebugJson, openStatistics, openMissingRelease, openPost } = usePostActions();
+  return (
+    <div className="blueprint-mobile-week">
+      {days.map((day) => {
+        const dayPosts = posts.filter((post) => postDates.get(post)?.isSame(day, 'day'));
+        return (
+          <section key={day.format('YYYY-MM-DD')} data-today={day.isSame(newDayjs(), 'day') || undefined}>
+            <h2><span>{day.format('dddd')}</span><time dateTime={day.format('YYYY-MM-DD')}>{day.format('L')}</time></h2>
+            {loading ? <div className="bg-newBgColorInner min-h-[44px]" aria-busy="true" /> : dayPosts.length ? dayPosts.map((post) => (
+              <CalendarItem
+                key={`${post.id}-${postDates.get(post)?.valueOf()}`}
+                display="day"
+                isBeforeNow={false}
+                date={postDates.get(post)!}
+                state={post.state}
+                statistics={openStatistics(post.id)}
+                missingRelease={openMissingRelease(post.id)}
+                openPost={openPost(post)}
+                editPost={editPost(post, false)}
+                duplicatePost={editPost(post, true)}
+                copyDebugJson={user?.isSuperAdmin ? copyDebugJson(post) : undefined}
+                post={post}
+                integrations={integrations}
+                deletePost={deletePost(post)}
+                showTime
+              />
+            )) : <p className="blueprint-note">{t('no_posts', 'No posts')}</p>}
+          </section>
+        );
+      })}
     </div>
   );
 };
@@ -710,7 +755,7 @@ export const ListView = () => {
   if (listPosts.length === 0) {
     return (
       <div className="flex flex-col flex-1 items-center justify-center">
-        <div className="text-textColor text-[16px]">{emptyMessage}</div>
+        <div className="blueprint-note text-textColor text-[16px]">{emptyMessage}</div>
       </div>
     );
   }
@@ -1039,7 +1084,7 @@ export const CalendarColumn: FC<{
         className={clsx(
           'relative flex flex-col flex-1 text-white rounded-[8px] min-h-[70px]',
           display === 'month' && 'mobile:min-h-[44px]',
-          canDrop && 'border border-[#612BD3]'
+          canDrop && 'border border-[var(--studio-accent,#612BD3)]'
         )}
       >
         <div
@@ -1260,7 +1305,7 @@ const CalendarItem: FC<{
       // @ts-ignore
       ref={dragRef}
       className={clsx(
-        'w-full flex h-full flex-1 flex-col group',
+        'blueprint-frame blueprint-post w-full flex h-full flex-1 flex-col group',
         'relative',
         state === 'ERROR' && 'rounded-[10px] ring-2 ring-red-500',
         state === 'PUBLISHED' && 'rounded-[10px] ring-2 ring-green-500'
@@ -1306,7 +1351,7 @@ const CalendarItem: FC<{
           display === 'month' && 'mobile:hidden'
         )}
         style={{
-          backgroundColor: post?.tags?.[0]?.tag?.color,
+          backgroundColor: `var(--studio-marker, ${post?.tags?.[0]?.tag?.color || 'transparent'})`,
         }}
       >
         <div

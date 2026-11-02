@@ -1,0 +1,13 @@
+// The link mark from the approved Blueprint reference, shared by studio and auth.
+export const BlueprintBrand = ({ wordmark = false }: { wordmark?: boolean }) => (
+  <span className="blueprint-brand" aria-label="LinkSelf Social">
+    <svg viewBox="0 0 192 192" width="36" height="36" aria-hidden="true">
+      <rect width="192" height="192" fill="currentColor" />
+      <g fill="none" stroke="var(--studio-ground)" strokeWidth="12" strokeLinecap="square">
+        <path d="M128 69Q134 53 114 53H84C46 53 46 107 84 107H109" />
+        <path d="M64 123Q58 135 78 135H108C146 135 146 80 108 80H83" />
+      </g>
+    </svg>
+    {wordmark && <span>LinkSelf Social</span>}
+  </span>
+);

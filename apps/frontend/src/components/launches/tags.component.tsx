@@ -243,8 +243,8 @@ export const TagsComponentInner: FC<{
           >
             <div className="flex-1 flex">
               <span
-                className="text-[14px] font-[600] text-[#fff] px-[12px] pt-[4px] pb-[6px] rounded-[6px] text-shadow-tags break-all"
-                style={{ backgroundColor: p.color }}
+                className="text-[14px] font-[600] text-[var(--studio-text,#fff)] px-[12px] pt-[4px] pb-[6px] rounded-[6px] text-shadow-tags break-all"
+                style={{ backgroundColor: `var(--studio-marker, ${p.color})` }}
               >
                 {p.name}
               </span>
@@ -257,7 +257,7 @@ export const TagsComponentInner: FC<{
         ))}
         <div
           onClick={addTag}
-          className="cursor-pointer gap-[8px] flex w-full h-[44px] rounded-[8px] px-[16px] justify-center items-center bg-[#D82D7E] text-white select-none"
+          className="cursor-pointer gap-[8px] flex w-full h-[44px] rounded-[8px] px-[16px] justify-center items-center blueprint-accent bg-[var(--studio-accent,#D82D7E)] text-white select-none"
         >
           <PlusIcon size={20} />
           <div className="text-[15px] font-[600]">
@@ -273,7 +273,7 @@ export const TagsComponentInner: FC<{
       ref={ref}
       className={clsx(
         'border rounded-[8px] justify-center flex items-center relative h-[44px] text-[15px] font-[600] select-none',
-        isOpen ? 'border-[#612BD3]' : 'border-newTextColor/10'
+        isOpen ? 'border-[var(--studio-accent,#612BD3)]' : 'border-newTextColor/10'
       )}
     >
       <div
@@ -290,9 +290,9 @@ export const TagsComponentInner: FC<{
             <>
               <div
                 className="h-full flex justify-center items-center px-[8px] rounded-[4px]"
-                style={{ backgroundColor: tagValue[0].color }}
+                style={{ backgroundColor: `var(--studio-marker, ${tagValue[0].color})` }}
               >
-                <span className="text-shadow-tags text-[#fff]">
+                <span className="text-shadow-tags text-[var(--studio-text,#fff)]">
                   {tagValue[0].name}
                 </span>
               </div>
@@ -318,8 +318,8 @@ export const TagsComponentInner: FC<{
               />
               <div className="h-full flex items-center flex-1 break-all">
                 <span
-                  className="text-[#fff] px-[8px] rounded-[8px] text-shadow-tags"
-                  style={{ backgroundColor: p.color }}
+                  className="text-[var(--studio-text,#fff)] px-[8px] rounded-[8px] text-shadow-tags"
+                  style={{ backgroundColor: `var(--studio-marker, ${p.color})` }}
                 >
                   {p.name}
                 </span>
@@ -342,7 +342,7 @@ export const TagsComponentInner: FC<{
           ))}
           <div
             onClick={addTag}
-            className="cursor-pointer gap-[8px] flex w-full h-[34px] rounded-[8px] mt-[12px] px-[16px] justify-center items-center bg-[#612BD3] text-white"
+            className="cursor-pointer gap-[8px] flex w-full h-[34px] rounded-[8px] mt-[12px] px-[16px] justify-center items-center blueprint-accent bg-[var(--studio-accent,#612BD3)] text-white"
           >
             <div>
               <PlusIcon />
@@ -366,7 +366,7 @@ export const Check: FC<{
       onClick={() => onChange(!value)}
       className={clsx(
         'text-[10px] font-[500] text-center flex border border-btnSimple rounded-[6px] min-w-[20px] min-h-[20px] w-[20px] h-[20px] justify-center items-center',
-        value && 'bg-[#612BD3]'
+        value && 'blueprint-accent bg-[var(--studio-accent,#612BD3)]'
       )}
     >
       {value ? <CheckmarkIcon className="text-white" /> : ''}
@@ -545,7 +545,7 @@ export const TagsComponentA: FC<{
               <div
                 className={`min-w-[50px] float-left ms-[4px] p-[3px] rounded-sm relative`}
                 style={{
-                  backgroundColor: findTag?.color,
+                  backgroundColor: `var(--studio-marker, ${findTag?.color || 'transparent'})`,
                 }}
               >
                 <div

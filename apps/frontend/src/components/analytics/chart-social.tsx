@@ -59,10 +59,14 @@ export const ChartSocial: FC<{
   const colors = colorSchemes[color];
 
   useEffect(() => {
+    const blueprint = document.documentElement.dataset.linkselfTheme === 'blueprint';
+    const tokens = getComputedStyle(document.body);
+    const studioColor = (name: string) => tokens.getPropertyValue(`--studio-${name}`).trim();
+    const chartColors = blueprint ? { start: studioColor('marker'), end: studioColor('panel'), border: studioColor(color === 'green' ? 'success' : color === 'blue' ? 'text' : 'accent') } : colors;
     const ctx = ref.current.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, ref.current.height);
-    gradient.addColorStop(0, colors.start);
-    gradient.addColorStop(1, colors.end);
+    gradient.addColorStop(0, chartColors.start);
+    gradient.addColorStop(1, chartColors.end);
 
     chart.current = new DrawChart(ref.current!, {
       type: 'line',
@@ -70,7 +74,7 @@ export const ChartSocial: FC<{
         maintainAspectRatio: false,
         responsive: true,
         animation: {
-          duration: 750,
+          duration: blueprint ? 0 : 750,
           easing: 'easeOutQuart',
         },
         interaction: {
@@ -104,19 +108,21 @@ export const ChartSocial: FC<{
           },
           tooltip: {
             enabled: true,
-            backgroundColor: mode === 'dark' ? '#1e1d1d' : '#fff',
-            titleColor: mode === 'dark' ? '#fff' : '#000',
-            bodyColor: mode === 'dark' ? '#9c9c9c' : '#777',
-            borderColor: mode === 'dark' ? '#2b2b2b' : '#e7e9eb',
+            backgroundColor: blueprint ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',
+            titleColor: blueprint ? studioColor('text') : mode === 'dark' ? '#fff' : '#000',
+            bodyColor: blueprint ? studioColor('muted') : mode === 'dark' ? '#9c9c9c' : '#777',
+            borderColor: blueprint ? studioColor('line') : mode === 'dark' ? '#2b2b2b' : '#e7e9eb',
             borderWidth: 1,
             padding: 10,
-            cornerRadius: 8,
+            cornerRadius: blueprint ? 0 : 8,
             displayColors: false,
             titleFont: {
+              ...(blueprint && { family: getComputedStyle(document.body).fontFamily }),
               size: 12,
               weight: 'normal',
             },
             bodyFont: {
+              ...(blueprint && { family: getComputedStyle(document.body).fontFamily }),
               size: 14,
               weight: 'bold',
             },
@@ -127,7 +133,7 @@ export const ChartSocial: FC<{
         labels: list.map((row) => row.date),
         datasets: [
           {
-            borderColor: colors.border,
+            borderColor: chartColors.border,
             borderWidth: 2,
             label: 'Total',
             backgroundColor: gradient,
@@ -136,8 +142,8 @@ export const ChartSocial: FC<{
             tension: 0.4,
             pointRadius: 0,
             pointHoverRadius: 6,
-            pointHoverBackgroundColor: colors.border,
-            pointHoverBorderColor: mode === 'dark' ? '#1e1d1d' : '#fff',
+            pointHoverBackgroundColor: chartColors.border,
+            pointHoverBorderColor: blueprint ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',
             pointHoverBorderWidth: 2,
           },
         ],
@@ -146,7 +152,7 @@ export const ChartSocial: FC<{
     return () => {
       chart?.current?.destroy();
     };
-  }, []);
+  }, [color, data, mode]);
 
   return <canvas className="w-full h-full" ref={ref} />;
 };

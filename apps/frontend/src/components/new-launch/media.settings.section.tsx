@@ -88,7 +88,7 @@ export const MediaSettingsSection: FC = () => {
               'media_settings_section_tooltip',
               `Thumbnails apply to videos in the main post and are sent to every channel that supports them. YouTube may ignore them on videos it treats as Shorts (vertical, up to 3 minutes) without failing the publish, and requires a phone-verified channel for custom thumbnails. If YouTube rejects the thumbnail the video is still published, and ${APP_NAME} cannot check eligibility in advance.`
             )}
-            className="cursor-help text-[#A3A3A3]"
+            className="cursor-help text-[var(--studio-muted,#A3A3A3)]"
             xmlns="http://www.w3.org/2000/svg"
             width="14"
             height="14"
@@ -104,7 +104,7 @@ export const MediaSettingsSection: FC = () => {
             <path d="M12 8h.01" />
           </svg>
         </div>
-        <div className="text-[12px] text-[#A3A3A3]">
+        <div className="text-[12px] text-[var(--studio-muted,#A3A3A3)]">
           {t(
             'media_settings_section_description',
             'Click a media item to set its alt text, or its thumbnail if it is a video.'

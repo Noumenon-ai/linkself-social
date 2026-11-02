@@ -89,11 +89,11 @@ export const FacebookSettings = () => {
             {...register('text_format_preset_id')}
             style={
               selectedBg
-                ? { background: selectedBg.background, color: selectedBg.text }
+                ? { background: `var(--studio-panel, ${selectedBg.background})`, color: `var(--studio-text, ${selectedBg.text})` }
                 : undefined
             }
           >
-            <option value="" style={{ background: '#ffffff', color: '#1c1e21' }}>
+            <option value="" style={{ background: 'var(--studio-text,#ffffff)', color: 'var(--studio-text,#1c1e21)' }}>
               {t('facebook_background_none', 'None (plain text)')}
             </option>
             {FACEBOOK_PRESETS.map((item) => {
@@ -103,7 +103,7 @@ export const FacebookSettings = () => {
                   key={item.id}
                   value={item.id}
                   style={
-                    bg ? { background: bg.background, color: bg.text } : undefined
+                    bg ? { background: `var(--studio-panel, ${bg.background})`, color: `var(--studio-text, ${bg.text})` } : undefined
                   }
                 >
                   {item.name}

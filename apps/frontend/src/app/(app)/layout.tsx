@@ -8,6 +8,7 @@ import LayoutContext from '@gitroom/frontend/components/layout/layout.context';
 import { ReactNode } from 'react';
 import { jakartaSans } from '@gitroom/frontend/fonts/plus-jakarta-sans/plus.jakarta.sans.font';
 import clsx from 'clsx';
+import { archivo, spaceMono, architectsDaughter } from '@gitroom/frontend/fonts/blueprint/blueprint.font';
 import { VariableContextComponent } from '@gitroom/react/helpers/variable.context';
 import UtmSaver from '@gitroom/helpers/utils/utm.saver';
 import { FacebookComponent } from '@gitroom/frontend/components/layout/facebook.component';
@@ -22,17 +23,18 @@ import Script from 'next/script';
 import { ChangeDirClient } from '@gitroom/frontend/components/new-layout/change.dir.client';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
+  const isLinkSelf = !!(process.env.LINKSELF_URL || process.env.NEXT_PUBLIC_LINKSELF_URL);
   const cookieStore = await cookies();
   const language = cookieStore.get(cookieName)?.value || fallbackLng;
   return (
-    <html>
+    <html data-linkself-theme={isLinkSelf ? 'blueprint' : undefined}>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href={isLinkSelf ? '/blueprint-icon.svg' : '/favicon.ico'} sizes="any" />
 
       </head>
       <ChangeDirClient />
       <body
-        className={clsx(jakartaSans.className, 'dark text-primary !bg-primary')}
+        className={clsx(jakartaSans.className, 'dark text-primary !bg-primary', isLinkSelf && [archivo.variable, spaceMono.variable, architectsDaughter.variable])}
       >
         <VariableContextComponent
           storageProvider={

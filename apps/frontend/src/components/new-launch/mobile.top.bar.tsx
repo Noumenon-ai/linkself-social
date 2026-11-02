@@ -17,7 +17,7 @@ export interface MobileTopBarAction {
 
 const actionColors = {
   primary: 'bg-btnPrimary text-white',
-  secondary: 'bg-[#D82D7E] text-white',
+  secondary: 'blueprint-accent bg-[var(--studio-accent,#D82D7E)] text-white',
   tertiary: 'bg-btnSimple text-btnText',
 };
 
@@ -39,7 +39,7 @@ export const MobileTopBar: FC<{
     <div className="hidden mobile:flex sticky top-0 z-[450] h-[60px] items-center gap-[8px] px-[16px] bg-newBgColorInner select-none">
       <div
         onClick={onBack}
-        className="w-[24px] h-[24px] flex justify-center items-center cursor-pointer text-[#A3A3A3]"
+        className="w-[24px] h-[24px] flex justify-center items-center cursor-pointer text-[var(--studio-muted,#A3A3A3)]"
       >
         <ChevronLeftIcon strokeWidth={1.5} className="rtl:rotate-180" />
       </div>

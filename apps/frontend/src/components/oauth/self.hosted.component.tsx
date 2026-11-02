@@ -76,7 +76,7 @@ export const OAuthSelfHosted: FC<{
   return (
     <form
       onSubmit={connect}
-      className="border-t border-[#2A2929] pt-[16px] flex flex-col gap-[16px]"
+      className="border-t border-[var(--studio-line,#2A2929)] pt-[16px] flex flex-col gap-[16px]"
     >
       <div className="flex flex-col gap-[4px]">
         <div className="text-[16px] font-semibold">Use self-hosted</div>
@@ -146,7 +146,7 @@ export const OAuthSelfHosted: FC<{
           disabled={
             submitting || !instanceUrl.trim() || (askEmail && !email.trim())
           }
-          className="flex-1 bg-[#612BD3] hover:bg-[#7B3FF2] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+          className="flex-1 blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
         >
           {submitting ? 'Connecting...' : 'Connect'}
         </button>
@@ -154,7 +154,7 @@ export const OAuthSelfHosted: FC<{
           type="button"
           onClick={onBack}
           disabled={submitting}
-          className="flex-1 bg-[#2A2929] hover:bg-[#3A3939] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+          className="flex-1 bg-[var(--studio-panel,#2A2929)] hover:bg-[var(--studio-hover,#3A3939)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
         >
           Back
         </button>

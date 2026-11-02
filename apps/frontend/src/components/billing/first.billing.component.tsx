@@ -133,7 +133,7 @@ export const FirstBillingComponent = () => {
       <>
         <div className="text-[46px] font-[600] leading-[110%] tablet:text-[36px] mobile:!text-[30px] whitespace-pre-line text-balance">
           {t('billing_join_over', 'Join Over')}{' '}
-          <span className="text-[#FC69FF]">
+          <span className="text-[var(--studio-text,#FC69FF)]">
             {t('billing_entrepreneurs_count', '20,000+ Entrepreneurs')}
           </span>{' '}
           {t('billing_who_use', 'who use')}{' '}
@@ -279,7 +279,7 @@ export const FirstBillingComponent = () => {
                   onClick={() => setPeriod('YEARLY')}
                 >
                   <div>{t('billing_yearly', 'Yearly')}</div>
-                  <div className="bg-[#AA0FA4] text-[white] px-[8px] rounded-[4px] mobile:hidden">
+                  <div className="blueprint-accent bg-[var(--studio-accent,#AA0FA4)] text-[white] px-[8px] rounded-[4px] mobile:hidden">
                     {t('billing_20_percent_off', '20% Off')}
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export const FirstBillingComponent = () => {
                     className={clsx(
                       'cursor-pointer select-none w-[266px] h-[138px] tablet:w-full tablet:h-[124px] p-[24px] tablet:p-[15px] rounded-[20px] flex flex-col',
                       key === tier
-                        ? 'border-[1.5px] border-[#618DFF]'
+                        ? 'border-[1.5px] border-[var(--studio-text,#618DFF)]'
                         : 'border-[1.5px] border-newColColor'
                     )}
                   >

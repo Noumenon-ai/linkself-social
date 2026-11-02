@@ -55,7 +55,7 @@ export const ShowNotification: FC<{
         </div>
       </div>
       {newNotification && (
-        <div className="w-[8px] h-[8px] mt-[6px] rounded-full bg-[#FF3EA2] shrink-0" />
+        <div className="w-[8px] h-[8px] mt-[6px] rounded-full blueprint-accent bg-[var(--studio-accent,#FF3EA2)] shrink-0" />
       )}
     </div>
   );
@@ -99,7 +99,7 @@ export const NotificationOpenComponent = () => {
           {t('notifications', 'Notifications')}
         </div>
         {!!newCount && (
-          <div className="h-[20px] min-w-[20px] px-[6px] rounded-full bg-[#FF3EA2] text-white text-[12px] font-[600] flex items-center justify-center">
+          <div className="h-[20px] min-w-[20px] px-[6px] rounded-full blueprint-accent bg-[var(--studio-accent,#FF3EA2)] text-white text-[12px] font-[600] flex items-center justify-center">
             {newCount}
           </div>
         )}
@@ -113,7 +113,7 @@ export const NotificationOpenComponent = () => {
         )}
         {!isLoading && !notifications.length && (
           <div className="flex flex-col items-center justify-center gap-[12px] py-[40px] px-[16px] text-center">
-            <div className="w-[48px] h-[48px] rounded-full bg-[#612bd3]/10 flex items-center justify-center text-[#612bd3]">
+            <div className="w-[48px] h-[48px] rounded-full bg-[var(--studio-marker,#612bd31a)] flex items-center justify-center text-[var(--studio-text,#612bd3)]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -193,7 +193,7 @@ const NotificationComponent = () => {
               cx="17.0625"
               cy="5"
               r="4"
-              fill="#FF3EA2"
+              fill="var(--studio-text,#FF3EA2)"
               stroke="currentColor"
               strokeWidth="2"
               className="text-newBgColorInner"

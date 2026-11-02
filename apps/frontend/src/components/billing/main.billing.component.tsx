@@ -154,7 +154,7 @@ const BillingCycle: FC<{
 
   return (
     <div className="flex items-center gap-[16px] rounded-[12px] border border-newTableBorder bg-newBgColorInner shadow-previewShadow px-[24px] py-[20px] mobile:flex-col mobile:items-stretch mobile:p-[16px]">
-      <div className="w-[48px] h-[48px] rounded-full bg-[#612bd3]/10 text-[#612bd3] flex items-center justify-center shrink-0 mobile:hidden">
+      <div className="w-[48px] h-[48px] rounded-full bg-[var(--studio-marker,#612bd31a)] text-[var(--studio-text,#612bd3)] flex items-center justify-center shrink-0 mobile:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -224,7 +224,7 @@ type PlanAction = {
 };
 
 const planButton = {
-  primary: 'bg-btnPrimary text-white hover:bg-[#5023b8]',
+  primary: 'bg-btnPrimary text-white hover:bg-[var(--studio-hover,#5023b8)]',
   simple: 'bg-btnSimple text-btnText hover:opacity-80',
   current: 'bg-newBgLineColor text-textItemBlur',
   danger: 'bg-red-500 text-white hover:bg-red-600',
@@ -275,7 +275,7 @@ const PlanCard: FC<{
         <div className="text-[18px] font-[600]">{capitalize(name)}</div>
         {current && (
           <div className="flex items-center gap-[6px] h-[26px] px-[10px] rounded-full bg-white/15 text-[12px] font-[600] uppercase whitespace-nowrap">
-            <span className="w-[6px] h-[6px] rounded-full bg-[#32D583]" />
+            <span className="w-[6px] h-[6px] rounded-full bg-[var(--studio-success,#32D583)]" />
             {t('active', 'Active')}
           </div>
         )}
@@ -356,7 +356,7 @@ const PlanCard: FC<{
               fill="none"
               className={clsx(
                 'shrink-0',
-                current ? 'text-white/75' : 'text-[#8b5cf6]'
+                current ? 'text-white/75' : 'text-[var(--studio-text,#8b5cf6)]'
               )}
             >
               <circle
@@ -899,15 +899,15 @@ export const MainBillingComponent: FC<{
             )}
           >
             {t('billing_yearly', 'Yearly')}
-            <div className="bg-[#AA0FA4] text-white text-[12px] px-[6px] rounded-[4px]">
+            <div className="blueprint-accent bg-[var(--studio-accent,#AA0FA4)] text-white text-[12px] px-[6px] rounded-[4px]">
               {t('billing_20_percent_off', '20% Off')}
             </div>
           </div>
         </div>
       </div>
       {subscription?.cancelAt && isGeneral && (
-        <div className="flex items-center gap-[12px] rounded-[12px] border border-[#FFAC30]/30 bg-[#FFAC30]/10 px-[16px] py-[12px] text-[14px]">
-          <div className="w-[8px] h-[8px] rounded-full bg-[#FFAC30] shrink-0" />
+        <div className="flex items-center gap-[12px] rounded-[12px] border border-[var(--studio-warning,#FFAC304c)] bg-[var(--studio-warning,#FFAC301a)] px-[16px] py-[12px] text-[14px]">
+          <div className="w-[8px] h-[8px] rounded-full bg-[var(--studio-warning,#FFAC30)] shrink-0" />
           <div>
             {t(
               'your_subscription_will_be_canceled_at',
@@ -972,7 +972,7 @@ export const MainBillingComponent: FC<{
       )}
       {!!subscription?.id && (
         <div className="flex items-center gap-[16px] rounded-[12px] border border-newTableBorder bg-newBgColorInner shadow-previewShadow px-[24px] py-[20px] mobile:flex-col mobile:items-stretch mobile:p-[16px]">
-          <div className="w-[48px] h-[48px] rounded-full bg-[#612bd3]/10 text-[#612bd3] flex items-center justify-center shrink-0 mobile:hidden">
+          <div className="w-[48px] h-[48px] rounded-full bg-[var(--studio-marker,#612bd31a)] text-[var(--studio-text,#612bd3)] flex items-center justify-center shrink-0 mobile:hidden">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"

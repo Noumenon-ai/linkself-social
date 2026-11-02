@@ -55,12 +55,12 @@ export default async function Auth(
       organizationId={post[0].organizationId}
     >
       <div className="mx-auto w-full max-w-[1346px] p-[12px] flex flex-col gap-[8px] text-newTextColor">
-        <div className="flex bg-newBgColorInner rounded-[12px] min-h-[80px] px-[20px] py-[12px] items-center gap-[20px] flex-wrap">
+        <div className="blueprint-frame flex bg-newBgColorInner rounded-[12px] min-h-[80px] px-[20px] py-[12px] items-center gap-[20px] flex-wrap">
           <Link
             href="/"
             className="flex items-center gap-[10px] text-textColor"
           >
-            <div className="w-[44px]">
+            <div className="blueprint-upstream-brand w-[44px]">
               <SafeImage src={'/logo.svg'} width={44} height={44} alt={APP_NAME} />
             </div>
             <div>
@@ -89,7 +89,7 @@ export default async function Auth(
             {post.map((p: any, index: number) => (
               <div
                 key={String(p.id)}
-                className="bg-newBgColorInner border border-newTableBorder rounded-[12px] p-[20px]"
+                className="blueprint-frame bg-newBgColorInner border border-newTableBorder rounded-[12px] p-[20px]"
               >
                 <div className="flex gap-[12px]">
                   <div>
@@ -153,7 +153,7 @@ export default async function Auth(
             ))}
           </div>
           <div className="w-full lg:w-[380px] lg:flex-shrink-0">
-            <div className="bg-newBgColorInner border border-newTableBorder rounded-[12px] p-[20px] lg:sticky lg:top-[12px]">
+            <div className="blueprint-frame bg-newBgColorInner border border-newTableBorder rounded-[12px] p-[20px] lg:sticky lg:top-[12px]">
               <CommentsComponents previewId={id} />
             </div>
           </div>

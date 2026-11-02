@@ -115,14 +115,14 @@ export const StatisticsModal: FC<{
                   const color = colorVariants[index % colorVariants.length];
                   return (
                     <div key={`analytics-${index}`} className="group">
-                      <div className="flex flex-col h-full bg-newTableHeader border border-newTableBorder rounded-[12px] overflow-hidden transition-all duration-200 hover:border-[#612bd3]/50">
+                      <div className="flex flex-col h-full bg-newTableHeader border border-newTableBorder rounded-[12px] overflow-hidden transition-all duration-200 hover:border-[var(--studio-accent,#612bd380)]">
                         <div className="flex items-center justify-between px-[16px] pt-[14px] pb-[8px]">
                           <div className="flex items-center gap-[10px]">
                             <div
                               className={`w-[8px] h-[8px] rounded-full ${
-                                color === 'purple' ? 'bg-[#612bd3]' : ''
-                              } ${color === 'green' ? 'bg-[#32d583]' : ''} ${
-                                color === 'blue' ? 'bg-[#1d9bf0]' : ''
+                                color === 'purple' ? 'blueprint-accent bg-[var(--studio-accent,#612bd3)]' : ''
+                              } ${color === 'green' ? 'bg-[var(--studio-success,#32d583)]' : ''} ${
+                                color === 'blue' ? 'bg-[var(--studio-hover,#1d9bf0)]' : ''
                               }`}
                             />
                             <span className="text-[15px] font-medium text-newTableText">

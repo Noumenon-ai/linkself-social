@@ -206,7 +206,7 @@ export const Component: FC<{
               className={clsx(
                 !modal.removeLayout &&
                   'gap-[40px] p-[32px] mobile:gap-[24px] mobile:p-[16px]',
-                'bg-newBgColorInner mx-auto flex flex-col w-fit rounded-[24px] mobile:rounded-[16px] relative mobile:!max-w-full',
+                'blueprint-frame bg-newBgColorInner mx-auto flex flex-col w-fit rounded-[24px] mobile:rounded-[16px] relative mobile:!max-w-full',
                 modal.destructive && 'border-2 border-red-700',
                 modal.size ? '' : 'min-w-[600px] mobile:min-w-0 mobile:w-full',
                 modal.fullScreen && 'h-full'
@@ -372,6 +372,7 @@ export const DecisionModal: FC<{
         </Button>
         {!onlyApprove && (
           <Button
+            className="blueprint-secondary"
             onClick={() => {
               resolution(false);
               closeCurrent();

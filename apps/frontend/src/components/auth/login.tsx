@@ -167,12 +167,12 @@ export function Login() {
                     {t('sign_in_1', 'Sign in')}
                   </Button>
                 </div>
-                <p className="mt-4 text-sm">
+                {!linkselfUrl && <p className="mt-4 text-sm">
                   {t('don_t_have_an_account', "Don't Have An Account?")}&nbsp;
                   <Link href="/auth" className="underline cursor-pointer">
                     {t('sign_up', 'Sign Up')}
                   </Link>
-                </p>
+                </p>}
                 <p className="mt-4 text-sm">
                   {!linkselfUrl && (
                     <Link

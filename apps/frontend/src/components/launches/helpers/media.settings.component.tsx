@@ -241,9 +241,9 @@ export const CreateThumbnail: FC<{
               onChange={handleSeek}
               className="w-full h-2 bg-fifth rounded-lg appearance-none cursor-pointer slider"
               style={{
-                background: `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${
+                background: `linear-gradient(to right, var(--studio-accent, #4f46e5) 0%, var(--studio-accent, #4f46e5) ${
                   (currentTime / duration) * 100
-                }%, #374151 ${(currentTime / duration) * 100}%, #374151 100%)`,
+                }%, var(--studio-hover, #374151) ${(currentTime / duration) * 100}%, var(--studio-hover, #374151) 100%)`,
               }}
             />
             <div className="flex justify-between text-sm text-textColor">
@@ -270,20 +270,20 @@ export const CreateThumbnail: FC<{
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #4f46e5;
+          background: var(--studio-accent, #4f46e5);
           cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border: 2px solid var(--studio-line, #ffffff);
+          box-shadow: var(--studio-shadow, 0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         .slider::-moz-range-thumb {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #4f46e5;
+          background: var(--studio-accent, #4f46e5);
           cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border: 2px solid var(--studio-line, #ffffff);
+          box-shadow: var(--studio-shadow, 0 2px 4px rgba(0, 0, 0, 0.2));
         }
       `}</style>
     </div>

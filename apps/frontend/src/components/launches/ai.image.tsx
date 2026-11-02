@@ -109,7 +109,7 @@ ${style}
               className={clsx(
                 'cursor-pointer rounded-[4px] px-[10px] h-[30px] flex items-center text-[12px] border',
                 style === p
-                  ? 'bg-[#612BD3] border-[#612BD3] text-white'
+                  ? 'blueprint-accent bg-[var(--studio-accent,#612BD3)] border-[var(--studio-accent,#612BD3)] text-white'
                   : 'bg-newColColor border-newBgLineColor'
               )}
             >
@@ -162,7 +162,7 @@ export const AiImage: FC<{
       >
         {loading && (
           <div className="absolute start-[50%] -translate-x-[50%]">
-            <Loading height={15} width={15} type="spin" color="#fff" />
+            <Loading height={15} width={15} type="spin" color="var(--studio-text,#fff)" />
           </div>
         )}
         <div

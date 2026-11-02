@@ -84,7 +84,7 @@ const YoutubeSettings: FC = () => {
             onClick={() =>
               setValue('thumbnail', undefined, { shouldDirty: true })
             }
-            className="cursor-pointer text-[#FF3F3F] font-[600]"
+            className="cursor-pointer text-[var(--studio-error,#FF3F3F)] font-[600]"
           >
             {t('remove', 'Remove')}
           </div>

@@ -283,8 +283,8 @@ export const ContinueIntegration: FC<{
       <div className="flex flex-1 items-center justify-center text-white relative overflow-hidden">
         {/* Background gradient decoration */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] bg-[#612BD3] rounded-full blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] bg-[#FC69FF] rounded-full blur-[120px]" />
+          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] blueprint-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
         </div>
 
         <div className="relative z-10 text-center">
@@ -322,13 +322,13 @@ export const ContinueIntegration: FC<{
       <div className="flex flex-1 items-center justify-center text-white relative overflow-hidden">
         {/* Background gradient decoration */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] bg-[#612BD3] rounded-full blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] bg-[#FC69FF] rounded-full blur-[120px]" />
+          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] blueprint-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
         </div>
 
         {/* Content */}
         <div className="relative z-10 w-full max-w-[550px] mx-auto px-[20px]">
-          <div className="bg-[#1A1919] rounded-[16px] p-[32px] flex flex-col gap-[24px]">
+          <div className="bg-[var(--studio-panel,#1A1919)] rounded-[16px] p-[32px] flex flex-col gap-[24px]">
             <div className="flex flex-col gap-[8px] text-center">
               <h1 className="text-[24px] font-semibold">
                 {t('configure_your_channel', 'Configure Your Channel')}
@@ -380,8 +380,8 @@ export const ContinueIntegration: FC<{
       <div className="flex flex-1 items-center justify-center text-white relative overflow-hidden">
         {/* Background gradient decoration */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] bg-[#612BD3] rounded-full blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] bg-[#FC69FF] rounded-full blur-[120px]" />
+          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] blueprint-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
         </div>
 
         <div className="relative z-10 text-center">
@@ -419,8 +419,8 @@ export const ContinueIntegration: FC<{
     <div className="flex flex-1 items-center justify-center text-white relative overflow-hidden">
       {/* Background gradient decoration */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] bg-[#612BD3] rounded-full blur-[120px]" />
-        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] bg-[#FC69FF] rounded-full blur-[120px]" />
+        <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] blueprint-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
       </div>
 
       <div className="relative z-10 text-center">
@@ -432,7 +432,7 @@ export const ContinueIntegration: FC<{
         </div>
         {/* Loading spinner */}
         <div className="mt-[32px] flex justify-center">
-          <div className="w-[48px] h-[48px] border-[3px] border-[#612BD3] border-t-transparent rounded-full animate-spin" />
+          <div className="w-[48px] h-[48px] border-[3px] border-[var(--studio-accent,#612BD3)] border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     </div>

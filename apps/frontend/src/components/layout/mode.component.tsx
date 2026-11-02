@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import useCookie from 'react-use-cookie';
 import EventEmitter from 'events';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 export const modeEmitter = new EventEmitter();
 
 const ModeComponent = () => {
+  const { linkselfUrl } = useVariables();
   const [mode, setMode] = useCookie('mode', 'dark');
 
   const changeMode = useCallback(() => {
@@ -18,6 +20,7 @@ const ModeComponent = () => {
     document.body.classList.remove('dark', 'light');
     document.body.classList.add(mode);
   }, [mode]);
+  if (linkselfUrl) return null;
   return (
     <div onClick={changeMode} className="select-none cursor-pointer">
       {mode === 'dark' ? (
