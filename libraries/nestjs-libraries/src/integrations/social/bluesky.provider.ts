@@ -883,7 +883,7 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
       return true;
     }
 
-    return true;
+    return false;
   }
 
   @Plug({
@@ -961,7 +961,7 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
       return true;
     }
 
-    return true;
+    return false;
   }
 
   override async mention(

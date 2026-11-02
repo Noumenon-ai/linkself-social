@@ -52,7 +52,7 @@ export class CopilotController {
       process.env.OPENAI_API_KEY === ''
     ) {
       Logger.warn('OpenAI API key not set, chat functionality will not work');
-      return;
+      return res.status(503).json({ message: 'AI is not configured' });
     }
 
     const copilotRuntimeHandler = copilotRuntimeNodeHttpEndpoint({
@@ -79,7 +79,7 @@ export class CopilotController {
       process.env.OPENAI_API_KEY === ''
     ) {
       Logger.warn('OpenAI API key not set, chat functionality will not work');
-      return;
+      return res.status(503).json({ message: 'AI is not configured' });
     }
     const mastra = await this._mastraService.mastra();
     const requestContext = new RequestContext<ChannelsContext>();

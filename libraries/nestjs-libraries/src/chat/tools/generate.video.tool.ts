@@ -22,6 +22,10 @@ export class GenerateVideoTool implements AgentToolInterface {
   ) {}
   name = 'generateVideoTool';
 
+  available() {
+    return this._videoManager.getAllVideos().length > 0;
+  }
+
   run() {
     return createTool({
       id: 'generateVideoTool',

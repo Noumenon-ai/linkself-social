@@ -17,7 +17,7 @@ interface MenuItemInterface {
 }
 
 export const useMenuItem = () => {
-  const { isGeneral } = useVariables();
+  const { isGeneral, aiEnabled } = useVariables();
   const t = useT();
 
   const firstMenu = [
@@ -59,6 +59,7 @@ export const useMenuItem = () => {
         </svg>
       ),
       path: '/agents',
+      hide: !aiEnabled,
     },
     {
       name: t('analytics', 'Analytics'),

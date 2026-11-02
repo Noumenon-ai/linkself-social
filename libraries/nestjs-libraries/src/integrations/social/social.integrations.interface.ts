@@ -28,6 +28,7 @@ export interface IAuthenticator {
     accessToken: string,
     date: number
   ): Promise<AnalyticsData[]>;
+  postAnalyticsEnabled?(): boolean;
   postAnalytics?(
     integrationId: string,
     accessToken: string,

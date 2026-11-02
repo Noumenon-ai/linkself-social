@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 export const dynamic = 'force-dynamic';
 import { BillingComponent } from '@gitroom/frontend/components/billing/billing.component';
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
   description: '',
 };
 export default async function Page() {
+  if (!process.env.STRIPE_PUBLISHABLE_KEY) redirect('/launches');
   return (
     <div className="bg-newBgColorInner flex-1 flex-col flex p-[20px] gap-[12px]">
       <BillingComponent />

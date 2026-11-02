@@ -67,9 +67,10 @@ export const startMcp = async (app: INestApplication) => {
   const resolveSelfHosted = (token: string) =>
     oauthService.getSelfHostedByAccessToken(token);
 
-  const mastra = await mastraService.mastra();
-  const agent = mastra.getAgent('postiz');
-  const agentTools = await agent.listTools();
+  const agent = process.env.OPENAI_API_KEY
+    ? (await mastraService.mastra()).getAgent('postiz')
+    : undefined;
+  const agentTools = agent ? await agent.listTools() : await loadToolsService.loadTools();
   const tools = {
     ...agentTools,
     // tools that only make sense inside an MCP host (ui:// widgets)
@@ -143,7 +144,7 @@ export const startMcp = async (app: INestApplication) => {
     name: 'Postiz MCP',
     version: '1.0.0',
     tools,
-    agents: { postiz: agent },
+    ...(agent ? { agents: { postiz: agent } } : {}),
     appResources,
   };
 

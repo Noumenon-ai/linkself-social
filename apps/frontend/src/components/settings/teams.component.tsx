@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { Button } from '@gitroom/react/form/button';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
@@ -29,6 +30,7 @@ const roles = [
   },
 ];
 export const AddMember = () => {
+  const { emailEnabled } = useVariables();
   const modals = useModals();
   const fetch = useFetch();
   const toast = useToaster();
@@ -39,7 +41,7 @@ export const AddMember = () => {
     values: {
       email: '',
       role: '',
-      sendEmail: true,
+      sendEmail: !!emailEnabled,
     },
     resolver,
     mode: 'onChange',
@@ -97,14 +99,16 @@ export const AddMember = () => {
               </option>
             ))}
           </Select>
-          <div className="flex gap-[5px]">
-            <div>
-              <Checkbox name="sendEmail" />
+          {emailEnabled && (
+            <div className="flex gap-[5px]">
+              <div>
+                <Checkbox name="sendEmail" />
+              </div>
+              <div>
+                {t('send_invitation_via_email', 'Send invitation via email?')}
+              </div>
             </div>
-            <div>
-              {t('send_invitation_via_email', 'Send invitation via email?')}
-            </div>
-          </div>
+          )}
           <Button type="submit" className="mt-[18px]">
             {sendEmail ? t('send_invitation_link', 'Send Invitation Link') : t('copy_link', 'Copy Link')}
           </Button>

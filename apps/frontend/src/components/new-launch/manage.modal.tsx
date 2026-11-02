@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import React, {
   FC,
   ReactNode,
@@ -72,6 +73,7 @@ import {
 } from '@gitroom/frontend/components/new-launch/media.settings.section';
 
 export const ManageModal: FC<AddEditModalProps> = (props) => {
+  const { aiEnabled } = useVariables();
   const t = useT();
   const fetch = useFetch();
   const ref = useRef(null);
@@ -1356,11 +1358,12 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
           />
         </BottomSheet>
       )}
-      <CopilotPopup
-        className="mobile:!z-[460] mobile:!bottom-[112px]"
-        hitEscapeToClose={false}
-        clickOutsideToClose={true}
-        instructions={`
+      {aiEnabled && (
+        <CopilotPopup
+          className="mobile:!z-[460] mobile:!bottom-[112px]"
+          hitEscapeToClose={false}
+          clickOutsideToClose={true}
+          instructions={`
 You are an assistant that help the user to schedule their social media posts,
 Here are the things you can do:
 - Add a new comment / post to the list of posts
@@ -1371,14 +1374,15 @@ Here are the things you can do:
 Post content can be added using the addPostContentFor{num} function.
 After using the addPostFor{num} it will create a new addPostContentFor{num+ 1} function.
 `}
-        labels={{
-          title: t('your_assistant', 'Your Assistant'),
-          initial: t(
-            'assistant_initial_message',
-            'Hi! I can help you to refine your social media posts.'
-          ),
-        }}
-      />
+          labels={{
+            title: t('your_assistant', 'Your Assistant'),
+            initial: t(
+              'assistant_initial_message',
+              'Hi! I can help you to refine your social media posts.'
+            ),
+          }}
+        />
+      )}
     </div>
   );
 };

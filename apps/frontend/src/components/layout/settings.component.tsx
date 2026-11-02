@@ -37,7 +37,7 @@ import { Plugs } from '@gitroom/frontend/components/plugs/plugs';
 export const SettingsPopup: FC<{
   getRef?: Ref<any>;
 }> = (props) => {
-  const { isGeneral } = useVariables();
+  const { isGeneral, linkselfUrl } = useVariables();
   const { getRef } = props;
   const fetch = useFetch();
   const toast = useToaster();
@@ -91,7 +91,7 @@ export const SettingsPopup: FC<{
     if (user?.tier?.public_api && isGeneral && showLogout) {
       arr.push({ tab: 'agents', label: t('agents_dev', 'Agents / Dev') });
     }
-    if (user?.tier?.team_members && isGeneral && user?.role !== 'USER') {
+    if (!linkselfUrl && user?.tier?.team_members && isGeneral && user?.role !== 'USER') {
       arr.push({ tab: 'teams', label: t('teams', 'Teams') });
     }
     if (user?.tier?.webhooks) {
@@ -111,7 +111,7 @@ export const SettingsPopup: FC<{
     arr.push({ tab: 'apps', label: t('apps', 'Apps') });
 
     return arr;
-  }, [user, isGeneral, showLogout, t]);
+  }, [user, isGeneral, showLogout, t, linkselfUrl]);
 
   const [tab, setTab] = useState(() => {
     const requested = url.get('tab');
@@ -174,7 +174,7 @@ export const SettingsPopup: FC<{
                   <GlobalSettings />
                 </div>
               )}
-              {tab === 'teams' &&
+              {tab === 'teams' && !linkselfUrl &&
                 !!user?.tier?.team_members &&
                 isGeneral &&
                 user?.role !== 'USER' && (

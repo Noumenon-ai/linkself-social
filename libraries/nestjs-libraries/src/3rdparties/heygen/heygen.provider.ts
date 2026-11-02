@@ -7,6 +7,7 @@ import { timer } from '@gitroom/helpers/utils/timer';
 
 @ThirdParty({
   identifier: 'heygen',
+  requiresLongRunningRequests: true,
   title: 'HeyGen',
   description: 'HeyGen is a platform for creating AI-generated avatars videos.',
   position: 'media',

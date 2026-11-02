@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { Button } from '@gitroom/react/form/button';
 import clsx from 'clsx';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
@@ -156,6 +157,7 @@ export const ThirdPartyMedia: FC<{
   }[];
 }> = (props) => {
   const { allData, onChange } = props;
+  const { linkselfUrl } = useVariables();
   const t = useT();
   const fetch = useFetch();
   const modals = useModals();
@@ -175,7 +177,11 @@ export const ThirdPartyMedia: FC<{
     refreshWhenOffline: false,
   });
 
-  if (isLoading || !data.length) {
+  const visibleIntegrations = data?.filter(
+    (integration: any) => !linkselfUrl || !integration.requiresLongRunningRequests
+  );
+
+  if (isLoading || !visibleIntegrations?.length) {
     return null;
   }
 
@@ -192,7 +198,7 @@ export const ThirdPartyMedia: FC<{
               size: '80%',
               children: (close) => (
                 <ThirdPartyPopup
-                  thirdParties={data}
+                  thirdParties={visibleIntegrations}
                   closeModal={close}
                   allData={allData}
                   onChange={onChange}

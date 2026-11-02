@@ -13,6 +13,10 @@ export class GenerateVideoOptionsTool implements AgentToolInterface {
   constructor(private _videoManagerService: VideoManager) {}
   name = 'generateVideoOptions';
 
+  available() {
+    return this._videoManagerService.getAllVideos().length > 0;
+  }
+
   run() {
     return createTool({
       id: 'generateVideoOptions',

@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import ImageWithFallback from '@gitroom/react/helpers/image.with.fallback';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { ThirdPartyListComponent } from '@gitroom/frontend/components/third-parties/third-party.list.component';
@@ -92,6 +93,7 @@ export const ThirdPartyMenuComponent: FC<{
 };
 
 export const ThirdPartyComponent = () => {
+  const { linkselfUrl } = useVariables();
   const t = useT();
   const fetch = useFetch();
 
@@ -107,6 +109,9 @@ export const ThirdPartyComponent = () => {
     refreshWhenHidden: false,
     refreshWhenOffline: false,
   });
+  const visibleIntegrations = data?.filter(
+    (integration: any) => !linkselfUrl || !integration.requiresLongRunningRequests
+  );
   return (
     <div className="flex flex-col gap-[20px]">
       <div className="flex flex-col">
@@ -114,11 +119,11 @@ export const ThirdPartyComponent = () => {
       </div>
       {!isLoading && (
         <div className="bg-sixth border-fifth border rounded-[4px] p-[24px]">
-          {!data?.length ? (
+          {!visibleIntegrations?.length ? (
             <div className="text-customColor18">No Integrations Yet</div>
           ) : (
             <div className="flex flex-col gap-[16px]">
-              {data?.map((p: any) => (
+              {visibleIntegrations?.map((p: any) => (
                 <div
                   key={p.id}
                   className="flex items-center justify-between gap-[12px] p-[12px] border border-fifth rounded-[4px]"

@@ -4,6 +4,8 @@ import { createContext, FC, ReactNode, useContext, useEffect } from 'react';
 interface VariableContextInterface {
   stripeClient: string;
   billingEnabled: boolean;
+  aiEnabled: boolean;
+  emailEnabled: boolean;
   isChatBase: boolean;
   isGeneral: boolean;
   genericOauth: boolean;
@@ -40,6 +42,8 @@ interface VariableContextInterface {
 const VariableContext = createContext({
   stripeClient: '',
   billingEnabled: false,
+  aiEnabled: false,
+  emailEnabled: false,
   isGeneral: true,
   genericOauth: false,
   isChatBase: false,

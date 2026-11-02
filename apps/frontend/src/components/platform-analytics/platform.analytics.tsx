@@ -160,10 +160,6 @@ export const PlatformAnalytics = () => {
             'You have to add Social Media channels'
           )}
         </div>
-        <div className="text-[20px]">
-          {t('supported', 'Supported:')}
-          {allowedIntegrations.map((p) => capitalize(p)).join(', ')}
-        </div>
         <Button onClick={() => router.push('/launches')}>
           {t(
             'go_to_the_calendar_to_add_channels',

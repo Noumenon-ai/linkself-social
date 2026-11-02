@@ -14,6 +14,10 @@ export class VideoFunctionTool implements AgentToolInterface {
   ) {}
   name = 'videoFunctionTool';
 
+  available() {
+    return this._videoManagerService.getAllVideos().length > 0;
+  }
+
   run() {
     return createTool({
       id: 'videoFunctionTool',

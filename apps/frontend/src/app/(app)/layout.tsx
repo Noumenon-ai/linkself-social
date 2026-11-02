@@ -43,6 +43,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           plontoKey={process.env.NEXT_PUBLIC_POLOTNO!}
           stripeClient={process.env.STRIPE_PUBLISHABLE_KEY!}
           isChatBase={!!process.env.CHATBASE_TOKEN}
+          aiEnabled={!!process.env.OPENAI_API_KEY}
+          emailEnabled={!!process.env.EMAIL_PROVIDER}
           billingEnabled={!!process.env.STRIPE_PUBLISHABLE_KEY}
           discordUrl={process.env.NEXT_PUBLIC_DISCORD_SUPPORT!}
           linkselfUrl={process.env.LINKSELF_URL || process.env.NEXT_PUBLIC_LINKSELF_URL || ''}
@@ -55,7 +57,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           cloudflareUrl={process.env.CLOUDFLARE_BUCKET_URL || ''}
           mainUrl={process.env.MAIN_URL || ''}
           mcpUrl={process.env.MCP_URL}
-          dub={false}
+          dub={!!(
+            process.env.DUB_TOKEN ||
+            process.env.SHORT_IO_SECRET_KEY ||
+            process.env.KUTT_API_KEY ||
+            process.env.LINK_DRIP_API_KEY
+          )}
           facebookPixel={process.env.NEXT_PUBLIC_FACEBOOK_PIXEL!}
           telegramBotName={process.env.TELEGRAM_BOT_NAME!}
           neynarClientId={process.env.NEYNAR_CLIENT_ID!}

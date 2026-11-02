@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
@@ -168,6 +169,7 @@ export const AddOrEditWebhook: FC<{
   reload: () => void;
 }> = (props) => {
   const { data, reload } = props;
+  const { aiEnabled } = useVariables();
   const fetch = useFetch();
   const t = useT();
   const options = getOptions(t);
@@ -191,11 +193,8 @@ export const AddOrEditWebhook: FC<{
       url: data?.url || '',
       // eslint-disable-next-line no-prototype-builtins
       active: data?.hasOwnProperty?.('active') ? data?.active : true,
-      addPicture: data?.addPicture || false,
-      // eslint-disable-next-line no-prototype-builtins
-      generateContent: data?.hasOwnProperty?.('generateContent')
-        ? data?.generateContent
-        : true,
+      addPicture: !!aiEnabled && (data?.addPicture || false),
+      generateContent: !!aiEnabled && (data?.generateContent ?? true),
       integrations: JSON.parse(data?.integrations || '[]') || [],
     },
   });
@@ -312,54 +311,67 @@ export const AddOrEditWebhook: FC<{
                 </option>
               ))}
             </Select>
-            <Select
-              label="Autogenerate content"
-              translationKey="label_autogenerate_content"
-              {...form.register('generateContent', {
-                setValueAs: (value) => value === 'true' || value === true,
-              })}
-            >
-              {optionsChoose.map((option) => (
-                <option key={String(option.value)} value={String(option.value)}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
+            {aiEnabled && (
+              <Select
+                label="Autogenerate content"
+                translationKey="label_autogenerate_content"
+                {...form.register('generateContent', {
+                  setValueAs: (value) => value === 'true' || value === true,
+                })}
+              >
+                {optionsChoose.map((option) => (
+                  <option key={String(option.value)} value={String(option.value)}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+            )}
             {!generateContent && (
               <>
                 <div className={`text-[14px] mb-[6px]`}>
                   {t('post_content', 'Post content')}
                 </div>
-                <CopilotTextarea
-                  disableBranding={true}
-                  className={clsx(
-                    '!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[#612AD5] bg-customColor2 outline-none mb-[16px] border-fifth border rounded-[4px]'
-                  )}
-                  value={content}
-                  onChange={(e) => {
-                    form.setValue('content', e.target.value);
-                  }}
-                  placeholder={t('write_your_post_placeholder', 'Write your post...')}
-                  autosuggestionsConfig={{
-                    textareaPurpose: `Assist me in writing social media post`,
-                    chatApiConfigs: {},
-                  }}
-                />
+                {aiEnabled ? (
+                  <CopilotTextarea
+                    disableBranding={true}
+                    className={clsx(
+                      '!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[#612AD5] bg-customColor2 outline-none mb-[16px] border-fifth border rounded-[4px]'
+                    )}
+                    value={content}
+                    onChange={(e) => {
+                      form.setValue('content', e.target.value);
+                    }}
+                    placeholder={t('write_your_post_placeholder', 'Write your post...')}
+                    autosuggestionsConfig={{
+                      textareaPurpose: `Assist me in writing social media post`,
+                      chatApiConfigs: {},
+                    }}
+                  />
+                ) : (
+                  <textarea
+                    className="!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[#612AD5] bg-customColor2 outline-none mb-[16px] border-fifth border rounded-[4px]"
+                    value={content}
+                    onChange={(e) => form.setValue('content', e.target.value)}
+                    placeholder={t('write_your_post_placeholder', 'Write your post...')}
+                  />
+                )}
               </>
             )}
-            <Select
-              label="Generate Picture?"
-              translationKey="label_generate_picture"
-              {...form.register('addPicture', {
-                setValueAs: (value) => value === 'true' || value === true,
-              })}
-            >
-              {optionsChoose.map((option) => (
-                <option key={String(option.value)} value={String(option.value)}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
+            {aiEnabled && (
+              <Select
+                label="Generate Picture?"
+                translationKey="label_generate_picture"
+                {...form.register('addPicture', {
+                  setValueAs: (value) => value === 'true' || value === true,
+                })}
+              >
+                {optionsChoose.map((option) => (
+                  <option key={String(option.value)} value={String(option.value)}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+            )}
             <Select
               value={allIntegrations.value}
               name="integrations"

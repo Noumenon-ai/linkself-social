@@ -18,6 +18,7 @@ export class ThirdPartyManager {
       .filter((p: any) => !p.installUrl || p.installUrl())
       .map((p: any) => ({
         identifier: p.identifier,
+        requiresLongRunningRequests: !!p.requiresLongRunningRequests,
         title: p.title,
         description: p.description,
         fields: p.fields || [],

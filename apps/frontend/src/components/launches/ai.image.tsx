@@ -50,11 +50,10 @@ const AiImageModal: FC<{
     close();
     setLocked(true);
     try {
-      const image = await (
-        await fetch('/media/generate-image-with-prompt', {
-          method: 'POST',
-          body: JSON.stringify({
-            prompt: `
+      const response = await fetch('/media/generate-image-with-prompt', {
+        method: 'POST',
+        body: JSON.stringify({
+          prompt: `
 <!-- description -->
 ${prompt}
 <!-- /description -->
@@ -64,15 +63,26 @@ ${style}
 <!-- /style -->
 
 `,
-          }),
-        })
-      ).json();
-      if (image) {
-        onChange(image);
+        }),
+      });
+      const image = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(image.message)
+            ? image.message.join(', ')
+            : image.message || 'Image generation failed'
+        );
       }
-    } catch (e) {}
-    setLocked(false);
-    setLoading(false);
+      onChange(image);
+    } catch (error) {
+      toaster.show(
+        error instanceof Error ? error.message : 'Image generation failed',
+        'warning'
+      );
+    } finally {
+      setLocked(false);
+      setLoading(false);
+    }
   }, [prompt, style, onChange]);
 
   return (

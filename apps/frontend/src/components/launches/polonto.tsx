@@ -20,7 +20,7 @@ import { Button } from '@gitroom/react/form/button';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { PictureGeneratorSection } from '@gitroom/frontend/components/launches/polonto/polonto.picture.generation';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
-import { loadVars } from '@gitroom/react/helpers/variable.context';
+import { loadVars, useVariables } from '@gitroom/react/helpers/variable.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 const store = createStore({
@@ -89,12 +89,13 @@ const Polonto: FC<{
   }, []);
 
   const user = useUser();
+  const { aiEnabled } = useVariables();
   const features = useMemo(() => {
     return [
       ...DEFAULT_SECTIONS,
-      ...(user?.tier?.image_generator ? [PictureGeneratorSection] : []),
+      ...(aiEnabled && user?.tier?.image_generator ? [PictureGeneratorSection] : []),
     ] as any[];
-  }, [user?.tier?.image_generator]);
+  }, [aiEnabled, user?.tier?.image_generator]);
   useEffect(() => {
     store.addPage({
       width: props.width || 540,

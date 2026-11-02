@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import React, {
   ChangeEvent,
   ClipboardEvent,
@@ -791,6 +792,7 @@ export const MultiMediaComponent: FC<{
     insertInContent,
   } = props;
   const user = useUser();
+  const { aiEnabled, plontoKey } = useVariables();
   const modals = useModals();
   const t = useT();
   useEffect(() => {
@@ -974,19 +976,21 @@ export const MultiMediaComponent: FC<{
                     </div>
                   </div>
                 </div>
-                <div
-                  onClick={designMedia}
-                  className="cursor-pointer h-[30px] rounded-[6px] justify-center items-center flex bg-newColColor px-[8px] mobile:hidden"
-                >
-                  <div className="flex gap-[5px] items-center">
-                    <div>
-                      <DesignMediaIcon />
-                    </div>
-                    <div className="text-[10px] font-[600] iconBreak:hidden block">
-                      {t('design_media', 'Design Media')}
+                {!!plontoKey && (
+                  <div
+                    onClick={designMedia}
+                    className="cursor-pointer h-[30px] rounded-[6px] justify-center items-center flex bg-newColColor px-[8px] mobile:hidden"
+                  >
+                    <div className="flex gap-[5px] items-center">
+                      <div>
+                        <DesignMediaIcon />
+                      </div>
+                      <div className="text-[10px] font-[600] iconBreak:hidden block">
+                        {t('design_media', 'Design Media')}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {!insertInContent && (
                   <ThirdPartyMedia allData={allData} onChange={changeMedia} />
@@ -994,7 +998,7 @@ export const MultiMediaComponent: FC<{
 
                 {!!user?.tier?.ai && (
                   <>
-                    <AiImage value={text} onChange={changeMedia} />
+                    {aiEnabled && <AiImage value={text} onChange={changeMedia} />}
                     {!insertInContent && (
                       <AiVideo value={text} onChange={changeMedia} />
                     )}

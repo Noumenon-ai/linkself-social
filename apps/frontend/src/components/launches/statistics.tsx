@@ -1,3 +1,4 @@
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
@@ -18,6 +19,7 @@ export const StatisticsModal: FC<{
   postId: string;
 }> = (props) => {
   const { postId } = props;
+  const { dub } = useVariables();
   const t = useT();
   const fetch = useFetch();
   const [dateRange, setDateRange] = useState(7);
@@ -31,7 +33,7 @@ export const StatisticsModal: FC<{
   }, [postId, dateRange, fetch]);
 
   const { data: statisticsData, isLoading: isLoadingStatistics } = useSWR(
-    `/posts/${postId}/statistics`,
+    dub ? `/posts/${postId}/statistics` : null,
     loadStatistics
   );
 
@@ -147,41 +149,43 @@ export const StatisticsModal: FC<{
           )}
 
           {/* Short Links Statistics Section */}
-          <div className="flex flex-col gap-[14px]">
-            <h3 className="text-[18px] font-[500]">
-              {t('short_links_statistics', 'Short Links Statistics')}
-            </h3>
-            {statisticsData?.clicks?.length === 0 ? (
-              <div className="text-gray-400">
-                {t('no_short_link_results', 'No short link results')}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3">
-                <div className="bg-forth p-[4px] rounded-tl-lg">
-                  {t('short_link', 'Short Link')}
+          {dub && (
+            <div className="flex flex-col gap-[14px]">
+              <h3 className="text-[18px] font-[500]">
+                {t('short_links_statistics', 'Short Links Statistics')}
+              </h3>
+              {statisticsData?.clicks?.length === 0 ? (
+                <div className="text-gray-400">
+                  {t('no_short_link_results', 'No short link results')}
                 </div>
-                <div className="bg-forth p-[4px]">
-                  {t('original_link', 'Original Link')}
+              ) : (
+                <div className="grid grid-cols-3">
+                  <div className="bg-forth p-[4px] rounded-tl-lg">
+                    {t('short_link', 'Short Link')}
+                  </div>
+                  <div className="bg-forth p-[4px]">
+                    {t('original_link', 'Original Link')}
+                  </div>
+                  <div className="bg-forth p-[4px] rounded-tr-lg">
+                    {t('clicks', 'Clicks')}
+                  </div>
+                  {statisticsData?.clicks?.map((p: any) => (
+                    <Fragment key={p.short}>
+                      <div className="p-[4px] py-[10px] bg-customColor6">
+                        {p.short}
+                      </div>
+                      <div className="p-[4px] py-[10px] bg-customColor6">
+                        {p.original}
+                      </div>
+                      <div className="p-[4px] py-[10px] bg-customColor6">
+                        {p.clicks}
+                      </div>
+                    </Fragment>
+                  ))}
                 </div>
-                <div className="bg-forth p-[4px] rounded-tr-lg">
-                  {t('clicks', 'Clicks')}
-                </div>
-                {statisticsData?.clicks?.map((p: any) => (
-                  <Fragment key={p.short}>
-                    <div className="p-[4px] py-[10px] bg-customColor6">
-                      {p.short}
-                    </div>
-                    <div className="p-[4px] py-[10px] bg-customColor6">
-                      {p.original}
-                    </div>
-                    <div className="p-[4px] py-[10px] bg-customColor6">
-                      {p.clicks}
-                    </div>
-                  </Fragment>
-                ))}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* No analytics available message */}
           {(!analyticsData || !Array.isArray(analyticsData) || analyticsData.length === 0) &&

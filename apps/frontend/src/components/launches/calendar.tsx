@@ -1230,7 +1230,9 @@ const CalendarItem: FC<{
     missingRelease,
     openPost,
   } = props;
-  const { disableXAnalytics } = useVariables();
+  const hasPostAnalytics = props.integrations.find(
+    (integration) => integration.id === post.integration.id
+  )?.hasPostAnalytics;
   const user = useUser();
   const showCreationMethodBadge =
     user?.impersonate &&
@@ -1339,7 +1341,7 @@ const CalendarItem: FC<{
               <OpenPost />
             </div>
           )}{' '}
-        {((post.integration.providerIdentifier === 'x' && disableXAnalytics) || !post.releaseId) ? (
+        {(!hasPostAnalytics || state !== 'PUBLISHED' || !post.releaseId) ? (
           <></>
         ) : post.releaseId === 'missing' && missingRelease ? (
           <div

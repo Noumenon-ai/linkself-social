@@ -100,11 +100,6 @@ export const Plugs = () => {
               'there_are_not_plugs_matching_your_channels',
               'There are not plugs matching your channels'
             )}
-            <br />
-            {t(
-              'you_have_to_add_x_linkedin_page_threads_or_bluesky',
-              'You have to add: X, LinkedIn Page, Threads or Bluesky'
-            )}
           </div>
           <Button onClick={() => router.push('/launches')}>
             {t(

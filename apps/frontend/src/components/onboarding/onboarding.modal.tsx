@@ -24,6 +24,7 @@ import {
   McpClient,
   mcpClients,
   mcpConnectorUrls,
+  requiresMcpApiKey,
 } from '@gitroom/frontend/components/public-api/public.component';
 import { McpClientIcon } from '@gitroom/frontend/components/public-api/mcp.client.icons';
 
@@ -33,6 +34,7 @@ interface OnboardingModalProps {
 
 export const OnboardingModal: FC<OnboardingModalProps> = ({ onClose }) => {
   const [step, setStep] = useState(1);
+  const { linkselfUrl } = useVariables();
   const modals = useModals();
   const t = useT();
 
@@ -40,9 +42,9 @@ export const OnboardingModal: FC<OnboardingModalProps> = ({ onClose }) => {
     () => [
       t('connect_channels', 'Connect Channels'),
       t('connect_agents', 'Connect Agents'),
-      t('watch_tutorial', 'Watch Tutorial'),
+      ...(!linkselfUrl ? [t('watch_tutorial', 'Watch Tutorial')] : []),
     ],
-    [t]
+    [t, linkselfUrl]
   );
 
   return (
@@ -112,10 +114,10 @@ export const OnboardingModal: FC<OnboardingModalProps> = ({ onClose }) => {
             {step === 2 && (
               <OnboardingStep2
                 onBack={() => setStep(1)}
-                onNext={() => setStep(3)}
+                onNext={() => linkselfUrl ? onClose() : setStep(3)}
               />
             )}
-            {step === 3 && (
+            {step === 3 && !linkselfUrl && (
               <OnboardingStep3 onBack={() => setStep(2)} onFinish={onClose} />
             )}
           </div>
@@ -285,24 +287,26 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
 }) => {
   const t = useT();
   const user = useUser();
-  const { backendUrl, mcpUrl, billingEnabled } = useVariables();
+  const { backendUrl, mcpUrl, billingEnabled, linkselfUrl } = useVariables();
+  const apiKeyOnly = requiresMcpApiKey(backendUrl, mcpUrl);
+  const hideUpstream = !!linkselfUrl || apiKeyOnly;
   const [tab, setTab] = useState<OnboardingTab>('Claude');
   const [otherAgent, setOtherAgent] = useState<McpClient>(otherAgents[0]);
   // The client the cards describe: the tab itself, or the pick inside "Other agents"
   const agent: AnyMcpClient | typeof apiTab =
     tab === otherTab ? otherAgent : tab;
-  const [auth, setAuth] = useState<McpAuth>('oauth');
+  const [auth, setAuth] = useState<McpAuth>(apiKeyOnly ? 'apikey' : 'oauth');
   const [revealed, setRevealed] = useState(false);
-  const mcpBase = mcpUrl || backendUrl;
+  const mcpBase = (mcpUrl || backendUrl).replace(/\/+$/, '');
   const apiKey = user?.publicApi || '';
   const available = !!apiKey && !!user?.tier?.public_api;
   // the official connectors work for self-hosted installs too
-  const officialConnectors = billingEnabled || isSelfHosted;
+  const officialConnectors = !apiKeyOnly && (billingEnabled || isSelfHosted);
 
   const { config, hint } =
     agent === apiTab
       ? { config: '', hint: '' }
-      : getMcpConfig(agent, auth, mcpBase, apiKey);
+      : getMcpConfig(agent, auth, mcpBase, apiKey, apiKeyOnly);
 
   const maskedConfig =
     revealed || auth === 'oauth' || !apiKey
@@ -381,27 +385,29 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
 
   const apiSection = (
     <>
-      <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder px-[20px] py-[14px] flex items-center justify-between gap-[12px]">
-        <div>
-          <div className="text-[15px] font-[600]">
-            {t('documentation', 'Documentation')}
+      {!hideUpstream && (
+        <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder px-[20px] py-[14px] flex items-center justify-between gap-[12px]">
+          <div>
+            <div className="text-[15px] font-[600]">
+              {t('documentation', 'Documentation')}
+            </div>
+            <div className="text-[13px] text-customColor18 mt-[2px]">
+              {t(
+                'api_onboarding_description',
+                `Use the ${APP_NAME} API from your own code, n8n or any other automation`
+              )}
+            </div>
           </div>
-          <div className="text-[13px] text-customColor18 mt-[2px]">
-            {t(
-              'api_onboarding_description',
-              `Use the ${APP_NAME} API from your own code, n8n or any other automation`
-            )}
-          </div>
+          <a
+            className="cursor-pointer px-[24px] h-[44px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[14px] font-[600] flex items-center gap-[8px] shrink-0"
+            href="https://docs.postiz.com/public-api/introduction"
+            target="_blank"
+          >
+            <McpClientIcon client={apiTab} size={18} />
+            {t('read_the_api_docs', 'Read the API docs')}
+          </a>
         </div>
-        <a
-          className="cursor-pointer px-[24px] h-[44px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[14px] font-[600] flex items-center gap-[8px] shrink-0"
-          href="https://docs.postiz.com/public-api/introduction"
-          target="_blank"
-        >
-          <McpClientIcon client={apiTab} size={18} />
-          {t('read_the_api_docs', 'Read the API docs')}
-        </a>
-      </div>
+      )}
       <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
         <div className="bg-newBgColorInner px-[20px] py-[14px] border-b border-newBorder">
           <div className="text-[15px] font-[600]">
@@ -480,7 +486,7 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
             {t('auth_method', 'Authentication')}
           </div>
           <div className="flex gap-[6px]">
-            {(['oauth', 'apikey'] as const).map((m) => (
+            {(apiKeyOnly ? ['apikey'] as const : ['oauth', 'apikey'] as const).map((m) => (
               <button
                 key={m}
                 type="button"
@@ -570,7 +576,7 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
       {available ? (
         <div className="flex flex-col gap-[16px] w-full max-w-[1100px] mx-auto">
           <div className="flex flex-wrap justify-center gap-[6px]">
-            {[...onboardingAgents, otherTab, apiTab].map((item) => (
+            {[...onboardingAgents, otherTab, apiTab].filter((item) => !hideUpstream || !isChatOnlyMcpClient(item)).map((item) => (
               <button
                 key={item}
                 type="button"
@@ -620,9 +626,9 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
           ) : (
             <>
               {connectorSection}
-              <div className="grid grid-cols-2 gap-[16px]">
+              <div className={clsx('grid gap-[16px]', !hideUpstream && 'grid-cols-2')}>
                 {mcpSection}
-                {cliSection}
+                {!hideUpstream && cliSection}
               </div>
             </>
           )}

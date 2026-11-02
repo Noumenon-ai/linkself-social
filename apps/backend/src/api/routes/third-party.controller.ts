@@ -39,10 +39,11 @@ export class ThirdPartyController {
           organization.id
         )
       ).map((thirdParty) => {
-        const { description, fields, position, title, identifier } =
+        const { description, fields, position, title, requiresLongRunningRequests } =
           this._thirdPartyManager.getThirdPartyByName(thirdParty.identifier);
         return {
           ...thirdParty,
+          requiresLongRunningRequests: !!requiresLongRunningRequests,
           title,
           position,
           fields,

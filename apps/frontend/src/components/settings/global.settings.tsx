@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import React from 'react';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import dynamic from 'next/dynamic';
@@ -16,15 +17,28 @@ const MetricComponent = dynamic(
 );
 
 export const GlobalSettings = () => {
+  const { emailEnabled, dub, linkselfUrl } = useVariables();
   const t = useT();
   return (
     <div className="flex flex-col">
       <h3 className="text-[20px]">{t('global_settings', 'Global Settings')}</h3>
       <AuthenticationComponent />
       <MetricComponent />
-      <EmailNotificationsComponent />
-      <ShortlinkPreferenceComponent />
-      <DeleteAccountComponent />
+      {emailEnabled && <EmailNotificationsComponent />}
+      {dub && <ShortlinkPreferenceComponent />}
+      {linkselfUrl ? (
+        <p>
+          Your account is managed and deleted in{' '}
+          <a
+            href={`${linkselfUrl.replace(/\/$/, '')}/dashboard/settings`}
+            className="underline"
+          >
+            LinkSelf
+          </a>.
+        </p>
+      ) : (
+        <DeleteAccountComponent />
+      )}
     </div>
   );
 };

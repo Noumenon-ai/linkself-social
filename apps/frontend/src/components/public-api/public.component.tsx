@@ -84,12 +84,22 @@ export const isChatOnlyMcpClient = (
   client: string
 ): client is ChatOnlyMcpClient => client in chatOnlyMcpClients;
 
+export const requiresMcpApiKey = (backendUrl: string, mcpUrl?: string) =>
+  !mcpUrl && new URL(backendUrl, 'http://localhost').pathname.replace(/\/+$/, '') !== '';
+
 export const getMcpConfig = (
   client: AnyMcpClient,
   auth: McpAuth,
   mcpBase: string,
-  apiKey: string
+  apiKey: string,
+  headerOnly = false
 ): { config: string; hint: string } => {
+  if (headerOnly && (isRemoteMcpClient(client) || client === 'NanoClaw')) {
+    return {
+      config: `${mcpBase.replace(/\/$/, '')}/mcp\nAuthorization: Bearer ${apiKey}`,
+      hint: 'Connect over HTTP with this URL and Authorization header.',
+    };
+  }
   if (isChatOnlyMcpClient(client)) {
     return {
       config: chatOnlyMcpClients[client],
@@ -316,11 +326,13 @@ const McpSection = ({
   mcpBase: string;
 }) => {
   const t = useT();
-  const { billingEnabled } = useVariables();
+  const { billingEnabled, backendUrl, mcpUrl, linkselfUrl } = useVariables();
+  const apiKeyOnly = requiresMcpApiKey(backendUrl, mcpUrl);
+  const hideUpstream = !!linkselfUrl || apiKeyOnly;
   const [activeClient, setActiveClient] = useState<AnyMcpClient>('Claude');
-  const officialConnectors = billingEnabled || isSelfHosted;
+  const officialConnectors = !apiKeyOnly && (billingEnabled || isSelfHosted);
   // the directory connectors come first wherever they work
-  const tabs: Array<'official' | McpAuth> = officialConnectors
+  const tabs: Array<'official' | McpAuth> = apiKeyOnly ? ['apikey'] : officialConnectors
     ? ['official', 'oauth', 'apikey']
     : ['oauth', 'apikey'];
   const [tab, setTab] = useState(tabs[0]);
@@ -331,7 +343,8 @@ const McpSection = ({
     activeClient,
     auth,
     mcpBase,
-    user.publicApi
+    user.publicApi,
+    apiKeyOnly
   );
 
   const baseUrl = auth === 'oauth' ? getMcpOauthUrl(mcpBase) : `${mcpBase}/mcp`;
@@ -381,14 +394,16 @@ const McpSection = ({
               </a>
             </>
           )}
-          <a
-            className="cursor-pointer px-[16px] h-[36px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
-            href="https://docs.postiz.com/mcp/introduction"
-            target="_blank"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-            {t('read_the_docs', 'Docs')}
-          </a>
+          {!hideUpstream && (
+            <a
+              className="cursor-pointer px-[16px] h-[36px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+              href="https://docs.postiz.com/mcp/introduction"
+              target="_blank"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+              {t('read_the_docs', 'Docs')}
+            </a>
+          )}
         </div>
       </div>
       <div className="p-[20px] mobile:p-[14px] flex flex-col gap-[16px]">
@@ -464,7 +479,7 @@ const McpSection = ({
             {[
               ...Object.keys(remoteMcpClients),
               ...mcpClients,
-              ...Object.keys(chatOnlyMcpClients),
+              ...(hideUpstream ? [] : Object.keys(chatOnlyMcpClients)),
             ].map((client) => (
               <button
                 key={client}
@@ -728,7 +743,8 @@ const CliSection = ({ apiKey }: { apiKey: string }) => {
 
 const PublicApiContent = () => {
   const user = useUser();
-  const { backendUrl, frontEndUrl, mcpUrl } = useVariables();
+  const { backendUrl, frontEndUrl, mcpUrl, linkselfUrl } = useVariables();
+  const hideUpstream = !!linkselfUrl || requiresMcpApiKey(backendUrl, mcpUrl);
   const toaster = useToaster();
   const fetch = useFetch();
   const decision = useDecisionModal();
@@ -760,7 +776,7 @@ const PublicApiContent = () => {
     return null;
   }
 
-  const mcpBase = mcpUrl || backendUrl;
+  const mcpBase = (mcpUrl || backendUrl).replace(/\/+$/, '');
 
   return (
     <div className="flex flex-col gap-[40px]">
@@ -799,22 +815,26 @@ const PublicApiContent = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-[6px] shrink-0 pt-[2px]">
-            <a
-              className="cursor-pointer px-[16px] h-[36px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
-              href="https://docs.postiz.com/public-api"
-              target="_blank"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-            {t('read_the_docs', 'Docs')}
-            </a>
-            <a
-              className="cursor-pointer px-[16px] h-[36px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
-              href="https://www.npmjs.com/package/n8n-nodes-postiz"
-              target="_blank"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-              {t('n8n_node', 'N8N Node')}
-            </a>
+            {!hideUpstream && (
+              <a
+                className="cursor-pointer px-[16px] h-[36px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                href="https://docs.postiz.com/public-api"
+                target="_blank"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+              {t('read_the_docs', 'Docs')}
+              </a>
+            )}
+            {!hideUpstream && (
+              <a
+                className="cursor-pointer px-[16px] h-[36px] bg-[#612BD3] hover:bg-[#5520CB] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                href="https://www.npmjs.com/package/n8n-nodes-postiz"
+                target="_blank"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                {t('n8n_node', 'N8N Node')}
+              </a>
+            )}
           </div>
         </div>
         <div className="p-[20px] mobile:p-[14px] flex flex-col gap-[16px]">
@@ -916,7 +936,7 @@ const PublicApiContent = () => {
         </div>
       </div>
 
-      <CliSection apiKey={user.publicApi} />
+      {!hideUpstream && <CliSection apiKey={user.publicApi} />}
 
       <McpSection user={user} mcpBase={mcpBase} />
     </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
 import React, { FC, useCallback, useState } from 'react';
@@ -95,6 +96,7 @@ export const ApiModal: FC<{
 };
 
 export const ThirdPartyListComponent: FC<{ reload: () => void }> = (props) => {
+  const { linkselfUrl } = useVariables();
   const fetch = useFetch();
   const modals = useModals();
   const { reload } = props;
@@ -136,7 +138,7 @@ export const ThirdPartyListComponent: FC<{ reload: () => void }> = (props) => {
 
   return (
     <div className="grid grid-cols-4 tablet:grid-cols-3 mobile:!grid-cols-2 gap-[10px] justify-items-center justify-center">
-      {data?.map((p: any) => (
+      {data?.filter((p: any) => !linkselfUrl || !p.requiresLongRunningRequests).map((p: any) => (
         <div
           onClick={
             p.installUrl

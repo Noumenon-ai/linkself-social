@@ -8,6 +8,7 @@ export abstract class ThirdPartyAbstract<T = any> {
   [key: string]: ((apiKey: string, data?: any) => Promise<any>) | undefined;
 }
 export interface ThirdPartyParams {
+  requiresLongRunningRequests?: boolean;
   identifier: string;
   title: string;
   description: string;

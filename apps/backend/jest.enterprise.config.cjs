@@ -5,6 +5,10 @@ module.exports = {
   rootDir: '../..',
   testEnvironment: 'node',
   testMatch: [
+    '<rootDir>/apps/backend/src/api/routes/copilot.controller.spec.ts',
+    '<rootDir>/apps/backend/src/api/routes/integrations.capabilities.spec.ts',
+    '<rootDir>/libraries/nestjs-libraries/src/chat/mcp.availability.spec.ts',
+    '<rootDir>/libraries/nestjs-libraries/src/integrations/social/bluesky.plugs.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/integrations/linkself.studio.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/database/prisma/integrations/integration.delete.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/database/prisma/integrations/integration.credentials.spec.ts',

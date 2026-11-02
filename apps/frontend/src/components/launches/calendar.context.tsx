@@ -98,6 +98,7 @@ export const CalendarContext = createContext({
 });
 
 export interface Integrations {
+  hasPostAnalytics?: boolean;
   name: string;
   originalName?: string;
   id: string;

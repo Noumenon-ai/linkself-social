@@ -1629,6 +1629,10 @@ export class XProvider extends SocialAbstract implements SocialProvider {
     return [];
   }
 
+  postAnalyticsEnabled() {
+    return !process.env.DISABLE_X_ANALYTICS;
+  }
+
   async postAnalytics(
     integrationId: string,
     accessToken: string,

@@ -17,6 +17,10 @@ export class GenerateImageTool implements AgentToolInterface {
   ) {}
   name = 'generateImageTool';
 
+  available() {
+    return !!process.env.OPENAI_API_KEY;
+  }
+
   run() {
     return createTool({
       id: 'generateImageTool',
