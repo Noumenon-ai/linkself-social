@@ -1,3 +1,4 @@
+import { OrganizationLimitsService } from '@gitroom/nestjs-libraries/database/prisma/organization-limits/organization.limits.service';
 import {
   Body,
   Controller,
@@ -22,8 +23,14 @@ import { AuthorizationActions, Sections } from '@gitroom/backend/services/auth/p
 @Controller('/settings')
 export class SettingsController {
   constructor(
-    private _organizationService: OrganizationService
+    private _organizationService: OrganizationService,
+    private _limitsService: OrganizationLimitsService
   ) {}
+
+  @Get('/limits')
+  getLimits(@GetOrgFromRequest() org: Organization) {
+    return this._limitsService.getUsage(org.id);
+  }
 
   @Get('/team')
   @CheckPolicies(

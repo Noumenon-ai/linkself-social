@@ -32,12 +32,15 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { SVGLine } from '@gitroom/frontend/components/launches/launches.component';
 import { GlobalSettings } from '@gitroom/frontend/components/settings/global.settings';
 import { AppsComponent } from '@gitroom/frontend/components/settings/apps.component';
+import { useOrganizationLimits } from '@gitroom/frontend/components/settings/use.organization.limits';
 import { ThirdPartyComponent } from '@gitroom/frontend/components/third-parties/third-party.component';
 import { Plugs } from '@gitroom/frontend/components/plugs/plugs';
 export const SettingsPopup: FC<{
   getRef?: Ref<any>;
 }> = (props) => {
   const { isGeneral, linkselfUrl } = useVariables();
+  const { data: limits } = useOrganizationLimits();
+  const canUseMcp = limits ? limits.mcp : !linkselfUrl;
   const { getRef } = props;
   const fetch = useFetch();
   const toast = useToaster();
@@ -86,12 +89,20 @@ export const SettingsPopup: FC<{
   const t = useT();
   const list = useMemo(() => {
     const arr = [];
-    arr.push({ tab: 'global_settings', label: t('global_settings', 'Global Settings') });
+    arr.push({
+      tab: 'global_settings',
+      label: t('global_settings', 'Global Settings'),
+    });
     // Populate tabs based on user permissions
-    if (user?.tier?.public_api && isGeneral && showLogout) {
+    if (canUseMcp && user?.tier?.public_api && isGeneral && showLogout) {
       arr.push({ tab: 'agents', label: t('agents_dev', 'Agents / Dev') });
     }
-    if (!linkselfUrl && user?.tier?.team_members && isGeneral && user?.role !== 'USER') {
+    if (
+      !linkselfUrl &&
+      user?.tier?.team_members &&
+      isGeneral &&
+      user?.role !== 'USER'
+    ) {
       arr.push({ tab: 'teams', label: t('teams', 'Teams') });
     }
     if (user?.tier?.webhooks) {
@@ -111,11 +122,12 @@ export const SettingsPopup: FC<{
     arr.push({ tab: 'apps', label: t('apps', 'Apps') });
 
     return arr;
-  }, [user, isGeneral, showLogout, t, linkselfUrl]);
+  }, [user, isGeneral, showLogout, t, linkselfUrl, canUseMcp]);
 
   const [tab, setTab] = useState(() => {
     const requested = url.get('tab');
-    return list.some((p) => p.tab === requested)
+    return (requested === 'agents' && linkselfUrl && !limits) ||
+      list.some((p) => p.tab === requested)
       ? requested!
       : 'global_settings';
   });
@@ -123,6 +135,10 @@ export const SettingsPopup: FC<{
   useEffect(() => {
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    if (limits && !limits.mcp && tab === 'agents') setTab('global_settings');
+  }, [limits, tab]);
 
   return (
     <>
@@ -174,7 +190,8 @@ export const SettingsPopup: FC<{
                   <GlobalSettings />
                 </div>
               )}
-              {tab === 'teams' && !linkselfUrl &&
+              {tab === 'teams' &&
+                !linkselfUrl &&
                 !!user?.tier?.team_members &&
                 isGeneral &&
                 user?.role !== 'USER' && (
@@ -220,6 +237,7 @@ export const SettingsPopup: FC<{
               )}
 
               {tab === 'agents' &&
+                canUseMcp &&
                 !!user?.tier?.public_api &&
                 isGeneral &&
                 showLogout && (

@@ -64,3 +64,104 @@ describe('Integration credential boundaries', () => {
     });
   });
 });
+
+describe('Page selection preserves plan-disabled channels', () => {
+  it('does not enable a channel disabled by a LinkSelf downgrade', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'pending' });
+    const repository = new IntegrationRepository(
+      {
+        model: {
+          integration: {
+            findUnique: jest.fn().mockResolvedValue(null),
+            update,
+          },
+        },
+      } as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any
+    );
+    expect(
+      await repository.updateIntegration(
+        'pending',
+        {
+          organizationId: 'org',
+          internalId: 'selected-page',
+          name: 'Page',
+        },
+        true
+      )
+    ).toEqual({ id: 'pending' });
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'pending' },
+      select: { id: true },
+      data: {
+        organizationId: 'org',
+        internalId: 'selected-page',
+        name: 'Page',
+        deletedAt: null,
+        refreshNeeded: false,
+      },
+    });
+  });
+});
+
+describe('Existing page reconnect disabled state', () => {
+  it.each([true, false])(
+    'preserves a disabled destination only when requested (%s)',
+    async (preserveDisabled) => {
+      const existing = { id: 'page', disabled: true, token: 'old-token' };
+      const fresh = {
+        rootInternalId: 'fresh-login',
+        refreshToken: 'fresh-refresh',
+      };
+      const update = jest.fn(async ({ where, data, select }) => {
+        if (where.id === existing.id) Object.assign(existing, data);
+        return select ? { id: where.id } : existing;
+      });
+      const repository = new IntegrationRepository(
+        {
+          model: {
+            integration: {
+              findUnique: jest
+                .fn()
+                .mockResolvedValueOnce(existing)
+                .mockResolvedValueOnce(fresh),
+              update,
+            },
+          },
+        } as any,
+        { model: { post: { updateMany: jest.fn() } } } as any,
+        {} as any,
+        {} as any,
+        {} as any,
+        {} as any
+      );
+      await expect(
+        repository.updateIntegration(
+          'pending',
+          {
+            organizationId: 'org',
+            internalId: 'selected-page',
+            token: 'new-token',
+          },
+          preserveDisabled
+        )
+      ).resolves.toEqual({ id: 'page' });
+      expect(existing.disabled).toBe(preserveDisabled);
+      expect(existing.token).toBe('new-token');
+      expect(update).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          where: { id: 'page' },
+          select: { id: true },
+          data: expect.objectContaining({
+            rootInternalId: 'fresh-login',
+            refreshToken: 'fresh-refresh',
+          }),
+        })
+      );
+    }
+  );
+});

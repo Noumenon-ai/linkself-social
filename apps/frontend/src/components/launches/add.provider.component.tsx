@@ -1,5 +1,6 @@
 'use client';
 
+import { useOrganizationLimits } from '@gitroom/frontend/components/settings/use.organization.limits';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
@@ -421,7 +422,8 @@ export const AddProviderComponent: FC<{
   isMobile?: boolean;
 }> = (props) => {
   const { update, social, article, onboarding, isMobile } = props;
-  const { isGeneral, extensionId } = useVariables();
+  const { isGeneral, extensionId, linkselfUrl } = useVariables();
+  const { data: limits } = useOrganizationLimits();
   const toaster = useToaster();
   const router = useRouter();
   const fetch = useFetch();
@@ -456,7 +458,14 @@ export const AddProviderComponent: FC<{
           if (response.status === 402) {
             return;
           }
-          const { url } = await response.json();
+          const { url, message } = await response.json();
+          if (!response.ok || !url) {
+            toaster.show(
+              message || 'Could not connect to the platform',
+              'warning'
+            );
+            return;
+          }
           modal.openModal({
             title: `Add ${capitalize(identifier)}`,
             withCloseButton: true,
@@ -501,13 +510,14 @@ export const AddProviderComponent: FC<{
           if (response.status === 402) {
             return;
           }
-          const { url, err } = await response.json();
-          if (err) {
+          const { url, err, message } = await response.json();
+          if (!response.ok || err || !url) {
             toaster.show(
-              t(
-                'could_not_connect_to_platform',
-                'Could not connect to the platform'
-              ),
+              message ||
+                t(
+                  'could_not_connect_to_platform',
+                  'Could not connect to the platform'
+                ),
               'warning'
             );
             return;
@@ -636,7 +646,14 @@ export const AddProviderComponent: FC<{
             if (response.status === 402) {
               return;
             }
-            const { url } = await response.json();
+            const { url, message } = await response.json();
+            if (!response.ok || !url) {
+              toaster.show(
+                message || 'Could not connect to the platform',
+                'warning'
+              );
+              return;
+            }
             modal.closeAll();
             window.location.href = `/integrations/social/${identifier}?state=${url}&code=${Buffer.from(
               JSON.stringify(cookieResponse.cookies)
@@ -696,6 +713,21 @@ export const AddProviderComponent: FC<{
 
   return (
     <div className="w-full flex flex-col gap-[20px] rounded-[4px] relative]">
+      {limits && limits.channels !== -1 && (
+        <div className="flex items-center gap-[12px] text-[14px]">
+          <span>
+            {limits.channelsUsed} of {limits.channels} channels
+          </span>
+          {linkselfUrl && (
+            <a
+              className="underline focus-visible:ring-2"
+              href={`${linkselfUrl.replace(/\/$/, '')}/pricing`}
+            >
+              Upgrade
+            </a>
+          )}
+        </div>
+      )}
       <div className="flex flex-col">
         <div
           className={clsx(

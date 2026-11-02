@@ -1,3 +1,5 @@
+import { ForbiddenException } from '@nestjs/common';
+import { OrganizationLimitsService } from '@gitroom/nestjs-libraries/database/prisma/organization-limits/organization.limits.service';
 import { INestApplication } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { MastraService } from '@gitroom/nestjs-libraries/chat/mastra.service';
@@ -48,6 +50,17 @@ const oauthScopes = [
 ];
 
 export const startMcp = async (app: INestApplication) => {
+  const limitsService = app.get(OrganizationLimitsService, { strict: false });
+  const allowMcp = async (orgId: string, res: Response) => {
+    try {
+      await limitsService.assertMcp(orgId);
+      return true;
+    } catch (error) {
+      if (!(error instanceof ForbiddenException)) throw error;
+      res.status(403).json({ message: error.message });
+      return false;
+    }
+  };
   const mastraService = app.get(MastraService, { strict: false });
   const organizationService = app.get(OrganizationService, { strict: false });
   const oauthService = app.get(OAuthService, { strict: false });
@@ -377,6 +390,7 @@ export const startMcp = async (app: INestApplication) => {
       return;
     }
 
+    if (auth && !(await allowMcp(auth.id, res))) return;
     endListenStream(req, res);
     fixAcceptHeader(req);
     await runWithContext({ requestId: token!, auth, relay: relay || undefined }, async () => {
@@ -424,6 +438,14 @@ export const startMcp = async (app: INestApplication) => {
       return;
     }
 
+    if (
+      !(await allowMcp(
+        (req as Request & { auth: { id: string } }).auth.id,
+        res
+      ))
+    )
+      return;
+
     const url = new URL('/mcp', process.env.NEXT_PUBLIC_BACKEND_URL);
 
     endListenStream(req, res);
@@ -461,6 +483,14 @@ export const startMcp = async (app: INestApplication) => {
       res.status(400).send('Invalid API Key');
       return;
     }
+
+    if (
+      !(await allowMcp(
+        (req as Request & { auth: { id: string } }).auth.id,
+        res
+      ))
+    )
+      return;
 
     const url = new URL(
       `/mcp/${req.params.id}`,
@@ -505,6 +535,14 @@ export const startMcp = async (app: INestApplication) => {
       res.status(400).send('Invalid API Key');
       return;
     }
+
+    if (
+      !(await allowMcp(
+        (req as Request & { auth: { id: string } }).auth.id,
+        res
+      ))
+    )
+      return;
 
     const url = new URL(req.originalUrl, process.env.NEXT_PUBLIC_BACKEND_URL);
 

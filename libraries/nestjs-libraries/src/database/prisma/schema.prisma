@@ -37,6 +37,7 @@ model Organization {
   submittedPost       Post[]               @relation("submittedForOrg")
   sets                Sets[]
   signatures          Signatures[]
+  limits              OrganizationLimits?
   subscription        Subscription?
   tags                Tags[]
   thirdParty          ThirdParty[]
@@ -1838,4 +1839,14 @@ model Announcement {
   description String
   color       AnnouncementColor @default(INFO)
   createdAt   DateTime          @default(now())
+}
+
+model OrganizationLimits {
+  organizationId String       @id
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  plan           String
+  channels       Int
+  postsPerMonth  Int
+  mcp            Boolean
+  updatedAt      DateTime     @updatedAt
 }

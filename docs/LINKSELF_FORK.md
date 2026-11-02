@@ -125,3 +125,45 @@ Disconnecting a channel preserves its row for post history but clears `token`, `
 `customInstanceDetails` (including stored custom-provider logins and cookies). Token refresh ignores soft-deleted channels
 without calling the provider, flagging them or notifying the user. One-time-token sibling updates only touch live channels
 in the same organization, so deleted channels cannot regain credentials through a sibling refresh or reconnect.
+
+
+## Studio organization limits (2026-11-02; dispatcher commit pending)
+
+`OrganizationLimits` stores each organization's plan, channel allowance, monthly post allowance and MCP access.
+With `LINKSELF_URL` set, organizations without a row use Free defaults: 3 channels, 30 posts per month and MCP disabled.
+Without `LINKSELF_URL`, quota checks remain unlimited and MCP stays available. An allowance of `-1` means unlimited.
+Apply the additive Prisma schema change through the existing deployment process before deploying this feature.
+
+LinkSelf sets limits using `POST /enterprise/limits` with JSON `{ "params": "<JWT>" }`. Sign with the existing
+`JWT_SECRET` using HS256 and include `orgId`, `plan` (`free`, `starter` or `pro`), integer `channels` and
+`postsPerMonth` (each at least -1), boolean `mcp`, and `iat`, `exp`, `jti`. Tokens must be unexpired, issued no later
+than now and valid for at most 60 seconds. Invalid claims/signatures return 400; an absent or deleted organization
+returns 404. Repeating a valid token is idempotent and returns HTTP 200 with `{ "ok": true }`; no SSO session or
+billing subscription is created. Only the plan and allowances are persisted, not token claims.
+
+New connections are checked at `IntegrationService.assertCanConnect`. Usage counts all non-deleted channels,
+including disabled ones, within the organization. Owned live reconnects remain allowed at capacity, and reconnecting
+or selecting a page preserves disabled state under LinkSelf. Manual enabling checks the active-channel allowance.
+A downgrade disables excess active channels with the existing integration repository operations. An upgrade that
+can accommodate all connected channels re-enables disabled channels through the existing enable-all operation;
+repeating unchanged limits does not re-enable manually disabled channels. Limits are saved after channel adjustments
+succeed, so failed adjustments remain retryable.
+
+`PostsService.createPost` checks the entire request before saving any posts. New post rows count toward the allowance,
+so publishing to N channels consumes N posts (thread replies also count as rows). Usage is scoped to the organization
+and counts non-deleted rows created during the current UTC calendar month, regardless of their publish date.
+Entries editing an existing owned post or group, reschedules and recurring republishes are exempt. A refusal returns
+403 with the LinkSelf plan allowance and upgrade message. The existing post saving and workflow-start order is unchanged.
+MCP requests return 403 when the organization's `mcp` allowance is false, including authenticated proxy routes.
+
+Authenticated `GET /settings/limits` returns the current organization's limits plus `channelsUsed` and `postsUsed`.
+The frontend uses an organization-keyed SWR hook: Add Channel shows channel usage and the LinkSelf upgrade link,
+and Settings hides Agents / Dev when MCP is unavailable.
+
+Known limitation: quota checks are ordinary reads before writes, without locks or a transaction context. Concurrent
+requests can exceed a limit by a few items; this is accepted, matching LinkSelf's own quotas. Limits updates and channel
+disable/re-enable operations likewise use ordinary repository calls, not an atomic cross-repository transaction.
+
+The `updateIntegration` return-shape audit searched the whole repository, including backend, orchestrator, public API
+and MCP tools. Its only production caller is `IntegrationService.saveProviderPage`, which ignores the write result and
+returns `{ success: true }`. The write therefore selects only the ID, following the existing credential-boundary pattern.

@@ -1,3 +1,5 @@
+import { OrganizationLimitsRepository } from './organization-limits/organization.limits.repository';
+import { OrganizationLimitsService } from './organization-limits/organization.limits.service';
 import { Global, Module } from '@nestjs/common';
 import { PrismaRepository, PrismaService, PrismaTransaction } from './prisma.service';
 import { OrganizationRepository } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.repository';
@@ -56,6 +58,8 @@ import { AdminStatsService } from '@gitroom/nestjs-libraries/database/prisma/adm
   imports: [],
   controllers: [],
   providers: [
+    OrganizationLimitsRepository,
+    OrganizationLimitsService,
     PrismaService,
     PrismaRepository,
     PrismaTransaction,

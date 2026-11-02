@@ -1,3 +1,4 @@
+import { OrganizationLimitsService } from '../organization-limits/organization.limits.service';
 import {
   BadRequestException,
   Injectable,
@@ -75,7 +76,8 @@ export class PostsService {
     private _shortLinkService: ShortLinkService,
     private _openaiService: OpenaiService,
     private _temporalService: TemporalService,
-    private _refreshIntegrationService: RefreshIntegrationService
+    private _refreshIntegrationService: RefreshIntegrationService,
+    private _limitsService: OrganizationLimitsService
   ) {}
 
   searchForMissingThreeHoursPosts() {
@@ -1151,6 +1153,7 @@ export class PostsService {
     creationMethod: CreationMethod,
     keepGroup = false
   ): Promise<any[]> {
+    await this._limitsService.assertCanCreatePosts(orgId, body);
     const postList = [];
     const batchId = uuidv4();
     for (const post of body.posts) {

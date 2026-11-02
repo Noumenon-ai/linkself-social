@@ -5,6 +5,9 @@ module.exports = {
   rootDir: '../..',
   testEnvironment: 'node',
   testMatch: [
+    '<rootDir>/libraries/nestjs-libraries/src/chat/mcp.limits.spec.ts',
+    '<rootDir>/libraries/nestjs-libraries/src/database/prisma/organization-limits/organization.limits.spec.ts',
+    '<rootDir>/apps/backend/src/api/routes/enterprise.limits.spec.ts',
     '<rootDir>/apps/backend/src/api/routes/copilot.controller.spec.ts',
     '<rootDir>/apps/backend/src/api/routes/integrations.capabilities.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/chat/mcp.availability.spec.ts',

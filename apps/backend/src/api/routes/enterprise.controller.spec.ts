@@ -24,6 +24,10 @@ jest.mock(
   () => ({ PostsService: class {} })
 );
 
+jest.mock('@gitroom/nestjs-libraries/upload/upload.factory', () => ({
+  UploadFactory: { createStorage: () => ({}) },
+}));
+
 describe('Enterprise browser login', () => {
   const env = { ...process.env };
   const now = 1793016000;
@@ -69,6 +73,7 @@ describe('Enterprise browser login', () => {
     controller = new EnterpriseController(
       {} as never,
       orgs as never,
+      {} as never,
       {} as never,
       {} as never
     );

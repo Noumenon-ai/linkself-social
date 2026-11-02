@@ -1,3 +1,13 @@
+import { OrganizationLimitsService } from '@gitroom/nestjs-libraries/database/prisma/organization-limits/organization.limits.service';
+import {
+  EnterpriseLimitsRequestDto,
+  OrganizationLimitsDto,
+} from '@gitroom/nestjs-libraries/dtos/enterprise/organization.limits.dto';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpCode,
+} from '@nestjs/common';
 import { Response } from 'express';
 import {
   createSessionToken,
@@ -28,16 +38,22 @@ export class EnterpriseController {
     private _integrationManager: IntegrationManager,
     private _organizationService: OrganizationService,
     private _integrationService: IntegrationService,
-    private _postsService: PostsService
+    private _postsService: PostsService,
+    private _limitsService: OrganizationLimitsService
   ) {}
 
-  private verifyEnterpriseToken<T extends object>(params: string): T {
-    const payload = AuthService.verifyJWT(params) as any;
+  private verifyEnterpriseToken<T extends object>(
+    params: string,
+    limits = false
+  ): T {
+    const payload = AuthService.verifyJWT(params, {
+      algorithms: ['HS256'],
+    }) as any;
     if (
       !payload ||
       typeof payload !== 'object' ||
       'providerName' in payload || // login token (full User row)
-      'orgId' in payload || // team invite token
+      (!limits && 'orgId' in payload) || // team invite token
       'expires' in payload // password reset token
     ) {
       throw new Error('Invalid enterprise token');
@@ -118,6 +134,21 @@ export class EnterpriseController {
         `${process.env.FRONTEND_URL}/auth/login?error=sso`
       );
     }
+  }
+
+  @Post('/limits')
+  @HttpCode(200)
+  async setLimits(@Body() body: EnterpriseLimitsRequestDto) {
+    let payload: OrganizationLimitsDto;
+    try {
+      payload = this.verifyEnterpriseToken<OrganizationLimitsDto>(
+        body.params,
+        true
+      );
+    } catch {
+      throw new BadRequestException('Invalid limits token');
+    }
+    return this._limitsService.set(payload);
   }
 
   @Post('/create-user')
@@ -208,7 +239,10 @@ export class EnterpriseController {
 
       return url;
     } catch (err) {
-      if (err instanceof ProviderNotEnabled) {
+      if (
+        err instanceof ProviderNotEnabled ||
+        err instanceof ForbiddenException
+      ) {
         throw err;
       }
     }

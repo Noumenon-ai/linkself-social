@@ -163,7 +163,11 @@ export class IntegrationRepository {
     });
   }
 
-  async updateIntegration(id: string, params: Partial<Integration>) {
+  async updateIntegration(
+    id: string,
+    params: Partial<Integration>,
+    preserveDisabled = false
+  ) {
     if (
       params.picture &&
       (params.picture.indexOf(process.env.CLOUDFLARE_BUCKET_URL!) === -1 ||
@@ -217,6 +221,7 @@ export class IntegrationRepository {
     }
 
     return this._integration.model.integration.update({
+      select: { id: true },
       where: {
         ...(existing ? { id: existing.id } : { id }),
       },
@@ -229,7 +234,7 @@ export class IntegrationRepository {
         ...(fresh?.tokenExpiration
           ? { tokenExpiration: fresh.tokenExpiration }
           : {}),
-        disabled: false,
+        ...(!preserveDisabled ? { disabled: false } : {}),
         deletedAt: null,
         refreshNeeded: false,
       },

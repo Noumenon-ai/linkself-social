@@ -1,3 +1,4 @@
+import { OrganizationLimitsService } from '../organization-limits/organization.limits.service';
 import {
   forwardRef,
   HttpException,
@@ -42,7 +43,8 @@ export class IntegrationService {
     private _notificationService: NotificationService,
     @Inject(forwardRef(() => RefreshIntegrationService))
     private _refreshIntegrationService: RefreshIntegrationService,
-    private _temporalService: TemporalService
+    private _temporalService: TemporalService,
+    private _limitsService: OrganizationLimitsService
   ) {}
 
   async changeActiveCron(orgId: string) {
@@ -154,17 +156,15 @@ export class IntegrationService {
   // Only connection entry points use this policy. Provider lookup stays
   // unrestricted for posting, analytics, deletion and token refresh.
   async assertCanConnect(org: string, identifier: string, refresh?: string) {
-    if (this._integrationManager.isEnabledProvider(identifier)) {
-      return;
-    }
-
     if (refresh) {
-      const existing = await this._integrationRepository.getIntegrationByInternalId(
-        org,
-        refresh
-      );
+      const existing =
+        await this._integrationRepository.getIntegrationByInternalId(
+          org,
+          refresh
+        );
       if (
         existing &&
+        !existing.deletedAt &&
         (existing.providerIdentifier === identifier ||
           this._integrationManager.getMigrationTarget(
             existing.providerIdentifier
@@ -174,7 +174,10 @@ export class IntegrationService {
       }
     }
 
-    throw new ProviderNotEnabled(identifier);
+    if (!this._integrationManager.isEnabledProvider(identifier)) {
+      throw new ProviderNotEnabled(identifier);
+    }
+    await this._limitsService.assertCanConnect(org);
   }
 
   getIntegrationsList(org: string) {
@@ -407,6 +410,11 @@ export class IntegrationService {
   }
 
   async enableChannel(org: string, totalChannels: number, id: string) {
+    const channel = await this._integrationRepository.getIntegrationById(
+      org,
+      id
+    );
+    if (channel?.disabled) await this._limitsService.assertCanEnable(org);
     const integrations = (
       await this._integrationRepository.getIntegrationsList(org)
     ).filter((f) => !f.disabled);
@@ -445,7 +453,7 @@ export class IntegrationService {
       org,
       id
     );
-    if (!getIntegration) {
+    if (!getIntegration || getIntegration.deletedAt) {
       throw new HttpException('Integration not found', HttpStatus.NOT_FOUND);
     }
     if (!getIntegration.inBetweenSteps) {
@@ -468,19 +476,30 @@ export class IntegrationService {
       data
     );
 
+    const current = await this._integrationRepository.getIntegrationById(org, id);
+    if (!current || current.deletedAt) {
+      throw new HttpException('Integration not found', HttpStatus.NOT_FOUND);
+    }
+    if (!current.inBetweenSteps) {
+      throw new HttpException('Invalid request', HttpStatus.BAD_REQUEST);
+    }
     await this.checkForDeletedOnceAndUpdate(
       org,
       String(getIntegrationInformation.id)
     );
-    await this._integrationRepository.updateIntegration(id, {
-      picture: getIntegrationInformation.picture,
-      internalId: String(getIntegrationInformation.id),
-      organizationId: org,
-      name: getIntegrationInformation.name,
-      inBetweenSteps: false,
-      token: getIntegrationInformation.access_token,
-      profile: getIntegrationInformation.username,
-    });
+    await this._integrationRepository.updateIntegration(
+      id,
+      {
+        picture: getIntegrationInformation.picture,
+        internalId: String(getIntegrationInformation.id),
+        organizationId: org,
+        name: getIntegrationInformation.name,
+        inBetweenSteps: false,
+        token: getIntegrationInformation.access_token,
+        profile: getIntegrationInformation.username,
+      },
+      !!process.env.LINKSELF_URL
+    );
 
     return { success: true };
   }

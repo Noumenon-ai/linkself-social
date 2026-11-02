@@ -110,7 +110,11 @@ describe('LinkSelf provider policy and analytics', () => {
       manager,
       notifications,
       undefined as never,
-      {} as never
+      {} as never,
+      {
+        assertCanConnect: jest.fn(),
+        assertCanEnable: jest.fn(),
+      } as never
     );
     refresh = new RefreshIntegrationService(manager, service, {} as never);
     (service as any)._refreshIntegrationService = refresh;
@@ -218,6 +222,7 @@ describe('LinkSelf provider policy and analytics', () => {
           manager,
           orgs,
           service,
+          {} as never,
           {} as never
         ).redirectParams(
           sign(
@@ -272,6 +277,7 @@ describe('LinkSelf provider policy and analytics', () => {
         manager,
         orgs,
         service,
+        {} as never,
         {} as never
       ).redirectParams(
         sign(
@@ -417,6 +423,7 @@ describe('LinkSelf provider policy and analytics', () => {
       manager,
       orgs,
       service,
+      {} as never,
       {} as never
     );
     await expect(
