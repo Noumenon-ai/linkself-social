@@ -1,8 +1,53 @@
 import {
-  IsBoolean, ValidateIf, IsIn, IsString, MaxLength, IsOptional, IsDefined, IsNumber, Min, Max, ValidateNested
+  IsBoolean,
+  ValidateIf,
+  IsIn,
+  IsString,
+  MaxLength,
+  IsOptional,
+  IsDefined,
+  IsNumber,
+  Min,
+  Max,
+  ValidateNested,
+  Validate,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { JSONSchema } from 'class-validator-jsonschema';
+
+@ValidatorConstraint({ name: 'TikTokDisclosure', async: false })
+class TikTokDisclosureConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown, args: ValidationArguments) {
+    const settings = args.object as TikTokDto;
+    return (
+      value !== true ||
+      settings.content_posting_method === 'UPLOAD' ||
+      settings.brand_organic_toggle === true ||
+      settings.brand_content_toggle === true
+    );
+  }
+
+  defaultMessage() {
+    return 'You need to indicate if your content promotes yourself, a third party, or both';
+  }
+}
+
+@ValidatorConstraint({ name: 'TikTokBrandedVisibility', async: false })
+class TikTokBrandedVisibilityConstraint
+  implements ValidatorConstraintInterface
+{
+  validate(value: unknown, args: ValidationArguments) {
+    const settings = args.object as TikTokDto;
+    return settings.brand_content_toggle !== true || value !== 'SELF_ONLY';
+  }
+
+  defaultMessage() {
+    return 'Branded content visibility cannot be set to private.';
+  }
+}
 
 export class TikTokMusic {
   @IsDefined()
@@ -66,8 +111,8 @@ export class TikTokLocation {
 // post_info has no is_aigc, disable_duet or disable_stitch field.
 // music / location are TikTok Business only: the legacy TikTok provider ignores
 // them (its Content Posting API has no music_sound_info / location fields).
-// Fields stay required here (existing clients depend on it); the constraints are
-// documented, not enforced.
+// Interaction fields stay required for existing clients. Privacy is required
+// only for direct posting; disclosure is optional for older API clients.
 export class TikTokDto {
   @ValidateIf((p) => p.title)
   @MaxLength(90)
@@ -77,13 +122,18 @@ export class TikTokDto {
   })
   title: string;
 
-  @IsIn([
-    'PUBLIC_TO_EVERYONE',
-    'MUTUAL_FOLLOW_FRIENDS',
-    'FOLLOWER_OF_CREATOR',
-    'SELF_ONLY',
-  ])
-  @IsString()
+  @ValidateIf((p) => p.content_posting_method !== 'UPLOAD')
+  @IsIn(
+    [
+      'PUBLIC_TO_EVERYONE',
+      'MUTUAL_FOLLOW_FRIENDS',
+      'FOLLOWER_OF_CREATOR',
+      'SELF_ONLY',
+    ],
+    { message: 'Choose who can see this video' }
+  )
+  @IsString({ message: 'Choose who can see this video' })
+  @Validate(TikTokBrandedVisibilityConstraint)
   @JSONSchema({
     description:
       'Applied only when content_posting_method=DIRECT_POST. Ignored by TikTok on UPLOAD.',
@@ -123,6 +173,14 @@ export class TikTokDto {
       'on legacy TikTok, "yes" lets TikTok auto-add its recommended music.',
   })
   autoAddMusic: 'yes' | 'no';
+
+  @IsOptional()
+  @IsBoolean()
+  @Validate(TikTokDisclosureConstraint)
+  @JSONSchema({
+    description: 'The "Disclose video content" switch of the settings screen.',
+  })
+  disclose?: boolean;
 
   @IsBoolean()
   @JSONSchema({

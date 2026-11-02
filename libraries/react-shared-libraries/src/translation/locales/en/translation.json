@@ -898,5 +898,19 @@
   "thumbnails_and_alt_text": "Thumbnails & alt text",
   "media_settings_section_description": "Click a media item to set its alt text, or its thumbnail if it is a video.",
   "media_settings_section_tooltip": "Thumbnails apply to videos in the main post and are sent to every channel that supports them. YouTube may ignore them on videos it treats as Shorts (vertical, up to 3 minutes) without failing the publish, and requires a phone-verified channel for custom thumbnails. If YouTube rejects the thumbnail the video is still published, and {{appName}} cannot check eligibility in advance.",
-  "youtube_thumbnail_overrides_media": "This post has a YouTube-specific thumbnail, which overrides the thumbnail set in the media settings."
+  "youtube_thumbnail_overrides_media": "This post has a YouTube-specific thumbnail, which overrides the thumbnail set in the media settings.",
+  "tiktok_branded_content_private": "Branded content visibility cannot be set to private.",
+  "tiktok_privacy_required": "Choose who can see this video",
+  "tiktok_creator_daily_limit": "TikTok says this account reached its daily post limit, please try again later",
+  "tiktok_creator_banned": "TikTok says this account is banned from posting, please check its account status",
+  "tiktok_app_daily_limit": "TikTok says this app reached its daily posting quota, please try again later",
+  "tiktok_creator_loading": "Loading TikTok account settings...",
+  "tiktok_creator_load_error": "Could not load TikTok account settings. Please try again later.",
+  "tiktok_posting_to": "Posting to {{nickname}} (@{{username}})",
+  "tiktok_try_again_later": "Please try again later.",
+  "tiktok_paid_partnership_label": "Your photo/video will be labeled as 'Paid partnership'",
+  "tiktok_promotional_content_label": "Your photo/video will be labeled as 'Promotional content'",
+  "tiktok_disclosure_required": "You need to indicate if your content promotes yourself, a third party, or both",
+  "tiktok_processing_notice": "After you post, TikTok may take a few minutes to process it before it appears on your profile.",
+  "tiktok_video_duration_notice": "This video is {{n}} seconds long; this TikTok account can post videos up to {{max}} seconds."
 }

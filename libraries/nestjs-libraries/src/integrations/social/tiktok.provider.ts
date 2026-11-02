@@ -22,6 +22,7 @@ import { createReadStream } from 'fs';
 import { getSsrfSafeDispatcher } from '@gitroom/nestjs-libraries/dtos/webhooks/ssrf.safe.dispatcher';
 import { Integration } from '@prisma/client';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
+import { DashboardFunction } from '@gitroom/nestjs-libraries/integrations/dashboard.function.decorator';
 
 @Rules(
   [
@@ -49,6 +50,58 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
   editor = 'normal' as const;
   maxLength() {
     return 2000;
+  }
+
+  @DashboardFunction()
+  async creatorInfo(accessToken: string) {
+    const { data: creator, error } = await (
+      await this.fetch(
+        'https://open.tiktokapis.com/v2/post/publish/creator_info/query/',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+        }
+      )
+    ).json();
+
+    // These limits arrive with HTTP 200. In particular, the app's quota must
+    // not go through handleErrors, which disconnects on reached_active_user_cap.
+    const reasons: Record<string, string> = {
+      spam_risk_too_many_posts:
+        'TikTok says this account reached its daily post limit, please try again later',
+      spam_risk_user_banned_from_posting:
+        'TikTok says this account is banned from posting, please check its account status',
+      reached_active_user_cap:
+        'TikTok says this app reached its daily posting quota, please try again later',
+    };
+    const reason = Object.prototype.hasOwnProperty.call(reasons, error?.code)
+      ? reasons[error.code]
+      : undefined;
+    if (error?.code !== 'ok' && !reason) {
+      throw new BadBody(
+        this.identifier,
+        '{}',
+        '{}',
+        'Could not load TikTok creator information, please try again later'
+      );
+    }
+
+    const data = creator ?? {};
+    return {
+      canPost: error.code === 'ok',
+      ...(reason ? { reason } : {}),
+      nickname: data.creator_nickname ?? '',
+      username: data.creator_username ?? '',
+      avatarUrl: data.creator_avatar_url ?? '',
+      privacyLevelOptions: data.privacy_level_options ?? [],
+      commentDisabled: data.comment_disabled ?? false,
+      duetDisabled: data.duet_disabled ?? false,
+      stitchDisabled: data.stitch_disabled ?? false,
+      maxVideoPostDurationSec: data.max_video_post_duration_sec ?? null,
+    };
   }
 
   override async checkValidity(
