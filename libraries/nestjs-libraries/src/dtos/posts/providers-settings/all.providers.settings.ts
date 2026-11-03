@@ -23,6 +23,7 @@ import { FacebookDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-sett
 import { MoltbookDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/moltbook.dto';
 import { SkoolDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/skool.dto';
 import { WhopDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/whop.dto';
+import { FanvueDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/fanvue.dto';
 import { MeweDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/mewe.dto';
 import { TumblrDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/tumblr.dto';
 
@@ -62,7 +63,8 @@ export type AllProvidersSettings =
   | ProviderExtension<'skool', SkoolDto>
   | ProviderExtension<'mewe', MeweDto>
   | ProviderExtension<'tumblr', TumblrDto>
-  | ProviderExtension<'whop', WhopDto>;
+  | ProviderExtension<'whop', WhopDto>
+  | ProviderExtension<'fanvue', FanvueDto>;
 
 type None = NonNullable<unknown>;
 
@@ -101,6 +103,7 @@ export const allProviders = (setEmpty?: any) => {
     { value: MoltbookDto, name: 'moltbook' },
     { value: SkoolDto, name: 'skool' },
     { value: WhopDto, name: 'whop' },
+    { value: FanvueDto, name: 'fanvue' },
     { value: MeweDto, name: 'mewe' },
     { value: TumblrDto, name: 'tumblr' },
   ].filter((f) => f.value);

@@ -1,5 +1,6 @@
 'use client';
 
+import FanvueProvider from '@gitroom/frontend/components/new-launch/providers/fanvue/fanvue.provider';
 import DevtoProvider from '@gitroom/frontend/components/new-launch/providers/devto/devto.provider';
 import XProvider from '@gitroom/frontend/components/new-launch/providers/x/x.provider';
 import LinkedinProvider from '@gitroom/frontend/components/new-launch/providers/linkedin/linkedin.provider';
@@ -169,6 +170,10 @@ export const Providers = [
   {
     identifier: 'skool',
     component: SkoolProvider,
+  },
+  {
+    identifier: 'fanvue',
+    component: FanvueProvider,
   },
   {
     identifier: 'whop',

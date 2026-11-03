@@ -20,6 +20,7 @@ module.exports = {
     '<rootDir>/libraries/nestjs-libraries/src/integrations/social/linkedin.scopes.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/integrations/social/pinterest.sandbox.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/integrations/social/tiktok.creator.spec.ts',
+    '<rootDir>/libraries/nestjs-libraries/src/integrations/social/fanvue.spec.ts',
   ],
   transform: {
     '^.+\\.tsx?$': [
