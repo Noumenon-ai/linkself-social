@@ -49,7 +49,7 @@ import { setUserTimezone } from '@gitroom/frontend/components/layout/set.timezon
 export const LayoutComponent = ({ children }: { children: ReactNode }) => {
   const fetch = useFetch();
 
-  const { backendUrl, billingEnabled, isGeneral } = useVariables();
+  const { backendUrl, billingEnabled, isGeneral, linkselfUrl } = useVariables();
 
   // Feedback icon component attaches Sentry feedback to a top-bar icon when DSN is present
   const searchParams = useSearchParams();
@@ -172,10 +172,12 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                           <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
                           <OrganizationSelector />
                           <InvoicesComponent />
-                          <div className="hover:text-newTextColor">
+                          <div className="hover:text-newTextColor empty:hidden">
                             <ModeComponent />
                           </div>
-                          <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
+                          {!linkselfUrl && (
+                            <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
+                          )}
                           <LanguageComponent />
                           <div className="contents mobile:hidden">
                             <ChromeExtensionComponent />

@@ -1016,6 +1016,15 @@ html[data-linkself-theme='blueprint'] {
     outline-offset: -5px;
   }
   :is(button:disabled, [aria-disabled='true']):not(.network-preview *) { opacity: 0.5; }
+  // A faded orange reads as brown on the blueprint ground, so unavailable or busy actions turn neutral.
+  :is(.blueprint-action, .blueprint-accent, .bg-btnPrimary, .bg-forth, .bg-ai, .swal2-confirm):is(:disabled, [aria-disabled='true'], [aria-busy='true']):not(.network-preview *),
+  :is(button:disabled, [aria-disabled='true']) :is(.blueprint-action, .blueprint-accent, .bg-btnPrimary, .bg-forth, .bg-ai):not(.network-preview *) {
+    opacity: 1;
+    background: transparent !important;
+    color: var(--studio-muted) !important;
+    border-style: dashed;
+  }
+  button.mantine-Modal-close:not(.network-preview *) { min-height: 0; border: 0; padding: 4px; display: inline-flex; align-items: center; justify-content: center; }
   body :is(a, button, input, textarea, select, [tabindex], [contenteditable='true']):focus-visible {
     outline: 3px solid var(--studio-accent, #FF7A45) !important;
     outline-offset: 5px !important;

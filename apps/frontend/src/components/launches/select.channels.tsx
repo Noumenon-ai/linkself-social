@@ -96,7 +96,7 @@ export const SelectChannels: FC<{
   }
 
   return (
-    <div className="relative select-none z-[500]" ref={ref}>
+    <div className={clsx('relative select-none', open && 'z-[500]')} ref={ref}>
       <div
         data-tooltip-id="tooltip"
         data-tooltip-content={t('select_channels_tooltip', 'Select Channels')}
