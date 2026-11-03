@@ -169,7 +169,6 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                         </div>
                         <div className="flex gap-[20px] mobile:gap-[14px] mobile:items-center text-textItemBlur">
                           <StreakComponent />
-                          <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
                           <OrganizationSelector />
                           <InvoicesComponent />
                           <div className="hover:text-newTextColor empty:hidden">
