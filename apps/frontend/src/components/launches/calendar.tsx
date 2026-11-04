@@ -889,7 +889,7 @@ export const ScheduledPosts = () => {
               }
             >
               <h3>{post.integration.name}</h3>
-              <p>{post.integration.providerIdentifier}</p>
+              <p className="capitalize">{post.integration.providerIdentifier}</p>
               <p className="line-clamp-4">
                 {stripHtmlValidation(
                   'none',
@@ -1214,6 +1214,17 @@ export const CalendarColumn: FC<{
 
         // Find the post to check its state
         const post = posts.find((p) => p.id === item.id);
+        // Month cells represent whole days; keep the post's local clock time.
+        if (display === 'month' && !post) return;
+        const dropDate =
+          display === 'month'
+            ? newDayjs(
+                `${getDate.format('YYYY-MM-DD')}T${fromUtc(
+                  post.publishDate
+                ).format('HH:mm:ss.SSS')}`
+              )
+            : getDate;
+        if (dropDate.startOf('hour').isBefore(currentHour)) return;
         let action: 'schedule' | 'update' = 'schedule';
 
         // Check if post is already published or queued in the past
@@ -1235,7 +1246,7 @@ export const CalendarColumn: FC<{
                         'This post was already published. Republishing will publish it again to'
                       )}{' '}
                       {post.integration?.name} {t('republish_at', 'at')}{' '}
-                      {getDate.format('DD/MM/YYYY HH:mm')}.
+                      {dropDate.format('DD/MM/YYYY HH:mm')}.
                       {(!!item.interval || !!post.intervalInDays) && (
                         <div className="mt-[10px]">
                           {t(
@@ -1288,12 +1299,12 @@ export const CalendarColumn: FC<{
         }
 
         if (!item.interval) {
-          changeDate(item.id, getDate);
+          changeDate(item.id, dropDate);
         }
         const { status } = await fetch(`/posts/${item.id}/date`, {
           method: 'PUT',
           body: JSON.stringify({
-            date: getDate.utc().format('YYYY-MM-DDTHH:mm:ss'),
+            date: dropDate.utc().format('YYYY-MM-DDTHH:mm:ss'),
             action,
             // published posts always confirm via the modal before reaching here;
             // for QUEUE posts the flag is a no-op on the server
@@ -1314,7 +1325,18 @@ export const CalendarColumn: FC<{
           : !!monitor.canDrop() && !!monitor.isOver(),
       }),
     }),
-    [posts, isBeforeNow]
+    [
+      posts,
+      isBeforeNow,
+      display,
+      getDate,
+      currentHour,
+      changeDate,
+      fetch,
+      modal,
+      t,
+      reloadCalendarView,
+    ]
   );
 
   const addModal = useCallback(async () => {

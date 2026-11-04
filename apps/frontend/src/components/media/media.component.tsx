@@ -523,11 +523,8 @@ export const MediaBox: FC<{
           )}
         </div>
         <div
-          className={clsx(
-            'w-full pointer-events-none relative mt-[5px] mb-[5px]',
-            // phones only keep the upload progress while there is something to show
-            !loading && !uploadInfo && 'mobile:hidden'
-          )}
+          hidden={!loading && !uploadInfo}
+          className="w-full pointer-events-none relative mt-[5px] mb-[5px]"
         >
           <div className="w-full h-[46px] overflow-hidden absolute left-0 bg-newBgColorInner uppyChange">
             <Dashboard

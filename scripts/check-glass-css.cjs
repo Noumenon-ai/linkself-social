@@ -216,6 +216,7 @@ async function main() {
   });
   check(`${gate} .glass-event footer::before`, 'width', '3px');
   check(`${gate} .glass-event footer::before`, 'height', '14px');
+  check(`${gate} .glass-schedule input`, 'padding-inline', '16px');
   ruleHas('.animate-normalFadeDown', 'opacity', '1');
   for (const animation of ['normalFadeIn', 'fadeIn', 'fade', 'fadeDown']) {
     ruleHas(`.animate-${animation}`, 'opacity', '1');

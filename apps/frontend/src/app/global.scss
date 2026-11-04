@@ -1258,6 +1258,9 @@ html[data-linkself-theme='glass-frame'] {
   .glass-schedule h2 {
     margin: 12px 0 24px;
   }
+  .glass-schedule input {
+    padding-inline: 16px;
+  }
   .glass-event {
     padding: 16px;
     background: var(--tile);
