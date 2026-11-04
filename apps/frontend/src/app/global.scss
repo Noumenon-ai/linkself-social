@@ -1302,6 +1302,19 @@ html[data-linkself-theme='glass-frame'] {
     color: var(--link);
     font-size: 14px;
   }
+  .glass-channel-grid > button.glass-channel-add {
+    align-self: stretch;
+    width: 100%;
+    height: auto;
+    min-height: 104px;
+    max-height: none;
+    border-radius: var(--radius-small);
+  }
+  @media (min-width: 761px) {
+    .glass-channels-button + button {
+      flex: 0 0 auto;
+    }
+  }
   .glass-channel-menu {
     position: absolute;
     top: 0;
