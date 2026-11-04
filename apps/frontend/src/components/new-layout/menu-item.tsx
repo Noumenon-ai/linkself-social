@@ -10,22 +10,25 @@ export const MenuItem: FC<{
   icon: ReactNode;
   path: string;
   onClick?: () => void;
-}> = ({ label, icon, path, onClick }) => {
+  active?: boolean;
+}> = ({ label, icon, path, onClick, active }) => {
   const currentPath = usePathname();
   const query = useSearchParams();
   const { linkselfUrl } = useVariables();
   const [pathname, search] = path.split('?');
   const settingsTab = query.get('tab') || 'global_settings';
-  const isActive = linkselfUrl
-    ? path === '/plugs'
-      ? currentPath === '/plugs' ||
-        (currentPath === '/settings' && settingsTab === 'plugs')
-      : currentPath === pathname &&
-        (search
-          ? settingsTab === new URLSearchParams(search).get('tab')
-          : pathname !== '/settings' ||
-            !['sets', 'signatures', 'plugs'].includes(settingsTab))
-    : currentPath.indexOf(path) === 0;
+  const isActive =
+    active ??
+    (linkselfUrl
+      ? path === '/plugs'
+        ? currentPath === '/plugs' ||
+          (currentPath === '/settings' && settingsTab === 'plugs')
+        : currentPath === pathname &&
+          (search
+            ? settingsTab === new URLSearchParams(search).get('tab')
+            : pathname !== '/settings' ||
+              !['sets', 'signatures', 'plugs'].includes(settingsTab))
+      : currentPath.indexOf(path) === 0);
 
   const className = clsx(
     'glass-rail-link group w-full minCustom:h-[54px] custom:h-[44px] py-[8px] px-[6px] minCustom:gap-[4px] custom:gap-[2px] flex flex-col font-[600] items-center justify-center rounded-[12px] hover:text-textItemFocused hover:bg-boxFocused transition-colors',
@@ -43,7 +46,13 @@ export const MenuItem: FC<{
 
   if (onClick) {
     return (
-      <button aria-label={label} aria-current={isActive ? 'page' : undefined} onClick={onClick} title={label} className={className}>
+      <button
+        aria-label={label}
+        aria-current={isActive ? 'page' : undefined}
+        onClick={onClick}
+        title={linkselfUrl ? undefined : label}
+        className={className}
+      >
         {inner}
       </button>
     );
@@ -54,7 +63,7 @@ export const MenuItem: FC<{
       prefetch={true}
       href={path}
       aria-label={label}
-      title={label}
+      title={linkselfUrl ? undefined : label}
       aria-current={isActive ? 'page' : undefined}
       {...(path.indexOf('http') === 0 &&
         !(linkselfUrl && path.startsWith(linkselfUrl.replace(/\/$/, ''))) && {

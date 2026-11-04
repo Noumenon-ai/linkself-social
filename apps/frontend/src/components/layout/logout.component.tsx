@@ -46,7 +46,7 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         }
         role="button"
         tabIndex={0}
-        aria-label={t('logout', 'Log out')}
+        aria-label={linkselfUrl && isIcon ? 'Logout' : t('logout', 'Log out')}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -55,7 +55,23 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         }}
         onClick={logout}
       >
-        {isIcon ? (
+        {isIcon && linkselfUrl ? (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m16 17 5-5-5-5" />
+            <path d="M21 12H9" />
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          </svg>
+        ) : isIcon ? (
           <svg
             width="24"
             height="24"
@@ -78,6 +94,9 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
             {t('logout_from', 'Logout from')}
             {' ' + APP_NAME}
           </span>
+        )}
+        {isIcon && linkselfUrl && (
+          <span className="glass-rail-label">Logout</span>
         )}
       </div>
     </>

@@ -49,7 +49,7 @@ function component(file, names, bindings) {
       target: ts.ScriptTarget.ES2020,
     },
   });
-  const sandbox = { exports: {}, React, ...bindings };
+  const sandbox = { exports: {}, React, Date: global.Date, ...bindings };
   vm.runInNewContext(
     result.outputText + `\nObject.assign(exports, {${names.join(',')}});`,
     sandbox,
@@ -88,6 +88,7 @@ vm.runInNewContext(timezoneCode, timezone, { filename: timezoneFile });
 timezone.exports.setUserTimezone('America/New_York');
 const { newDayjs, fromUtc } = timezone.exports;
 const now = () => newDayjs();
+check(now().valueOf() === fixedNow && dayjs().valueOf() === fixedNow, 'Calendar helpers and dayjs share the fixed clock, independent of time of day');
 const integrations = [
   { id: 'a', name: 'Channel A' },
   { id: 'b', name: 'Channel B' },
@@ -562,15 +563,13 @@ check(
   JSON.stringify(destinations) ===
     JSON.stringify([
       'https://example.test/dashboard',
+      'https://example.test/dashboard/links',
       '/launches',
-      '/analytics',
-      '/media',
-      '/plugs',
-      '/settings?tab=sets',
-      '/settings?tab=signatures',
-      '/settings',
+      'https://example.test/dashboard/products',
+      'https://example.test/dashboard/analytics',
+      'https://example.test/dashboard/settings',
     ]),
-  'Paid rail exposes direct destinations in the requested order'
+  'Shared rail exposes exactly the category destinations in the requested order'
 );
 check(
   !nodes(menu).some((n) => n.type === 'details' || n.type === 'summary') &&
@@ -584,17 +583,38 @@ check(
 menuUser = { ...menuUser, tier: { current: 'FREE' } };
 menu = TopMenu();
 check(
-  !nodes(menu).some((n) =>
-    [
-      '/settings?tab=sets',
-      '/settings?tab=signatures',
-      '/launches',
-      '/analytics',
-      '/media',
-    ].includes(n.props.path)
-  ),
-  'Free plan visibility is retained'
+  JSON.stringify(nodes(menu).filter((n) => n.type === 'menu-item').map((n) => n.props.path)) === JSON.stringify(destinations),
+  'Shared category rail remains identical across plans; Settings retains feature permissions'
 );
+check(
+  JSON.stringify(nodes(menu).filter((n) => n.type === 'menu-item').map((n) => n.props.label)) ===
+    JSON.stringify(['Home', 'My page', 'Studio', 'Sell', 'Audience', 'Settings']),
+  'Shared rail has exactly the approved labels and order'
+);
+const bottomRail = nodes(menu).find((n) => n.props.className === 'glass-rail-bottom');
+check(
+  React.Children.toArray(bottomRail.props.children).map((n) => n.type).join(',') === 'menu-item,logout,span',
+  'Bottom rail contains Settings, Logout and avatar in order'
+);
+const lucide = require('lucide-react');
+const { renderToStaticMarkup } = require('react-dom/server');
+const iconShapes = (element) => renderToStaticMarkup(element).match(/<(path|rect|circle|line)\b[^>]*>/g);
+for (const [index, name] of ['LayoutDashboard', 'Link', 'Send', 'ShoppingBag', 'BarChart3', 'Settings'].entries()) {
+  const item = nodes(menu).filter((n) => n.type === 'menu-item')[index];
+  check(
+    JSON.stringify(iconShapes(item.props.icon)) === JSON.stringify(iconShapes(React.createElement(lucide[name]))),
+    `${item.props.label} uses the requested lucide ${name} inline SVG geometry`
+  );
+  check(item.props.icon.props.strokeWidth === '2', `${item.props.label} uses lucide's default stroke`);
+}
+const { LogoutComponent: LabelledLogout } = component(
+  'apps/frontend/src/components/layout/logout.component.tsx', ['LogoutComponent'],
+  { useVariables: () => ({ linkselfUrl }), useFetch: () => () => {},
+    useCallback: (f) => f, useT: () => (_, fallback) => fallback, APP_NAME: 'LinkSelf Social' }
+);
+const logoutButton = nodes(LabelledLogout({ isIcon: true })).find((n) => n.props.role === 'button');
+check(text(logoutButton).trim() === 'Logout' && logoutButton.props['aria-label'] === 'Logout', 'Logout has the shared visible and accessible label');
+check(JSON.stringify(iconShapes(nodes(logoutButton).find((n) => n.type === 'svg'))) === JSON.stringify(iconShapes(React.createElement(lucide.LogOut))), 'Logout matches the shared lucide LogOut icon');
 linkselfUrl = '';
 menu = TopMenu();
 check(
@@ -774,6 +794,72 @@ for (const tab of ['sets', 'signatures', 'plugs', 'global_settings']) {
     `Rail tracks ${tab} including redirect routes`
   );
 }
+
+// The category stays selected across Studio routes; the page tab carries route state.
+let studioPath = '/launches';
+const { MenuItem: CategoryItem } = component(
+  'apps/frontend/src/components/new-layout/menu-item.tsx', ['MenuItem'],
+  { usePathname: () => studioPath, useSearchParams: () => new URLSearchParams(),
+    useVariables: () => ({ linkselfUrl }), URLSearchParams, clsx, Link: 'a' }
+);
+const { StudioTabs } = component(
+  'apps/frontend/src/components/layout/studio.tabs.tsx', ['StudioTabs'],
+  { usePathname: () => studioPath, useVariables: () => ({ linkselfUrl }), Link: 'a' }
+);
+for (const base of ['https://example.test', 'https://example.test/']) {
+  linkselfUrl = base;
+  for (const [route, selected] of [
+    ['/launches', 'Calendar'], ['/analytics', 'Analytics'], ['/media', 'Media'],
+    ['/settings', 'Settings'], ['/plugs', 'Settings'], ['/launches/detail', 'Calendar'],
+    ['/agents', undefined],
+  ]) {
+    studioPath = route;
+    const links = nodes(StudioTabs()).filter((n) => n.type === 'a');
+    check(JSON.stringify(links.map(text)) === JSON.stringify(['Calendar', 'Analytics', 'Media', 'Settings', 'Channels setup', 'Campaigns']), `${route}: category tabs have the exact labels and order`);
+    check(JSON.stringify(links.map((n) => n.props.href)) === JSON.stringify(['/launches', '/analytics', '/media', '/settings', 'https://example.test/dashboard/social', 'https://example.test/dashboard/campaigns']), `${route}: category tabs resolve to exact destinations`);
+    check(links.every((n) => n.props.target === undefined), `${route}: every tab uses the same tab`);
+    check(JSON.stringify(links.filter((n) => n.props['aria-current'] === 'page').map(text)) === JSON.stringify(selected ? [selected] : []), `${route}: only the current Studio tab is selected`);
+    const rail = nodes(TopMenu()).filter((n) => n.type === 'menu-item').map((n) => CategoryItem(n.props));
+    check(rail.filter((n) => n.props['aria-current'] === 'page').map((n) => n.props['aria-label']).join() === 'Studio', `${route}: Studio is the only active rail category`);
+    check(rail.every((n) => n.props.target === undefined), `${route}: all LinkSelf rail links stay in the same tab`);
+  }
+}
+linkselfUrl = '';
+check(StudioTabs() === null, 'Upstream never renders Studio category tabs');
+check(CategoryItem({ path: 'https://external.test', label: 'External' }).props.target === '_blank', 'Upstream external menu links retain their target');
+linkselfUrl = 'https://example.test';
+check(CategoryItem({ path: 'https://external.test', label: 'External' }).props.target === '_blank', 'Unrelated external destinations retain their target');
+
+// Settings keeps its existing feature gates and its independent second tab row.
+let settingsTab = 'global_settings';
+const { SettingsPopup } = component(
+  'apps/frontend/src/components/layout/settings.component.tsx', ['SettingsPopup'],
+  {
+    useVariables: () => ({ linkselfUrl, isGeneral: true }),
+    useOrganizationLimits: () => ({ data: { mcp: false } }),
+    useFetch: () => () => {}, useToaster: () => ({}), useSWRConfig: () => ({}),
+    useUser: () => menuUser, useMemo: (f) => f(), classValidatorResolver: () => ({}), UserDetailDto: {},
+    useForm: () => ({ watch: () => '', handleSubmit: () => () => {} }),
+    useModals: () => ({}), useCallback: (f) => f, useEffect: () => {},
+    useSearchParams: () => new URLSearchParams(`tab=${settingsTab}`), useRouter: () => ({}),
+    useState: (init) => [init(), () => {}], useT: () => (_, fallback) => fallback,
+    clsx, FormProvider: 'form-provider', SVGLine: 'svg-line',
+    GlobalSettings: 'global-settings', Sets: 'sets', SignaturesComponent: 'signatures',
+    Plugs: 'plugs', ThirdPartyComponent: 'integrations', AppsComponent: 'apps',
+  }
+);
+for (const plan of ['FREE', 'PRO']) {
+  menuUser = { ...menuUser, tier: { current: plan } };
+  for (settingsTab of ['global_settings', 'plugs', 'sets', 'signatures']) {
+    const settings = SettingsPopup({});
+    const buttons = nodes(settings).filter((n) => n.type === 'button');
+    const allowed = plan === 'PRO' || !['sets', 'signatures'].includes(settingsTab);
+    check(buttons.some((n) => text(n).trim() === 'Plugs'), `${plan}: Plugs remains in Settings' second row`);
+    check(['Sets', 'Signatures'].every((label) => buttons.some((n) => text(n).trim() === label) === (plan === 'PRO')), `${plan}: Settings preserves Sets and Signatures feature permissions`);
+    check(buttons.filter((n) => n.props['aria-current'] === 'page').map(text).join().trim() === ({ global_settings: 'Global Settings', plugs: 'Plugs', sets: 'Sets', signatures: 'Signatures' })[allowed ? settingsTab : 'global_settings'], `${plan}: second row tracks ${settingsTab} independently`);
+  }
+}
+check(fs.readFileSync('apps/frontend/src/app/(app)/(site)/plugs/page.tsx', 'utf8').includes("redirect('/settings?tab=plugs')"), '/plugs still redirects to the Settings Plugs tab');
 
 const { AddProviderComponent } = component(
   'apps/frontend/src/components/launches/add.provider.component.tsx',

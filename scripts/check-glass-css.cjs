@@ -162,7 +162,8 @@ async function main() {
     'repeat(7, minmax(0, 1fr))'
   );
   check(`${gate} .glass-month-grid`, 'position', 'static');
-  check(`${gate} .glass-rail`, 'width', '56px');
+  check(`${gate} .glass-rail`, 'width', '72px');
+  check(`${gate} #left-menu`, 'width', '72px');
   verify(
     css.includes('@media (max-width: 999px)'),
     'Schedule must stack below 1000px'
@@ -257,8 +258,10 @@ async function main() {
     'background',
     'var(--success)'
   );
-  ruleHas('.glass-rail-link::after', 'inset-inline-start', '56px');
-  ruleHas('.glass-rail-link::after', 'inset-inline-end', '0', true);
+  ruleHas('#left-menu .glass-rail-link > div:last-child', 'display', 'block');
+  ruleHas('#left-menu .glass-rail-link > div:last-child', 'font-size', '12px');
+  ruleHas('#left-menu .glass-rail-label', 'font-size', '12px');
+  verify(!css.includes('.glass-rail-link::after'), 'Labelled rail has no clipped hover tooltips');
   ruleHas('.glass-rail', 'z-index', '40');
   ruleHas(
     'body:has(.bg-popup, .mantine-Modal-root, .swal2-container) .glass-navigation',
@@ -321,8 +324,8 @@ async function main() {
     ['.glass-shell', 'margin', '16px'],
     ['.glass-shell', 'padding', '20px'],
     ['.glass-title', 'font-size', '24px'],
-    ['#left-menu .glass-rail-link', 'width', '40px'],
-    ['#left-menu .glass-rail-link', 'height', '40px'],
+    ['#left-menu .glass-rail-link', 'width', '58px'],
+    ['#left-menu .glass-rail-link', 'height', '56px'],
     ['#left-menu .glass-rail-link', 'align-items', 'center'],
     ['#left-menu .glass-rail-link', 'justify-content', 'center'],
     ['.glass-calendar-cell', 'min-height', '44px'],
@@ -331,7 +334,7 @@ async function main() {
     ['.glass-provider-name', 'white-space', 'nowrap'],
     ['.glass-settings', 'flex-direction', 'column'],
     ['.glass-settings-tabs', 'flex-wrap', 'nowrap'],
-    ['.glass-settings-tabs > button', 'justify-content', 'center'],
+    ['.glass-settings-tabs > :is(button, a)', 'justify-content', 'center'],
     ['.glass-editor .glass-editor-settings-toggle', 'width', 'auto'],
     ['.glass-compose-field .tiptap', 'min-height', '160px'],
     ['.glass-switch-thumb', 'background', 'var(--muted)'],
@@ -353,6 +356,19 @@ async function main() {
   ruleHas('.glass-modal-close', 'padding', '0');
   ruleHas('.glass-navigation', 'overflow-x', 'auto', true);
   ruleHas('.glass-rail-bottom', 'display', 'flex', true);
+  ruleHas('.glass-navigation', 'flex-wrap', 'nowrap', true);
+  ruleHas('.glass-navigation', 'max-width', '100%', true);
+  ruleHas('.glass-settings-tabs', 'overflow-x', 'auto');
+  ruleHas('.glass-settings-tabs', 'min-width', '0');
+  ruleHas('.glass-settings-tabs', 'max-width', '100%');
+  ruleHas('.glass-settings-tabs > :is(button, a)', 'flex', '0 0 auto');
+  ruleHas('.glass-settings-tabs > :is(button, a)', 'white-space', 'nowrap');
+  ruleHas('.glass-studio-tabs', 'width', '100%');
+  verify(
+    layoutSource.indexOf('<StudioTabs />') > layoutSource.indexOf('<Title />') &&
+      layoutSource.indexOf('<StudioTabs />') < layoutSource.indexOf('className="glass-workspace-content'),
+    'Studio category tabs follow the page title before content on every page'
+  );
   ruleHas(
     '.glass-plug-row > div',
     'grid-template-columns',

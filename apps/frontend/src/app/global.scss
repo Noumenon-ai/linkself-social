@@ -1051,7 +1051,7 @@ html[data-linkself-theme='glass-frame'] {
   }
   .glass-rail {
     z-index: 40;
-    width: 56px;
+    width: 72px;
     flex-shrink: 0;
     background: transparent;
     border: 0;
@@ -1059,7 +1059,7 @@ html[data-linkself-theme='glass-frame'] {
   }
   #left-menu {
     position: static;
-    width: 56px;
+    width: 72px;
     height: 100%;
   }
   #left-menu > div {
@@ -1095,26 +1095,12 @@ html[data-linkself-theme='glass-frame'] {
     background: var(--accent);
     color: var(--on-accent);
   }
-  .glass-rail-link > div:last-child {
-    display: none;
-  }
-  .glass-rail-link::after {
-    content: attr(aria-label);
-    display: none;
-    position: absolute;
-    inset-inline-start: 56px;
-    z-index: 50;
-    padding: 8px 12px;
-    white-space: nowrap;
-    background: var(--popover);
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-small);
-    font-size: 14px;
-  }
-  .glass-rail-link:hover::after,
-  .glass-rail-link:focus-visible::after {
+  #left-menu .glass-rail-link > div:last-child,
+  #left-menu .glass-rail-label {
     display: block;
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
   }
   .glass-avatar {
     width: 44px;
@@ -2087,11 +2073,6 @@ html[data-linkself-theme='glass-frame'] {
       height: 44px;
       min-height: 44px;
     }
-    .glass-rail-link::after {
-      top: 48px;
-      inset-inline-start: auto;
-      inset-inline-end: 0;
-    }
     .glass-topbar {
       gap: 12px;
     }
@@ -2250,19 +2231,22 @@ html[data-linkself-theme='glass-frame'] {
   .glass-rail-primary,
   .glass-rail-bottom {
     gap: 8px;
-    padding: 7px;
+    padding: 4px;
   }
   #left-menu .glass-rail-link {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    min-height: 40px;
-    min-width: 40px;
+    width: 58px;
+    height: 56px;
+    min-height: 56px;
+    min-width: 58px;
     flex-shrink: 0;
-    padding: 0;
-    border-radius: var(--radius-pill);
+    gap: 4px;
+    padding: 8px 0;
+    font-weight: 500;
+    border-radius: var(--radius-small);
   }
   #left-menu .glass-rail-link > div:first-child {
     display: flex;
@@ -2525,13 +2509,16 @@ html[data-linkself-theme='glass-frame'] {
     min-width: 0;
   }
   .glass-settings-tabs {
+    min-width: 0;
+    max-width: 100%;
+    flex-shrink: 0;
     flex-direction: row;
     flex-wrap: nowrap;
     overflow-x: auto;
     gap: 4px;
     padding: 4px;
   }
-  .glass-settings-tabs > button {
+  .glass-settings-tabs > :is(button, a) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2544,10 +2531,13 @@ html[data-linkself-theme='glass-frame'] {
     text-align: center;
     font-weight: 500;
   }
+  .glass-studio-tabs {
+    width: 100%;
+  }
   .glass-settings-tabs > button > div {
     display: none;
   }
-  .glass-settings-tabs > button[aria-current='page'] {
+  .glass-settings-tabs > :is(button, a)[aria-current='page'] {
     background: var(--tile-hover);
     color: var(--text);
   }
@@ -2866,8 +2856,10 @@ html[data-linkself-theme='glass-frame'] {
     }
     .glass-navigation {
       flex-direction: row;
+      flex-wrap: nowrap;
       overflow-x: auto;
       min-width: 0;
+      max-width: 100%;
       padding: 4px;
       gap: 8px;
       border: 1px solid var(--line);
@@ -2883,12 +2875,6 @@ html[data-linkself-theme='glass-frame'] {
       border: 0;
       background: transparent;
       gap: 8px;
-    }
-    .glass-rail-link::after {
-      position: fixed;
-      top: 88px;
-      inset-inline-start: 24px;
-      inset-inline-end: auto;
     }
     .glass-calendar-heading {
       max-width: 100%;

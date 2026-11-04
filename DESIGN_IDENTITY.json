@@ -8,6 +8,6 @@
   "composition": "dense-dashboard",
   "imagery": "product-ui",
   "motion": "minimal",
-  "signature": "A wide glass frame with a compact direct icon rail, one-row calendar toolbar and a narrow schedule edge.",
-  "rationale": "The owner-approved compact app addendum uses 16px desktop margins, 40px rail icons and 36px controls in the existing Figtree and azure identity. Settings uses horizontal tabs and full-width content; editor channel settings expand one row at a time with a live destination count. Source attribution remains discoverable in the footer. Theme overrides are gated to LinkSelf; upstream installs and native network simulations retain their appearance."
+  "signature": "A wide glass frame with a 72px labelled category rail, one-row calendar toolbar and a narrow schedule edge.",
+  "rationale": "The owner-approved compact app addendum uses 16px desktop margins, 12px rail labels and 36px controls in the existing Figtree and azure identity. Studio category tabs sit below each page title, with Settings retaining its own second pill row; both navigation rows scroll within the phone frame. Settings uses full-width content; editor channel settings expand one row at a time with a live destination count. Source attribution remains discoverable in the footer. Theme overrides are gated to LinkSelf; upstream installs and native network simulations retain their appearance."
 }

@@ -32,6 +32,7 @@ import { CopilotKit } from '@copilotkit/react-core';
 import { MantineWrapper } from '@gitroom/react/helpers/mantine.wrapper';
 import { Impersonate } from '@gitroom/frontend/components/layout/impersonate';
 import { AnnouncementBanner } from '@gitroom/frontend/components/layout/announcement.banner';
+import { StudioTabs } from '@gitroom/frontend/components/layout/studio.tabs';
 import { Title } from '@gitroom/frontend/components/layout/title';
 import { TopMenu } from '@gitroom/frontend/components/layout/top.menu';
 import { LanguageComponent } from '@gitroom/frontend/components/layout/language.component';
@@ -191,6 +192,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                           <NotificationComponent />
                         </div>
                       </div>
+                      <StudioTabs />
                       <div className="glass-workspace-content flex flex-1 min-w-0 gap-[1px] mobile:flex-col">
                         {children}
                       </div>
