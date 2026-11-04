@@ -388,6 +388,10 @@ check(heading().includes('11/04/2026'), 'Day heading includes actual date');
 
 // Month ticks preserve status information and consume pointer/keyboard activation.
 let detailOpens = 0;
+let dropSpec;
+let dropDialog;
+let dropChoice = 'schedule';
+const dropRequests = [];
 const { CalendarItem, CalendarColumn } = component(
   'apps/frontend/src/components/launches/calendar.tsx',
   ['channelColor', 'CalendarItem', 'CalendarColumn'],
@@ -404,14 +408,38 @@ const { CalendarItem, CalendarColumn } = component(
     },
     useUser: () => ({}),
     useDrag: () => [{ opacity: 1 }, () => {}],
-    useDrop: () => [{ canDrop: false }, () => {}],
+    useDrop: (factory) => {
+      dropSpec = factory();
+      return [{ canDrop: false }, () => {}];
+    },
     usePostActions: () => ({}),
-    useModals: () => ({}),
-    useFetch: () => () => {},
+    useModals: () => ({
+      openModal: (dialog) => {
+        dropDialog = dialog;
+        if (dropChoice === 'cancel') return dialog.onClose();
+        nodes(dialog.children)
+          .find(
+            (n) =>
+              n.type === 'button' &&
+              text(n) ===
+                (dropChoice === 'update'
+                  ? 'Just update the post details'
+                  : 'Reschedule the post')
+          )
+          .props.onClick();
+      },
+      closeAll: () => {},
+    }),
+    useFetch: () => async (url, options) => {
+      dropRequests.push({ url, ...options, body: JSON.parse(options.body) });
+      return { status: 200 };
+    },
     useAddProvider: () => () => {},
     clsx: require('clsx'),
     newDayjs,
     fromUtc,
+    dayjs,
+    Button: 'button',
     SafeImage: 'img',
   }
 );
@@ -667,7 +695,355 @@ for (const label of ['Edit post', 'Duplicate', 'Preview', 'Delete'])
     `Month details preserve ${label}`
   );
 
+// Channels use the same data, action menu and drag payload as the upstream sidebar.
+const launchesFile = 'apps/frontend/src/components/launches/launches.component.tsx';
+const noop = () => {};
+let channelData = Array.from({ length: 7 }, (_, index) => ({
+  id: `channel-${index}`, name: `Account ${index}`, identifier: 'network',
+  picture: '/account.jpg', type: 'social', disabled: false,
+  customer: index > 3 ? { id: 'customer', name: 'Customer' } : undefined,
+}));
+let channelModal;
+let addCalls = 0;
+let reconnectCalls = 0;
+let continueCalls = 0;
+let channelDrop;
+let channelDrag;
+let channelRequest;
+let channelReloads = 0;
+let channelUpdate;
+const dragManager = {};
+const channelProps = {
+  refreshChannel: () => () => reconnectCalls++,
+  continueIntegration: () => () => continueCalls++,
+  update: (reload) => { channelUpdate = reload; },
+};
+const channelComponents = component(launchesFile,
+  ['useChannelGroups', 'MenuGroupComponent', 'MenuComponent', 'ChannelsPopup', 'ChannelsButton', 'LaunchesComponent'], {
+    ...require('lodash'), clsx: require('clsx'),
+    useState: (value) => [value, noop], useMemo: (f) => f(),
+    useCallback: (f) => f, useEffect: noop,
+    useFetch: () => async (url, options) => { channelRequest = { url, ...options }; },
+    useUser: () => ({ totalChannels: 25 }),
+    useVariables: () => ({ linkselfUrl }),
+    useRouter: () => ({}), useSearchParams: () => new URLSearchParams(),
+    useToaster: () => ({}), useFireEvents: () => noop,
+    useT: () => (key, fallback) => fallback || key,
+    useModals: () => ({ openModal: (value) => { channelModal = value; } }),
+    useCookie: (_, fallback) => [fallback, noop],
+    useIntegrationList: () => ({ data: channelData, mutate: noop }),
+    useCalendar: () => ({ integrations: channelData, reloadCalendarView: () => channelReloads++ }),
+    useDragDropManager: () => dragManager,
+    useAddProvider: () => () => addCalls++,
+    useDrag: (f) => { channelDrag = f(); return [{}, noop, noop]; },
+    useDrop: (f) => { channelDrop = f(); return [{}, noop]; },
+    localStorage: { getItem: () => '0' },
+    process: { env: {} },
+    ImageWithFallback: 'channel-image', SafeImage: 'network-image', Menu: 'channel-menu',
+    CalendarContext: { Provider: 'calendar-context' }, DndProvider: 'dnd-context',
+    DNDProvider: 'dnd', Onboarding: 'onboarding', ChannelsAfterPayment: 'after-payment',
+    HubspotInstalled: 'hubspot', CalendarWeekProvider: 'calendar-provider',
+    AddProviderButton: 'add-provider', NewPost: 'new-post', GeneratorComponent: 'generator',
+    Filters: 'filters', Calendar: 'calendar', ScheduledPosts: 'schedule', EditPencil: 'pencil',
+  });
+linkselfUrl = 'https://example.test';
+let channelTree = channelComponents.LaunchesComponent();
+check(!nodes(channelTree).some((n) => n.props.className?.includes('glass-channels ')), 'LinkSelf removes the entire channel rows section');
+check(nodes(channelTree).filter((n) => n.type === channelComponents.ChannelsButton).length === 1, 'LinkSelf has one Channels control for every viewport');
+check(nodes(channelTree).some((n) => n.type === 'new-post'), 'Desktop creation action survives sidebar removal');
+linkselfUrl = '';
+channelTree = channelComponents.LaunchesComponent();
+check(nodes(channelTree).some((n) => n.props.id === 'calendar-channels' && n.type === 'div'), 'Upstream keeps its sidebar and original anchor');
+check(!nodes(channelTree).some((n) => n.type === channelComponents.ChannelsButton), 'Upstream does not acquire the popup toolbar');
+linkselfUrl = 'https://example.test';
+channelTree = channelComponents.ChannelsButton(channelProps);
+check(channelTree.type === 'button' && channelTree.props.id === 'calendar-channels', 'Tour anchor is the keyboard-accessible Channels button');
+check(nodes(channelTree).filter((n) => n.type === 'channel-image').length === 5 && text(channelTree).includes('+ 2'), 'Stack shows five account icons and remaining count');
+check(text(channelTree).includes('Channels') && text(channelTree).includes('7'), 'Button labels the real channel count');
+channelTree.props.onClick();
+check(channelModal.title === 'Channels' && channelModal.closeOnEscape && channelModal.closeOnClickOutside, 'Channels opens the existing dismissible modal');
+check(channelModal.children.props.manager === dragManager, 'Popup reuses the calendar drag manager');
+const popupProps = channelModal.children.props.children.props;
+channelTree = channelComponents.ChannelsPopup(popupProps);
+const groups = nodes(channelTree).filter((n) => n.type === channelComponents.MenuGroupComponent);
+check(groups.length === 2 && groups.some((n) => n.props.group.name === 'Customer'), 'Popup retains customer groups');
+check(groups.every((n) => n.props.compact), 'Popup requests tiles instead of rows');
+nodes(channelTree).find((n) => n.type === 'button').props.onClick();
+check(addCalls === 1, 'Last Add tile invokes the existing Add Channel flow directly');
+let tile = channelComponents.MenuComponent({ ...channelProps, compact: true, integration: { ...channelData[0], disabled: true, refreshNeeded: true }, totalNonDisabledChannels: 6 });
+check(text(tile).includes('Disabled') && text(tile).includes('Needs reconnect'), 'Disabled and disconnected states have visible text');
+check(channelDrag.type === 'menu' && channelDrag.item.id === channelData[0].id, 'Tile retains the channel drag payload');
+check(nodes(tile).some((n) => n.type === 'network-image' && n.props.alt === 'network'), 'Tile includes a named network badge');
+let tileMenu = nodes(tile).find((n) => n.type === 'channel-menu');
+check(tileMenu.props.inChannelsPopup && tileMenu.props.canEnable && !tileMenu.props.canDisable && tileMenu.props.refreshChannel === channelProps.refreshChannel, 'Tile reuses the full menu with enable and refresh capabilities');
+nodes(tile).find((n) => n.type === 'button').props.onClick();
+check(reconnectCalls === 1, 'Reconnect tile action uses the existing handler');
+tile = channelComponents.MenuComponent({ ...channelProps, compact: true, integration: { ...channelData[0], inBetweenSteps: true }, totalNonDisabledChannels: 7 });
+nodes(tile).find((n) => n.type === 'button').props.onClick();
+check(continueCalls === 1, 'Incomplete channel keeps its continuation action');
+const customerGroup = groups.find((n) => n.props.group.id === 'customer');
+channelTree = channelComponents.MenuGroupComponent(customerGroup.props);
+check(nodes(channelTree).some((n) => n.props.className === 'glass-channel-grid'), 'Groups render grids even when their old sidebar was collapsed');
+check(nodes(channelTree).some((n) => n.type === 'button' && n.props['aria-label'].includes('Edit group name')), 'Customer group rename remains keyboard-accessible');
+channelDrop.drop({ id: channelData[0].id });
+check(channelRequest.url === `/integrations/${channelData[0].id}/group` && channelRequest.method === 'PUT' && JSON.parse(channelRequest.body).group === 'customer', 'Dropping a tile uses the existing group endpoint');
+channelData = [{ ...channelData[0], name: 'Renamed', disabled: true }];
+channelTree = channelComponents.ChannelsPopup(popupProps);
+check(channelTree.props.value.integrations[0].name === 'Renamed' && channelTree.props.value.integrations[0].disabled, 'Open popup subscribes to updated integration data');
+channelData = [];
+channelTree = channelComponents.ChannelsButton(channelProps);
+check(text(channelTree) === 'Connect a channel' && channelTree.props.className.includes('glass-action'), 'Empty button is the primary Connect a channel action');
+channelTree = channelComponents.ChannelsPopup(popupProps);
+check(text(channelTree).includes('No channels yet') && nodes(channelTree).some((n) => n.type === 'button'), 'Deleting the last channel leaves a usable Add tile');
+
+// Mount the actual modal and Menu with real focus/click-outside hooks in an offline DOM.
+async function checkChannelDialog() {
+  const { JSDOM } = require('jsdom');
+  const dom = new JSDOM('<!doctype html><button id="opener">Channels</button><div id="root"></div>');
+  const savedGlobals = {};
+  for (const key of ['window', 'document', 'navigator', 'HTMLElement', 'HTMLAnchorElement', 'Document', 'ShadowRoot', 'Element', 'Node']) {
+    savedGlobals[key] = Object.getOwnPropertyDescriptor(global, key);
+    Object.defineProperty(global, key, { configurable: true, value: dom.window[key] });
+  }
+  global.IS_REACT_ACT_ENVIRONMENT = true;
+  const { createRoot } = require('react-dom/client');
+  const { createPortal } = require('react-dom');
+  const { useFocusTrap, useClickOutside } = require('@mantine/hooks');
+  const { useHotkeys } = require('react-hotkeys-hook');
+  const { act } = React;
+  const root = createRoot(document.getElementById('root'));
+  const opener = document.getElementById('opener');
+  opener.focus();
+  let closes = 0;
+  let nestedModal;
+  const hooks = { ...React, document, window, clsx: require('clsx'), useT: () => (_, fallback) => fallback };
+  const { Component: Dialog } = component('apps/frontend/src/components/layout/new-modal.tsx', ['Component'], {
+    ...hooks, useFocusTrap, useHotkeys,
+    useVariables: () => ({ linkselfUrl: 'https://example.test' }),
+    useDecisionModal: () => ({ open: async () => true }),
+    CurrentModalContext: React.createContext({ id: '' }),
+  });
+  const { Menu: RealMenu } = component('apps/frontend/src/components/launches/menu/menu.tsx', ['Menu'], {
+    ...hooks, useClickOutside, createPortal,
+    useFetch: () => async () => { throw new Error('Menu checks must not fetch'); },
+    useRouter: () => ({}), useVariables: () => ({}), useToaster: () => ({}),
+    useCalendar: () => ({ integrations: [{ id: 'one', name: 'Account', identifier: 'network', type: 'social', additionalSettings: true, originalName: 'Original', refreshNeeded: true }] }),
+    useModals: () => ({ openModal: (value) => { nestedModal = value; } }),
+    SettingsModal: () => React.createElement('button', null, 'Settings content'),
+  });
+  const menu = React.createElement(RealMenu, { inChannelsPopup: true, id: 'one', canEnable: false, canDisable: true, canChangeProfilePicture: true, canChangeNickName: true, refreshChannel: noop, onChange: noop, mutate: noop });
+  const modal = { id: 'channels-test', title: 'Channels', children: menu, closeOnEscape: true, closeOnClickOutside: true };
+  const render = async (extra = {}, nested) => {
+    await act(async () => root.render(React.createElement(React.Fragment, null,
+      React.createElement(Dialog, { key: 'channels', isLast: !nested, zIndex: 200, closeModal: () => closes++, modal: { ...modal, ...extra } }),
+      nested && React.createElement(Dialog, { key: 'nested', isLast: true, zIndex: 201, closeModal: noop, modal: { ...nested, id: 'nested' } })
+    )));
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 5)));
+  };
+  const key = async (node, key, extra = {}) => {
+    await act(async () => node.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key, code: key, bubbles: true, cancelable: true, ...extra })));
+    await act(async () => node.dispatchEvent(new dom.window.KeyboardEvent('keyup', { key, code: key, bubbles: true, ...extra })));
+  };
+  try {
+    await render();
+    const dialog = document.querySelector('[role="dialog"]');
+    check(dialog && dialog.contains(document.activeElement), 'Modal initially focuses inside the dialog');
+    const trigger = dialog.querySelector('[aria-haspopup="menu"]');
+    trigger.focus();
+    await key(trigger, 'Tab');
+    check(document.activeElement === dialog.querySelector('button'), 'Tab from the last control wraps within the dialog');
+    await key(document.activeElement, 'Tab', { shiftKey: true });
+    check(document.activeElement === trigger, 'Shift Tab wraps to the last control');
+    await key(trigger, 'Enter');
+    const dropdown = dialog.querySelector('[role="menu"]');
+    check(dropdown?.parentElement.hasAttribute('data-modal-overlays'), 'Menu is portalled to the modal overlay, outside the tile grid');
+    check(dropdown.contains(document.activeElement), 'Keyboard opening focuses the first menu action');
+    for (const label of ['Additional Settings', 'Reconnect channel', 'Disable Channel', 'Delete', 'Move / add to group', 'Rename channel', 'Edit Time Slots']) {
+      check(dropdown.textContent.includes(label), `Popup menu preserves ${label}`);
+    }
+    await key(document.activeElement, 'ArrowDown');
+    check(document.activeElement === dropdown.querySelectorAll('[role="menuitem"]')[1], 'Arrow keys navigate the existing action menu');
+    await key(document.activeElement, 'Escape');
+    check(!dialog.querySelector('[role="menu"]') && closes === 0 && document.activeElement === trigger, 'Escape closes the menu first and restores its trigger');
+    await act(async () => trigger.click());
+    const settings = Array.from(dialog.querySelectorAll('[role="menuitem"]')).find((n) => n.textContent.includes('Additional Settings'));
+    await act(async () => settings.click());
+    check(nestedModal?.title === 'Additional Settings' && !dialog.querySelector('[role="menu"]'), 'Existing settings action opens its existing modal');
+    await render({}, nestedModal);
+    const nestedDialog = document.querySelectorAll('[role="dialog"]')[1];
+    check(nestedDialog.contains(document.activeElement), 'Nested channel settings owns focus above the Channels popup');
+    const nestedButtons = nestedDialog.querySelectorAll('button');
+    nestedButtons[nestedButtons.length - 1].focus();
+    await key(document.activeElement, 'Tab');
+    check(document.activeElement === nestedButtons[0], 'Only the top dialog traps Tab while channel settings is open');
+    await render();
+    check(document.activeElement === trigger, 'Closing nested settings restores focus to its channel menu trigger');
+    await key(trigger, 'Escape');
+    check(closes === 1, 'Escape closes the Channels dialog');
+    await act(async () => document.querySelector('[aria-label="Close dialog"]').click());
+    check(closes === 2, 'Backdrop closes the Channels dialog');
+    await render({ closeOnEscape: false, closeOnClickOutside: false });
+    await key(trigger, 'Escape');
+    await act(async () => document.querySelector('[aria-label="Close dialog"]').click());
+    check(closes === 2, 'Other LinkSelf dialogs retain explicit dismissal protections');
+    await act(async () => root.unmount());
+    check(document.activeElement === opener, 'Closing the dialog returns focus to the toolbar button');
+  } finally {
+    await act(async () => root.unmount());
+    dom.window.close();
+    for (const [key, descriptor] of Object.entries(savedGlobals)) {
+      if (descriptor) Object.defineProperty(global, key, descriptor);
+      else delete global[key];
+    }
+    delete global.IS_REACT_ACT_ENVIRONMENT;
+  }
+}
+
 (async () => {
+  // Invoke the actual drop callback, including its optimistic update and PUT.
+  const runDrop = async ({
+    display = 'month',
+    source,
+    target,
+    state = 'DRAFT',
+    interval = false,
+  }) => {
+    const dragged = { ...post('dragged', source), state };
+    const changes = [];
+    dropRequests.length = 0;
+    dropDialog = undefined;
+    calendar = {
+      ...calendar,
+      display,
+      posts: [dragged],
+      postDates: new Map([[dragged, fromUtc(source)]]),
+      currentHour: now().startOf('hour'),
+      changeDate: (id, date) => changes.push({ id, date }),
+      reloadCalendarView: () => {},
+    };
+    CalendarColumn({ getDate: target });
+    // The drag payload's date is the source cell, not the post's time.
+    await dropSpec.drop({
+      id: dragged.id,
+      interval,
+      date: fromUtc(source).endOf('day'),
+    });
+    return changes;
+  };
+  for (const mode of ['', 'https://example.test']) {
+    linkselfUrl = mode;
+    const label = mode ? 'LinkSelf' : 'upstream';
+    for (const [source, target, local, utc] of [
+      [
+        '2026-11-20T15:00:00Z',
+        '2026-11-21',
+        '2026-11-21T10:00:00.000',
+        '2026-11-21T15:00:00',
+      ],
+      [
+        '2026-11-20T15:37:42.123Z',
+        '2026-11-22',
+        '2026-11-22T10:37:42.123',
+        '2026-11-22T15:37:42',
+      ],
+      [
+        '2026-11-20T02:15:00Z',
+        '2026-11-22',
+        '2026-11-22T21:15:00.000',
+        '2026-11-23T02:15:00',
+      ],
+      [
+        '2026-11-20T15:00:00Z',
+        '2027-03-14',
+        '2027-03-14T10:00:00.000',
+        '2027-03-14T14:00:00',
+      ],
+    ]) {
+      const changes = await runDrop({
+        source,
+        target: newDayjs(target).endOf('day'),
+      });
+      check(
+        changes.length === 1 &&
+          changes[0].id === 'dragged' &&
+          changes[0].date.format('YYYY-MM-DDTHH:mm:ss.SSS') === local,
+        `${label}: month optimistic date preserves local time on ${target}`
+      );
+      check(
+        dropRequests.length === 1 &&
+          dropRequests[0].url === '/posts/dragged/date' &&
+          dropRequests[0].method === 'PUT' &&
+          dropRequests[0].body.date === utc,
+        `${label}: month PUT uses preserved time and target timezone offset on ${target}`
+      );
+    }
+    for (const display of ['day', 'week']) {
+      const target = newDayjs('2026-11-21T16:00:00');
+      const changes = await runDrop({
+        display,
+        source: '2026-11-20T15:37:42Z',
+        target,
+      });
+      check(
+        changes[0].date.valueOf() === target.valueOf() &&
+          dropRequests[0].body.date === '2026-11-21T21:00:00',
+        `${label}: ${display} drop still uses its target slot time`
+      );
+    }
+    for (const target of [
+      newDayjs('2026-11-03').endOf('day'),
+      now().endOf('day'),
+    ]) {
+      const changes = await runDrop({ source: '2026-11-20T15:00:00Z', target });
+      check(
+        changes.length === 0 && dropRequests.length === 0 && !dropDialog,
+        `${label}: preserved time in a past hour is rejected before changes or requests`
+      );
+    }
+    for (const hour of [14, 18]) {
+      const source = newDayjs(`2026-11-20T${hour}:30:00`).utc().format();
+      await runDrop({ source, target: now().endOf('day') });
+      check(
+        dropRequests.length === 1 &&
+          fromUtc(dropRequests[0].body.date).hour() === hour,
+        `${label}: today's current/future hour follows the existing allowed-slot rule`
+      );
+    }
+    const changes = await runDrop({
+      source: '2026-11-20T15:00:00Z',
+      target: newDayjs('2026-11-21').endOf('day'),
+      interval: true,
+    });
+    check(
+      changes.length === 0 &&
+        dropRequests[0].body.date === '2026-11-21T15:00:00',
+      `${label}: recurring month drop preserves time without an optimistic single-post update`
+    );
+  }
+  linkselfUrl = 'https://example.test';
+  for (const choice of ['schedule', 'update', 'cancel']) {
+    dropChoice = choice;
+    const changes = await runDrop({
+      source: '2026-11-20T15:00:00Z',
+      target: newDayjs('2026-11-21').endOf('day'),
+      state: 'PUBLISHED',
+    });
+    check(
+      text(dropDialog.children).includes('21/11/2026 10:00'),
+      `${choice}: republish confirmation shows the preserved time`
+    );
+    check(
+      choice === 'cancel'
+        ? changes.length === 0 && dropRequests.length === 0
+        : changes.length === 1 &&
+            dropRequests[0].body.action === choice &&
+            dropRequests[0].body.date === '2026-11-21T15:00:00' &&
+            dropRequests[0].body.republish ===
+              (choice === 'schedule' ? true : undefined),
+      `${choice}: existing republish choice and cancellation behavior is retained`
+    );
+  }
+
   const date = newDayjs('2026-11-07T12:00:00');
   await NewPost({ date }).props.onClick();
   check(requests === 0, 'Selected-day creation adds no request');
@@ -766,6 +1142,9 @@ for (const label of ['Edit post', 'Duplicate', 'Preview', 'Delete'])
     closed.length === 1 && closed[0] === 'post-details-detail' && reloads === 1,
     'Successful DELETE refreshes calendar and closes only its details modal'
   );
+  await customerGroup.props.update(true);
+  check(channelUpdate === false && channelReloads === 1, 'Channel deletion reloads posts without unmounting the shared calendar drag manager');
+  await checkChannelDialog();
   console.log(`Glass calendar behavior checks: ${count} passed, 0 failed.`);
 })().catch((error) => {
   console.error(error);

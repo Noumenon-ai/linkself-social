@@ -15,6 +15,8 @@ import { Button } from '@gitroom/react/form/button';
 import { useHotkeys } from 'react-hotkeys-hook';
 import clsx from 'clsx';
 import { EventEmitter } from 'events';
+import { useFocusTrap } from '@mantine/hooks';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 interface OpenModalInterface {
   title?: any;
@@ -106,6 +108,17 @@ export const Component: FC<{
   modal: { id: string } & OpenModalInterface;
 }> = memo(({ isLast, modal, closeModal, zIndex }) => {
   const decision = useDecisionModal();
+  const { linkselfUrl } = useVariables();
+  const trapFocus = useFocusTrap(
+    !!linkselfUrl && isLast && !modal.removeLayout
+  );
+  useEffect(() => {
+    if (!linkselfUrl || modal.removeLayout) return;
+    const previous = document.activeElement as HTMLElement | null;
+    return () => {
+      if (previous?.isConnected) previous.focus();
+    };
+  }, [linkselfUrl, modal.removeLayout]);
   const closeModalFunction = useCallback(async () => {
     if (modal.askClose) {
       const open = await decision.open();
@@ -126,11 +139,12 @@ export const Component: FC<{
   useHotkeys(
     'Escape',
     () => {
-      if (isLast) {
+      if (isLast && (!linkselfUrl || modal.closeOnEscape !== false)) {
         closeModalFunction();
       }
     },
-    [isLast, closeModalFunction]
+    { enableOnFormTags: !!linkselfUrl },
+    [isLast, closeModalFunction, linkselfUrl, modal.closeOnEscape]
   );
 
   if (modal.removeLayout) {
@@ -180,7 +194,10 @@ export const Component: FC<{
     <CurrentModalContext.Provider value={{ id: modal.id }}>
       <div
         aria-label="Close dialog"
-        onClick={closeModalFunction}
+        onClick={() => {
+          if (!linkselfUrl || (isLast && modal.closeOnClickOutside !== false))
+            closeModalFunction();
+        }}
         style={{ zIndex }}
         className={clsx(
           'fixed flex left-0 top-0 min-w-full min-h-full bg-popup transition-all animate-fadeIn overflow-y-auto text-newTextColor',
@@ -207,6 +224,11 @@ export const Component: FC<{
             )}
           >
             <div
+              ref={trapFocus}
+              role={linkselfUrl ? 'dialog' : undefined}
+              aria-modal={linkselfUrl ? true : undefined}
+              aria-labelledby={linkselfUrl ? `${modal.id}-title` : undefined}
+              tabIndex={linkselfUrl ? -1 : undefined}
               className={clsx(
                 !modal.removeLayout &&
                   'gap-[40px] p-[32px] mobile:gap-[24px] mobile:p-[16px]',
@@ -225,7 +247,10 @@ export const Component: FC<{
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center">
-                <div className="glass-modal-title text-[24px] mobile:text-[20px] mobile:pe-[28px] font-[600] flex-1">
+                <div
+                  id={`${modal.id}-title`}
+                  className="glass-modal-title text-[24px] mobile:text-[20px] mobile:pe-[28px] font-[600] flex-1"
+                >
                   {modal.title}
                 </div>
                 {typeof modal.withCloseButton === 'undefined' ||
@@ -263,6 +288,9 @@ export const Component: FC<{
               >
                 {RenderComponent}
               </div>
+              {linkselfUrl && (
+                <div className="glass-modal-overlays" data-modal-overlays />
+              )}
             </div>
           </div>
         </div>

@@ -9,5 +9,5 @@
   "imagery": "product-ui",
   "motion": "minimal",
   "signature": "A floating rounded glass frame over fixed azure light bands, with an icon rail, date tiles and a schedule edge.",
-  "rationale": "Figtree, azure actions and inset controls share the approved LinkSelf identity. Calendar date ticks and the schedule edge use the same channel colors and loaded post data. Theme overrides are gated to LinkSelf; upstream installs and native network simulations retain their appearance."
+  "rationale": "Figtree, azure actions and inset controls share the approved LinkSelf identity. Calendar date ticks and the schedule edge use the same channel colors and loaded post data. A compact Channels pill opens round account tiles in a Glass popup, preserving channel actions and customer groups. Theme overrides are gated to LinkSelf; upstream installs and native network simulations retain their appearance."
 }

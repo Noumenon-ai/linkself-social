@@ -226,6 +226,18 @@ async function main() {
     'grid-column',
     '1/-1'
   );
+  ruleHas('.glass-channel-grid', 'grid-template-columns', 'repeat(auto-fill, minmax(104px, 1fr))');
+  ruleHas('.glass-channel-image', 'border-radius', 'var(--radius-pill)');
+  ruleHas('.glass-channels-button', 'min-height', '44px');
+  ruleHas('.glass-channels-button', 'border-radius', 'var(--radius-pill)');
+  ruleHas('.glass-channel-name', 'text-overflow', 'ellipsis');
+  ruleHas('.glass-channel-name', 'white-space', 'nowrap');
+  ruleHas('.glass-modal-overlays', 'position', 'fixed');
+  ruleHas('.glass-modal-overlays', 'z-index', '1');
+  ruleHas('.glass-channel-menu-dropdown', 'max-height', 'calc(100dvh - 24px)');
+  ruleHas('.glass-channel-menu-dropdown', 'max-width', 'calc(100vw - 24px)');
+  ruleHas('.glass-channel-menu-dropdown', 'pointer-events', 'auto');
+  ruleHas('.glass-channel-menu-dropdown', 'overflow-y', 'auto');
   const inputSource = fs.readFileSync(
     'libraries/react-shared-libraries/src/form/input.tsx',
     'utf8'

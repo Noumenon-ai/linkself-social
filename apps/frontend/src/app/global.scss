@@ -1174,29 +1174,167 @@ html[data-linkself-theme='glass-frame'] {
     min-height: 600px;
     min-width: 0;
   }
-  .glass-channels {
-    position: static;
-    grid-column: 1;
-    grid-row: 2;
-    width: 100%;
+  .glass-calendar-actions {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
   }
-  .glass-channels > div {
-    position: static;
-    background: transparent;
-    height: auto;
-    max-height: none;
-    padding: 24px;
+  .glass-channels-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 16px;
+    min-height: 44px;
+    max-width: 100%;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 600;
   }
-  .glass-channels .group-\[\.sidebar\]\:hidden {
-    display: block;
+  .glass-channel-stack {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
-  .glass-channels > div > div:first-child > div {
-    display: none;
+  .glass-channel-stack > * {
+    border: 2px solid var(--inset);
+    border-radius: var(--radius-pill);
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
   }
-  .glass-channels .group-\[\.sidebar\]\:w-\[44px\] {
+  .glass-channel-stack > * + * {
+    margin-inline-start: -8px;
+  }
+  .glass-channel-stack > span {
     width: auto;
-    margin: 0;
+    min-width: 24px;
+    padding-inline: 4px;
+    background: var(--inset);
+    font-size: 13px;
+  }
+  .glass-channels-popup {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .glass-channel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 12px;
+    min-width: 0;
+  }
+  .glass-channel-group[data-drop-active] {
+    outline: 3px solid var(--focus) !important;
+    outline-offset: 2px;
+  }
+  .glass-channel-group-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .glass-channel-group-heading h3 {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+  .glass-channel-group-heading button {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .glass-channel-tile,
+  .glass-channel-add {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    min-width: 0;
+    padding: 12px 8px;
+    border-radius: var(--radius-small);
+    background: var(--inset);
+  }
+  .glass-channel-portrait {
+    position: relative;
+    margin-top: 24px;
+    cursor: move;
+  }
+  .glass-channel-image {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-pill);
+    object-fit: cover;
+  }
+  .glass-channel-badge {
+    position: absolute;
+    bottom: -4px;
+    inset-inline-end: -4px;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    background: var(--popover);
+  }
+  .glass-channel-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .glass-channel-state,
+  .glass-channel-reconnect {
+    font-size: 13px;
+    color: var(--warning);
+    text-align: center;
+  }
+  .glass-channel-reconnect {
+    min-height: 44px;
+    text-decoration: underline;
+  }
+  .glass-channel-add {
+    justify-content: center;
+    min-height: 132px;
+    border: 1px dashed var(--accent);
+    color: var(--link);
+    font-size: 14px;
+  }
+  .glass-channel-menu {
+    position: absolute;
+    top: 0;
+    inset-inline-end: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .glass-modal-overlays {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .glass-channel-menu-dropdown {
+    pointer-events: auto;
+    max-height: calc(100dvh - 24px);
+    max-width: calc(100vw - 24px);
+    overflow-y: auto;
+    white-space: normal;
+    background: var(--popover);
+    border-radius: var(--radius-small);
+  }
+  .glass-channel-menu-dropdown [role='menuitem'] {
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .glass-channel-menu-dropdown [role='menuitem']:hover,
+  .glass-channel-add:hover {
+    background: var(--tile-hover);
   }
   .glass-busy-label {
     display: inline;
