@@ -489,7 +489,7 @@ export const Filters = () => {
       )}
       <div
         className={clsx(
-          'flex flex-row p-[4px] border border-newTableBorder rounded-[8px] text-[14px] font-[500] mobile:order-1 mobile:flex-1 mobile:overflow-x-auto',
+          'glass-view-switch flex flex-row p-[4px] border border-newTableBorder rounded-[8px] text-[14px] font-[500] mobile:order-1 mobile:flex-1 mobile:overflow-x-auto',
           isListView && 'hidden mobile:flex'
         )}
       >
