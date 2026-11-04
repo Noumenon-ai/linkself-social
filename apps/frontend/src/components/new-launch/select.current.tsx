@@ -215,7 +215,7 @@ export const IsGlobal: FC<{ id: string }> = ({ id }) => {
         'no_longer_global_mode',
         'No longer in global mode'
       )}
-      className="w-[8px] h-[8px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] -top-[1px] -end-[3px] absolute rounded-full"
+      className="w-[8px] h-[8px] glass-accent bg-[var(--studio-accent,#FC69FF)] -top-[1px] -end-[3px] absolute rounded-full"
     />
   );
 };

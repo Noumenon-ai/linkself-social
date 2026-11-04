@@ -377,7 +377,7 @@ const McpSection = ({
           {officialConnectors && (
             <>
               <a
-                className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
                 href={mcpConnectorUrls.Claude}
                 target="_blank"
               >
@@ -385,7 +385,7 @@ const McpSection = ({
                 {t('add_to_claude', 'Add to Claude')}
               </a>
               <a
-                className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
                 href={mcpConnectorUrls.ChatGPT}
                 target="_blank"
               >
@@ -396,7 +396,7 @@ const McpSection = ({
           )}
           {!hideUpstream && (
             <a
-              className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+              className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
               href="https://docs.postiz.com/mcp/introduction"
               target="_blank"
             >
@@ -420,7 +420,7 @@ const McpSection = ({
                   className={clsx(
                     'cursor-pointer px-[14px] h-[36px] text-[13px] font-[500] rounded-[8px] transition-colors',
                     tab === m
-                      ? 'blueprint-accent bg-[var(--studio-accent,#612BD3)] text-white'
+                      ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
                       : 'bg-btnSimple text-customColor18 hover:bg-boxHover hover:text-textColor'
                   )}
                   onClick={() => setTab(m)}
@@ -453,7 +453,7 @@ const McpSection = ({
               {officialConnectorClients.map((client) => (
                 <a
                   key={client}
-                  className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[8px]"
+                  className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[8px]"
                   href={mcpConnectorUrls[client]}
                   target="_blank"
                 >
@@ -487,7 +487,7 @@ const McpSection = ({
                 className={clsx(
                   'cursor-pointer px-[14px] h-[36px] text-[13px] font-[500] rounded-[8px] transition-colors flex items-center gap-[8px]',
                   activeClient === client
-                    ? 'blueprint-accent bg-[var(--studio-accent,#612BD3)] text-white'
+                    ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
                     : 'bg-btnSimple text-customColor18 hover:bg-boxHover hover:text-textColor'
                 )}
                 onClick={() =>
@@ -552,7 +552,7 @@ const McpSection = ({
             )}
             {activeClient === 'Claude' && officialConnectors && (
               <a
-                className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
                 href={mcpConnectorUrls.Claude}
                 target="_blank"
               >
@@ -562,7 +562,7 @@ const McpSection = ({
             )}
             {activeClient === 'ChatGPT' && officialConnectors && (
               <a
-                className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
                 href={mcpConnectorUrls.ChatGPT}
                 target="_blank"
               >
@@ -572,7 +572,7 @@ const McpSection = ({
             )}
             {activeClient === 'Grok Bot' && officialConnectors && (
               <a
-                className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
                 href={mcpConnectorUrls['Grok Bot']}
                 target="_blank"
               >
@@ -659,7 +659,7 @@ const CliSection = ({ apiKey }: { apiKey: string }) => {
         </div>
         <div className="flex flex-wrap gap-[6px] shrink-0 pt-[2px]">
           <a
-            className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+            className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
             href="https://docs.postiz.com/cli/introduction"
             target="_blank"
           >
@@ -677,7 +677,7 @@ const CliSection = ({ apiKey }: { apiKey: string }) => {
               className={clsx(
                 'cursor-pointer px-[14px] h-[36px] text-[13px] font-[500] rounded-[8px] transition-colors',
                 mode === m
-                  ? 'blueprint-accent bg-[var(--studio-accent,#612BD3)] text-white'
+                  ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
                   : 'bg-btnSimple text-customColor18 hover:bg-boxHover hover:text-textColor'
               )}
               onClick={() => setMode(m)}
@@ -817,7 +817,7 @@ const PublicApiContent = () => {
           <div className="flex flex-wrap gap-[6px] shrink-0 pt-[2px]">
             {!hideUpstream && (
               <a
-                className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
                 href="https://docs.postiz.com/public-api"
                 target="_blank"
               >
@@ -827,7 +827,7 @@ const PublicApiContent = () => {
             )}
             {!hideUpstream && (
               <a
-                className="cursor-pointer px-[16px] h-[36px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
                 href="https://www.npmjs.com/package/n8n-nodes-postiz"
                 target="_blank"
               >

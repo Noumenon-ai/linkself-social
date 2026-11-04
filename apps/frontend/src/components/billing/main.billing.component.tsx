@@ -899,7 +899,7 @@ export const MainBillingComponent: FC<{
             )}
           >
             {t('billing_yearly', 'Yearly')}
-            <div className="blueprint-accent bg-[var(--studio-accent,#AA0FA4)] text-white text-[12px] px-[6px] rounded-[4px]">
+            <div className="glass-accent bg-[var(--studio-accent,#AA0FA4)] text-white text-[12px] px-[6px] rounded-[4px]">
               {t('billing_20_percent_off', '20% Off')}
             </div>
           </div>

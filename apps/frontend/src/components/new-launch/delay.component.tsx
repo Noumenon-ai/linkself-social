@@ -89,7 +89,7 @@ export const DelayComponent: FC<{
         }
         className={clsx(
           'cursor-pointer flex items-center gap-[4px]',
-          currentDelay > 0 && 'blueprint-accent bg-[var(--studio-accent,#D82D7E)] text-white rounded-full'
+          currentDelay > 0 && 'glass-accent bg-[var(--studio-accent,#D82D7E)] text-white rounded-full'
         )}
       >
         <DelayIcon />
@@ -103,7 +103,7 @@ export const DelayComponent: FC<{
                 key={option.value}
                 className={clsx(
                   'h-[32px] flex items-center justify-center rounded-[4px] cursor-pointer hover:bg-newBgColor text-[13px]',
-                  currentDelay === option.value && 'blueprint-accent bg-[var(--studio-accent,#612BD3)] text-white hover:bg-[var(--studio-hover,#612BD3)]'
+                  currentDelay === option.value && 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white hover:bg-[var(--studio-hover,#612BD3)]'
                 )}
               >
                 {option.label}
@@ -133,7 +133,7 @@ export const DelayComponent: FC<{
                     setCustomValue('');
                   }
                 }}
-                className="h-[32px] px-[10px] rounded-[4px] blueprint-accent bg-[var(--studio-accent,#612BD3)] text-white text-[12px] font-[600] hover:bg-[var(--studio-hover,#612BD3cc)]"
+                className="h-[32px] px-[10px] rounded-[4px] glass-accent bg-[var(--studio-accent,#612BD3)] text-white text-[12px] font-[600] hover:bg-[var(--studio-hover,#612BD3cc)]"
               >
                 Set
               </button>

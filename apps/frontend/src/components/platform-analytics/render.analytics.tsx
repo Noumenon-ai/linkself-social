@@ -59,7 +59,7 @@ const AnalyticsCard: FC<{
   const hasDataPoints = item.data.length >= 1;
 
   return (
-    <div className="blueprint-frame group relative">
+    <div className="glass-frame group relative">
       <div
         className={`
           flex flex-col h-full
@@ -77,7 +77,7 @@ const AnalyticsCard: FC<{
             <div
               className={`
                 w-[8px] h-[8px] rounded-full
-                ${color === 'purple' ? 'blueprint-accent bg-[var(--studio-accent,#612bd3)]' : ''}
+                ${color === 'purple' ? 'glass-accent bg-[var(--studio-accent,#612bd3)]' : ''}
                 ${color === 'green' ? 'bg-[var(--studio-success,#32d583)]' : ''}
                 ${color === 'blue' ? 'bg-[var(--studio-hover,#1d9bf0)]' : ''}
               `}
@@ -154,7 +154,7 @@ const EmptyState: FC<{
       {refreshNeeded && (
         <button
           onClick={onRefresh}
-          className="inline-flex items-center gap-[6px] px-[16px] py-[8px] text-[14px] font-medium text-white blueprint-accent bg-[var(--studio-accent,#612bd3)] hover:bg-[var(--studio-hover,#5023b8)] rounded-[8px] transition-colors"
+          className="inline-flex items-center gap-[6px] px-[16px] py-[8px] text-[14px] font-medium text-white glass-accent bg-[var(--studio-accent,#612bd3)] hover:bg-[var(--studio-hover,#5023b8)] rounded-[8px] transition-colors"
         >
           <svg
             width="16"

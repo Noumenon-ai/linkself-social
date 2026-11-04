@@ -15,20 +15,20 @@ export const Chart: FC<{
   const ref = useRef<any>(null);
   const chart = useRef<null | DrawChart>(null);
   useEffect(() => {
-    const blueprint = document.documentElement.dataset.linkselfTheme === 'blueprint';
+    const glass = document.documentElement.dataset.linkselfTheme === 'glass-frame';
     const tokens = getComputedStyle(document.body);
     const studioColor = (name: string) => tokens.getPropertyValue(`--studio-${name}`).trim();
     const gradient = ref.current
       .getContext('2d')
       .createLinearGradient(0, 0, 0, ref.current.height);
-    gradient.addColorStop(0, blueprint ? studioColor('marker') : 'rgba(114, 118, 137, 1)'); // Start color with some transparency
-    gradient.addColorStop(1, blueprint ? studioColor('panel') : 'rgb(9, 11, 19, 1)');
+    gradient.addColorStop(0, glass ? studioColor('chart') : 'rgba(114, 118, 137, 1)'); // Start color with some transparency
+    gradient.addColorStop(1, glass ? studioColor('panel') : 'rgb(9, 11, 19, 1)');
     chart.current = new DrawChart(ref.current!, {
-      type: 'line',
+      type: glass ? 'bar' : 'line',
       options: {
         maintainAspectRatio: false,
         responsive: true,
-        ...(blueprint && { animation: false as const }),
+        ...(glass && { animation: false as const }),
         layout: {
           padding: {
             left: 0,
@@ -56,10 +56,11 @@ export const Chart: FC<{
         labels: list.map((row) => newDayjs(row.date).format('DD/MM/YYYY')),
         datasets: [
           {
-            borderColor: blueprint ? studioColor('accent') : '#fff',
+            borderColor: glass ? studioColor('accent') : '#fff',
             // @ts-ignore
             label: list?.[0]?.totalForks ? 'Forks by date' : 'Stars by date',
-            backgroundColor: gradient,
+            backgroundColor: glass ? list.map((_, index) => studioColor(index === list.length - 1 ? 'accent' : 'chart')) : gradient,
+            ...(glass && { borderRadius: 14, borderWidth: 0 }),
             fill: true,
             // @ts-ignore
             data: list.map((row) => row.totalForks || row.totalStars),

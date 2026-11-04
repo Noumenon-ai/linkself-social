@@ -101,7 +101,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
             <ContinueProvider />
             <div
               className={clsx(
-                'blueprint-shell flex flex-col min-h-screen min-w-screen text-newTextColor p-[12px] mobile:p-[8px] mobile:pb-[80px]',
+                'glass-shell flex flex-col min-h-screen min-w-screen text-newTextColor p-[12px] mobile:p-[8px] mobile:pb-[80px]',
                 jakartaSans.className
               )}
             >
@@ -111,20 +111,20 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
               ) : (
                 <>
                   <AnnouncementBanner />
-                  <div className="flex-1 flex gap-[8px] mobile:gap-0">
+                  <div className="glass-shell-layout flex-1 flex gap-[8px] mobile:gap-0">
                     <Support />
                     {menuOpen && (
                       <div
                         className="hidden mobile:block fixed inset-0 bg-newBackdrop opacity-60 z-[490]"
-                        onClick={() => setMenuOpen(false)}
+                        onClick={() => !linkselfUrl && setMenuOpen(false)}
                       />
                     )}
                     <div
                       className={clsx(
-                        'blueprint-rail blueprint-frame flex flex-col bg-newBgColorInner w-[80px] rounded-[12px] mobile:fixed mobile:top-0 mobile:bottom-0 mobile:start-0 mobile:z-[491] mobile:rounded-none mobile:overflow-y-auto mobile:overflow-x-hidden',
+                        'glass-rail glass-frame flex flex-col bg-newBgColorInner w-[80px] rounded-[12px] mobile:fixed mobile:top-0 mobile:bottom-0 mobile:start-0 mobile:z-[491] mobile:rounded-none mobile:overflow-y-auto mobile:overflow-x-hidden',
                         !menuOpen && 'mobile:hidden'
                       )}
-                      onClick={() => setMenuOpen(false)}
+                      onClick={() => !linkselfUrl && setMenuOpen(false)}
                     >
                       <div
                         id="left-menu"
@@ -141,9 +141,9 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="blueprint-workspace blueprint-frame flex-1 min-w-0 bg-newBgLineColor rounded-[12px] overflow-hidden flex flex-col gap-[1px] blurMe">
+                    <div className="glass-workspace glass-frame flex-1 min-w-0 bg-newBgLineColor rounded-[12px] overflow-hidden flex flex-col gap-[1px] blurMe">
                       {/* relative: the notifications popup spans this bar on phones */}
-                      <div className="blueprint-topbar relative flex bg-newBgColorInner h-[80px] mobile:h-[64px] px-[20px] mobile:px-[12px] gap-[12px] items-center">
+                      <div className="glass-topbar relative flex bg-newBgColorInner h-[80px] mobile:h-[64px] px-[20px] mobile:px-[12px] gap-[12px] items-center">
                         <button
                           className="hidden mobile:flex items-center justify-center w-[36px] h-[36px] -ms-[6px] rounded-[8px] text-textItemBlur hover:text-newTextColor hover:bg-boxFocused"
                           onClick={() => setMenuOpen(true)}
@@ -164,8 +164,18 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                             />
                           </svg>
                         </button>
-                        <div className="blueprint-title text-[24px] mobile:text-[20px] font-[600] flex flex-1 min-w-0">
-                          <Title />
+                        <div className="glass-heading flex-1 min-w-0">
+                          {linkselfUrl && (
+                            <p className="glass-eyebrow">LinkSelf Social</p>
+                          )}
+                          <div className="glass-title text-[24px] mobile:text-[20px] font-[600] flex flex-1 min-w-0">
+                            <Title />
+                          </div>
+                          {linkselfUrl && pathname.startsWith('/launches') && (
+                            <p className="glass-subtitle">
+                              Plan and publish your social posts.
+                            </p>
+                          )}
                         </div>
                         <div className="flex gap-[20px] mobile:gap-[14px] mobile:items-center text-textItemBlur">
                           <StreakComponent />
@@ -188,9 +198,24 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                           <NotificationComponent />
                         </div>
                       </div>
-                      <div className="flex flex-1 min-w-0 gap-[1px] mobile:flex-col">
+                      <div className="glass-workspace-content flex flex-1 min-w-0 gap-[1px] mobile:flex-col">
                         {children}
                       </div>
+                      {linkselfUrl && (
+                        <footer className="glass-footer">
+                          <span>LinkSelf Social</span>
+                          <nav aria-label="Footer">
+                            <a
+                              href={`${linkselfUrl.replace(/\/$/, '')}/privacy`}
+                            >
+                              Privacy
+                            </a>
+                            <a href={`${linkselfUrl.replace(/\/$/, '')}/terms`}>
+                              Terms
+                            </a>
+                          </nav>
+                        </footer>
+                      )}
                     </div>
                   </div>
                 </>

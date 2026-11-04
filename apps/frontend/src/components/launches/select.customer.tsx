@@ -95,7 +95,7 @@ export const SelectCustomer: FC<{
                 )}
               >
                 {selected && (
-                  <div className="w-[12px] h-[12px] rounded-full blueprint-accent bg-[var(--studio-accent,#FC69FF)]" />
+                  <div className="w-[12px] h-[12px] rounded-full glass-accent bg-[var(--studio-accent,#FC69FF)]" />
                 )}
               </div>
             </div>

@@ -38,11 +38,11 @@
     --facebook-bg-comment: #333334;
     --instagram-bg: #0b1014;
     --tiktok-item-bg: #2a2a2a;
-    --tiktok-item-icon-bg: #FFF;
-    --youtube-bg: #0F0F0F;
-    --youtube-button: #F1F1F1;
+    --tiktok-item-icon-bg: #fff;
+    --youtube-bg: #0f0f0f;
+    --youtube-button: #f1f1f1;
     --youtube-action-color: #272727;
-    --youtube-svg-border: #A0A0A0;
+    --youtube-svg-border: #a0a0a0;
   }
   .light,
   .light .network-preview {
@@ -89,12 +89,12 @@
     --facebook-bg: #fff;
     --facebook-bg-comment: #f6f6f6;
     --instagram-bg: #fff;
-    --tiktok-item-bg: #EEF1F0;
+    --tiktok-item-bg: #eef1f0;
     --tiktok-item-icon-bg: #454645;
-    --youtube-bg: #FFF;
+    --youtube-bg: #fff;
     --youtube-button: #000;
-    --youtube-action-color: #F1F1F1;
-    --youtube-svg-border: #1A1A1A;
+    --youtube-action-color: #f1f1f1;
+    --youtube-svg-border: #1a1a1a;
   }
 }
 
@@ -243,48 +243,79 @@
   }
 }
 
-// Blueprint is selected on the server, including auth and public post previews.
-// Both stored modes resolve identically. Network mocks retain their own tokens.
-html[data-linkself-theme='blueprint'] body,
-html[data-linkself-theme='blueprint'] :is(.dark, .light):not(.network-preview, .network-preview *) {
-  --studio-ground-rgb: 27 58 92;
-  --studio-panel-rgb: 20 48 73;
-  --studio-line-rgb: 234 242 250;
-  --studio-text-rgb: 234 242 250;
-  --studio-muted-rgb: 169 193 217;
-  --studio-hover-rgb: 46 83 121;
-  --studio-accent-rgb: 255 122 69;
-  --studio-ink-rgb: 18 22 28;
+// Glass frame is selected on the server; upstream and network mocks keep their themes.
+html[data-linkself-theme='glass-frame'] body,
+html[data-linkself-theme='glass-frame']
+  :is(.dark, .light):not(.network-preview, .network-preview *) {
+  --page: #10151F;
+  --frame: rgba(31, 40, 54, 0.92);
+  --tile: rgba(52, 66, 84, 0.8);
+  --tile-hover: #3B4B60;
+  --inset: #222E40;
+  --popover: #273449;
+  --text: #F4F7FC;
+  --muted: #BBC7D8;
+  --link: #85C2FF;
+  --accent: #2F95FF;
+  --button: #2F95FF;
+  --button-hover: #65B1FF;
+  --on-accent: #07182B;
+  --coral: #FF6347;
+  --lime: #C9E650;
+  --focus: #C9E650;
+  --selected-top: #1869B2;
+  --selected-bottom: #253B52;
+  --avatar: #3D5573;
+  --chart-bar: #6087B1;
+  --line: rgba(200, 219, 244, 0.16);
+  --input-border: #63758D;
+  --error: #FF9B8F;
+  --success: #8FE3B8;
+  --warning: #FFD27A;
+  --shadow: 0 20px 70px rgba(4, 12, 25, 0.2);
+  --tile-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  --radius-frame: 40px;
+  --radius-tile: 22px;
+  --radius-small: 14px;
+  --radius-pill: 999px;
+  --studio-ground: var(--page);
+  --studio-panel: var(--inset);
+  --studio-line: var(--line);
+  --studio-text: var(--text);
+  --studio-muted: var(--muted);
+  --studio-hover: var(--tile-hover);
+  --studio-accent: var(--accent);
+  --studio-ink: var(--on-accent);
+  --studio-error: var(--error);
+  --studio-success: var(--success);
+  --studio-warning: var(--warning);
+  --studio-marker: var(--selected-top);
+  --studio-shadow: var(--shadow);
+  --studio-chart: var(--chart-bar);
+  --studio-ground-rgb: 16 21 31;
+  --studio-panel-rgb: 34 46 64;
+  --studio-line-rgb: 200 219 244;
+  --studio-text-rgb: 244 247 252;
+  --studio-muted-rgb: 187 199 216;
+  --studio-hover-rgb: 59 75 96;
+  --studio-accent-rgb: 47 149 255;
+  --studio-ink-rgb: 7 24 43;
   --studio-error-rgb: 255 155 143;
   --studio-success-rgb: 143 227 184;
   --studio-warning-rgb: 255 210 122;
-  --studio-shadow: none;
-  --studio-ground: #1B3A5C;
-  --studio-panel: #143049;
-  --studio-line: #EAF2FA;
-  --studio-text: #EAF2FA;
-  --studio-muted: #A9C1D9;
-  --studio-hover: #2E5379;
-  --studio-accent: #FF7A45;
-  --studio-ink: #12161C;
-  --studio-error: #FF9B8F;
-  --studio-success: #8FE3B8;
-  --studio-warning: #FFD27A;
-  --studio-marker: rgb(255 122 69 / 0.16);
-  --studio-grid: rgb(46 83 121 / 0.55);
   --new-back-drop: var(--studio-ground);
   --new-settings: var(--studio-panel);
   --new-border: var(--studio-line);
-  --new-bgColor: var(--studio-ground);
-  --new-bgColorInner: var(--studio-panel);
+  --new-bgColor: var(--page);
+  --new-bgColorInner: var(--popover);
   --new-sep: var(--studio-line);
   --new-bgLineColor: var(--studio-hover);
   --new-textItemFocused: var(--studio-text);
   --new-textItemBlur: var(--studio-muted);
   --new-boxFocused: var(--studio-hover);
-  --new-textColor: 234 242 250;
+  --new-textColor: 244 247 252;
   --new-blockSeparator: var(--studio-line);
-  --new-btn-simple: transparent;
+  --new-btn-simple: var(--inset);
   --new-btn-text: var(--studio-text);
   --new-btn-primary: var(--studio-accent);
   --new-ai-btn: var(--studio-accent);
@@ -298,8 +329,8 @@ html[data-linkself-theme='blueprint'] :is(.dark, .light):not(.network-preview, .
   --new-col-color: var(--studio-hover);
   --new-menu-dots: var(--studio-muted);
   --new-menu-hover: var(--studio-text);
-  --menu-shadow: none;
-  --popup-color: rgb(27 58 92 / 0.85);
+  --menu-shadow: var(--shadow);
+  --popup-color: rgba(16, 21, 31, 0.72);
   --border-preview: var(--studio-line);
   --preview-box-shadow: none;
   --color-primary: var(--studio-ground);
@@ -311,26 +342,14 @@ html[data-linkself-theme='blueprint'] :is(.dark, .light):not(.network-preview, .
   --color-sixth: var(--studio-panel);
   --color-seventh: var(--studio-hover);
   --color-gray: var(--studio-muted);
-  --color-input: var(--studio-panel);
+  --color-input: var(--inset);
   --color-input-text: var(--studio-muted);
   --color-table-border: var(--studio-line);
   --color-modalCustom: var(--studio-ground);
 }
 
-// An unset custom property uses the original utility fallback inside network mocks.
-html[data-linkself-theme='blueprint'] .network-preview {
-  --studio-ground-rgb: initial;
-  --studio-panel-rgb: initial;
-  --studio-line-rgb: initial;
-  --studio-text-rgb: initial;
-  --studio-muted-rgb: initial;
-  --studio-hover-rgb: initial;
-  --studio-accent-rgb: initial;
-  --studio-ink-rgb: initial;
-  --studio-error-rgb: initial;
-  --studio-success-rgb: initial;
-  --studio-warning-rgb: initial;
-  --studio-shadow: initial;
+// Native network simulations deliberately retain the original utility fallbacks.
+html[data-linkself-theme='glass-frame'] .network-preview {
   --studio-ground: initial;
   --studio-panel: initial;
   --studio-line: initial;
@@ -343,5 +362,17 @@ html[data-linkself-theme='blueprint'] .network-preview {
   --studio-success: initial;
   --studio-warning: initial;
   --studio-marker: initial;
-  --studio-grid: initial;
+  --studio-shadow: initial;
+  --studio-chart: initial;
+  --studio-ground-rgb: initial;
+  --studio-panel-rgb: initial;
+  --studio-line-rgb: initial;
+  --studio-text-rgb: initial;
+  --studio-muted-rgb: initial;
+  --studio-hover-rgb: initial;
+  --studio-accent-rgb: initial;
+  --studio-ink-rgb: initial;
+  --studio-error-rgb: initial;
+  --studio-success-rgb: initial;
+  --studio-warning-rgb: initial;
 }

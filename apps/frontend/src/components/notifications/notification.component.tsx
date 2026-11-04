@@ -55,7 +55,7 @@ export const ShowNotification: FC<{
         </div>
       </div>
       {newNotification && (
-        <div className="w-[8px] h-[8px] mt-[6px] rounded-full blueprint-accent bg-[var(--studio-accent,#FF3EA2)] shrink-0" />
+        <div className="w-[8px] h-[8px] mt-[6px] rounded-full glass-accent bg-[var(--studio-accent,#FF3EA2)] shrink-0" />
       )}
     </div>
   );
@@ -99,7 +99,7 @@ export const NotificationOpenComponent = () => {
           {t('notifications', 'Notifications')}
         </div>
         {!!newCount && (
-          <div className="h-[20px] min-w-[20px] px-[6px] rounded-full blueprint-accent bg-[var(--studio-accent,#FF3EA2)] text-white text-[12px] font-[600] flex items-center justify-center">
+          <div className="h-[20px] min-w-[20px] px-[6px] rounded-full glass-accent bg-[var(--studio-accent,#FF3EA2)] text-white text-[12px] font-[600] flex items-center justify-center">
             {newCount}
           </div>
         )}

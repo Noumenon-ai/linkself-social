@@ -47,7 +47,7 @@ export const ColorPicker: FC<{
     await color.onChange({
       target: {
         name,
-        value: linkselfUrl ? '#FF7A45' : '#FFFFFF',
+        value: linkselfUrl ? '#2F95FF' : '#FFFFFF',
       },
     });
     setEnabledState(true);
@@ -113,7 +113,7 @@ export const ColorPicker: FC<{
                 }}
                 onBlur={() => setColorDraft(watch || '')}
               />
-              {!validDraft && <p className="text-red-500 text-[13px]">{t('enter_hex_color', 'Enter a six-digit hex color, for example #FF7A45.')}</p>}
+              {!validDraft && <p className="text-red-500 text-[13px]">{t('enter_hex_color', 'Enter a six-digit hex color, for example #2F95FF.')}</p>}
             </div>
           ) : <HexColorPicker
             color={watch}

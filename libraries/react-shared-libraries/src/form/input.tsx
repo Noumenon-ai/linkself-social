@@ -50,7 +50,10 @@ export const Input: FC<
     }
   }, [watch]);
   return (
-    <div className="flex flex-col gap-[6px]">
+    <div
+      className="glass-field-row flex flex-col gap-[6px]"
+      data-unlabelled={!label || undefined}
+    >
       {!!label && (
         <div className={`text-[14px]`}>
           <TranslatedLabel

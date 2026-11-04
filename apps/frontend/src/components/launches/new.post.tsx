@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Dayjs } from 'dayjs';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import { fromUtc } from '@gitroom/frontend/components/layout/set.timezone';
 import { useCalendar } from '@gitroom/frontend/components/launches/calendar.context';
@@ -8,14 +9,16 @@ import { SetSelectionModal } from '@gitroom/frontend/components/launches/calenda
 import { AddEditModal } from '@gitroom/frontend/components/new-launch/add.edit.modal';
 import { ModalWrapperComponent } from '@gitroom/frontend/components/new-launch/modal.wrapper.component';
 
-export const NewPost = () => {
+export const NewPost = ({ date: selectedDate }: { date?: Dayjs }) => {
   const fetch = useFetch();
   const modal = useModals();
   const { integrations, reloadCalendarView, sets } = useCalendar();
   const t = useT();
 
   const createAPost = useCallback(async () => {
-    const date = (await (await fetch('/posts/find-slot')).json()).date;
+    const date =
+      selectedDate ||
+      fromUtc((await (await fetch('/posts/find-slot')).json()).date);
 
     const set: any = !sets.length
       ? undefined
@@ -67,13 +70,13 @@ export const NewPost = () => {
           reopenModal={createAPost}
           mutate={reloadCalendarView}
           integrations={integrations}
-          date={fromUtc(date)}
+          date={date}
         />
       ),
       size: '80%',
       title: ``,
     });
-  }, [integrations, sets]);
+  }, [integrations, sets, selectedDate, fetch, modal, reloadCalendarView, t]);
   return (
     <button
       onClick={createAPost}

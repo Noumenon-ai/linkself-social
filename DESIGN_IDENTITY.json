@@ -1,13 +1,13 @@
 {
   "product": "LinkSelf Social",
   "audience": "Creators planning and publishing social posts from LinkSelf",
-  "universe": "Owner-approved LinkSelf Blueprint reference, 2026-11-02",
+  "universe": "Owner-approved LinkSelf Glass frame reference, 2026-11-04",
   "palette_value": "dark",
   "palette_topology": "functional-multicolor",
-  "typography_class": "mixed",
+  "typography_class": "humanist-sans",
   "composition": "dense-dashboard",
   "imagery": "product-ui",
-  "motion": "none",
-  "signature": "Blue drafting grid with doubled square construction frames, Archivo UI, Space Mono metadata and short Architects Daughter notes.",
-  "rationale": "The studio retains its scheduling workflow and existing responsive navigation within the approved shared LinkSelf identity. Orange primary actions, outlined secondary controls and state colors distinguish publishing actions and feedback. The server selects Blueprint only in LinkSelf mode, while upstream themes and native network preview simulations retain their own appearance."
+  "motion": "minimal",
+  "signature": "A floating rounded glass frame over fixed azure light bands, with an icon rail, date tiles and a schedule edge.",
+  "rationale": "Figtree, azure actions and inset controls share the approved LinkSelf identity. Calendar date ticks and the schedule edge use the same channel colors and loaded post data. Theme overrides are gated to LinkSelf; upstream installs and native network simulations retain their appearance."
 }

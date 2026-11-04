@@ -1,6 +1,10 @@
 'use client';
 
-import { useCalendar, ListStateFilter } from '@gitroom/frontend/components/launches/calendar.context';
+import {
+  useCalendar,
+  ListStateFilter,
+  getDateRange,
+} from '@gitroom/frontend/components/launches/calendar.context';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { useCallback, useState } from 'react';
@@ -10,41 +14,12 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import i18next from 'i18next';
 import { newDayjs } from '@gitroom/frontend/components/layout/set.timezone';
 import { BottomSheet } from '@gitroom/frontend/components/ui/bottom.sheet.component';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { FilterIcon } from '@gitroom/frontend/components/ui/icons';
-
-// Helper function to get start and end dates based on display type
-function getDateRange(
-  display: 'day' | 'week' | 'month' | 'list',
-  referenceDate?: string
-) {
-  const date = referenceDate ? newDayjs(referenceDate) : newDayjs();
-
-  switch (display) {
-    case 'day':
-      return {
-        startDate: date.format('YYYY-MM-DD'),
-        endDate: date.format('YYYY-MM-DD'),
-      };
-    case 'week':
-      return {
-        startDate: date.startOf('isoWeek').format('YYYY-MM-DD'),
-        endDate: date.endOf('isoWeek').format('YYYY-MM-DD'),
-      };
-    case 'month':
-      return {
-        startDate: date.startOf('month').format('YYYY-MM-DD'),
-        endDate: date.endOf('month').format('YYYY-MM-DD'),
-      };
-    case 'list':
-      return {
-        startDate: date.format('YYYY-MM-DD'),
-        endDate: date.format('YYYY-MM-DD'),
-      };
-  }
-}
 
 export const Filters = () => {
   const calendar = useCalendar();
+  const { linkselfUrl } = useVariables();
   const t = useT();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -71,6 +46,7 @@ export const Filters = () => {
 
   const setToday = useCallback(() => {
     const today = newDayjs();
+    calendar.setSelectedDay(today.format('YYYY-MM-DD'));
     const currentRange = getDateRange(
       calendar.display as 'day' | 'week' | 'month'
     );
@@ -292,8 +268,54 @@ export const Filters = () => {
 
   return (
     <div className="text-textColor flex flex-row flex-wrap gap-[8px] items-center select-none">
+      {linkselfUrl && !isListView && (
+        <div className="glass-calendar-heading">
+          <h2>{getDisplayText()}</h2>
+          <button
+            type="button"
+            className="glass-secondary glass-calendar-arrow rtl:rotate-180"
+            aria-label={t('previous', 'Previous')}
+            onClick={previous}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="m14 6-6 6 6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="glass-secondary glass-calendar-arrow rtl:rotate-180"
+            aria-label={t('next', 'Next')}
+            onClick={next}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="m10 6 6 6-6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="glass-secondary px-3"
+            onClick={setToday}
+          >
+            {t('today', 'Today')}
+          </button>
+        </div>
+      )}
       {/* phones: view switcher and filter first, then the date or list row */}
-      {!isListView && (
+      {!isListView && !linkselfUrl && (
         <div className="flex flex-grow flex-row items-center gap-[10px] mobile:order-3 mobile:basis-full mobile:min-w-0 mobile:gap-[8px]">
           <div className="border h-[42px] border-newTableBorder bg-newTableBorder gap-[1px] flex items-center rounded-[8px] overflow-hidden mobile:flex-1 mobile:min-w-0">
             <div
@@ -392,7 +414,8 @@ export const Filters = () => {
             </div>
             <div className="min-w-[200px] mobile:min-w-0 mobile:flex-1 text-center bg-newBgColorInner h-full flex items-center justify-center">
               <div className="py-[3px] px-[9px] rounded-[5px] transition-all text-[14px]">
-                {t('page', 'Page')} {calendar.listPage + 1} {t('of', 'of')} {Math.max(1, calendar.listTotalPages)}
+                {t('page', 'Page')} {calendar.listPage + 1} {t('of', 'of')}{' '}
+                {Math.max(1, calendar.listTotalPages)}
               </div>
             </div>
             <div
@@ -460,7 +483,7 @@ export const Filters = () => {
         >
           <FilterIcon />
           {calendar.selectedChannels && (
-            <div className="absolute top-[6px] end-[6px] w-[6px] h-[6px] rounded-full blueprint-accent bg-[var(--studio-accent,#612BD3)]" />
+            <div className="absolute top-[6px] end-[6px] w-[6px] h-[6px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)]" />
           )}
         </div>
       )}

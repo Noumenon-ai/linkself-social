@@ -257,7 +257,7 @@ export const TagsComponentInner: FC<{
         ))}
         <div
           onClick={addTag}
-          className="cursor-pointer gap-[8px] flex w-full h-[44px] rounded-[8px] px-[16px] justify-center items-center blueprint-accent bg-[var(--studio-accent,#D82D7E)] text-white select-none"
+          className="cursor-pointer gap-[8px] flex w-full h-[44px] rounded-[8px] px-[16px] justify-center items-center glass-accent bg-[var(--studio-accent,#D82D7E)] text-white select-none"
         >
           <PlusIcon size={20} />
           <div className="text-[15px] font-[600]">
@@ -342,7 +342,7 @@ export const TagsComponentInner: FC<{
           ))}
           <div
             onClick={addTag}
-            className="cursor-pointer gap-[8px] flex w-full h-[34px] rounded-[8px] mt-[12px] px-[16px] justify-center items-center blueprint-accent bg-[var(--studio-accent,#612BD3)] text-white"
+            className="cursor-pointer gap-[8px] flex w-full h-[34px] rounded-[8px] mt-[12px] px-[16px] justify-center items-center glass-accent bg-[var(--studio-accent,#612BD3)] text-white"
           >
             <div>
               <PlusIcon />
@@ -366,7 +366,7 @@ export const Check: FC<{
       onClick={() => onChange(!value)}
       className={clsx(
         'text-[10px] font-[500] text-center flex border border-btnSimple rounded-[6px] min-w-[20px] min-h-[20px] w-[20px] h-[20px] justify-center items-center',
-        value && 'blueprint-accent bg-[var(--studio-accent,#612BD3)]'
+        value && 'glass-accent bg-[var(--studio-accent,#612BD3)]'
       )}
     >
       {value ? <CheckmarkIcon className="text-white" /> : ''}

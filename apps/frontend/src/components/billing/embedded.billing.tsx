@@ -64,10 +64,10 @@ export const EmbeddedBilling: FC<{
           elementsOptions: {
             appearance: {
               variables: {
-                ...(linkselfUrl && { colorPrimary: '#FF7A45', colorDanger: '#FF9B8F', colorTextSecondary: '#A9C1D9' }),
-                colorText: linkselfUrl ? '#EAF2FA' : mode === 'dark' ? '#ffffff' : '#0e0e0e',
-                borderRadius: linkselfUrl ? '0px' : '8px',
-                colorBackground: linkselfUrl ? '#143049' : mode === 'dark' ? '#1E1E1E' : '#FFFFFF',
+                ...(linkselfUrl && { colorPrimary: '#2F95FF', colorDanger: '#FF9B8F', colorTextSecondary: '#BBC7D8' }),
+                colorText: linkselfUrl ? '#F4F7FC' : mode === 'dark' ? '#ffffff' : '#0e0e0e',
+                borderRadius: linkselfUrl ? '14px' : '8px',
+                colorBackground: linkselfUrl ? '#222E40' : mode === 'dark' ? '#1E1E1E' : '#FFFFFF',
               },
               rules: {
                 '.Label': {
@@ -77,7 +77,7 @@ export const EmbeddedBilling: FC<{
                 },
                 '.Input': {
                   height: '44px',
-                  backgroundColor: linkselfUrl ? '#143049' : mode === 'dark' ? '#1E1E1E' : '#FFFFFF',
+                  backgroundColor: linkselfUrl ? '#222E40' : mode === 'dark' ? '#1E1E1E' : '#FFFFFF',
                 },
               },
             },

@@ -19,7 +19,7 @@ import { Integration } from '@prisma/client';
 import ImageWithFallback from '@gitroom/react/helpers/image.with.fallback';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { useFireEvents } from '@gitroom/helpers/utils/use.fire.events';
-import { Calendar } from './calendar';
+import { Calendar, ScheduledPosts } from './calendar';
 import { useDrag, useDrop } from 'react-dnd';
 import { DNDProvider } from '@gitroom/frontend/components/launches/helpers/dnd.provider';
 import { GeneratorComponent } from './generator/generator';
@@ -74,7 +74,11 @@ export const SVGLine = () => {
           gradientTransform="translate(1.19333 7.45342) rotate(21.2064) scale(16.1503 188.627)"
         >
           <stop stopColor="var(--studio-text,#8C66FF)" />
-          <stop offset="1" stopColor="var(--studio-text,#8C66FF)" stopOpacity="0" />
+          <stop
+            offset="1"
+            stopColor="var(--studio-text,#8C66FF)"
+            stopOpacity="0"
+          />
         </radialGradient>
       </defs>
     </svg>
@@ -460,7 +464,7 @@ export const MenuComponent: FC<
 export const LaunchesComponent = () => {
   const fetch = useFetch();
   const user = useUser();
-  const { billingEnabled } = useVariables();
+  const { billingEnabled, linkselfUrl } = useVariables();
   const router = useRouter();
   const search = useSearchParams();
   const toast = useToaster();
@@ -632,170 +636,191 @@ export const LaunchesComponent = () => {
       <ChannelsAfterPayment integrations={integrations} />
       <HubspotInstalled />
       <CalendarWeekProvider integrations={sortedIntegrations}>
-        {channelsOpen && (
-          <div
-            className="hidden mobile:block fixed inset-0 bg-newBackdrop opacity-60 z-[149]"
-            onClick={() => setChannelsOpen(false)}
-          />
-        )}
-        <div
-          className={clsx(
-            'blueprint-channels blueprint-frame flex relative flex-col',
-            collapseMenu === '1' && !channelsOpen
-              ? 'group sidebar w-[100px]'
-              : 'w-[260px]',
-            channelsOpen
-              ? 'mobile:fixed mobile:inset-x-0 mobile:bottom-0 mobile:z-[150] mobile:w-full mobile:max-h-[80vh] mobile:rounded-t-[16px] mobile:overflow-hidden'
-              : 'mobile:hidden'
+        <div className="glass-launches contents">
+          {channelsOpen && !linkselfUrl && (
+            <div
+              className="hidden mobile:block fixed inset-0 bg-newBackdrop opacity-60 z-[149]"
+              onClick={() => setChannelsOpen(false)}
+            />
           )}
-        >
           <div
+            id="calendar-channels"
+            tabIndex={-1}
+            aria-label="Channels"
             className={clsx(
-              'bg-newBgColorInner p-[20px] flex flex-col gap-[15px] transition-all absolute start-0 top-0 w-full h-full mobile:static mobile:h-auto mobile:max-h-[80vh] mobile:pb-[80px] overflow-x-hidden overflow-y-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor'
+              'glass-channels glass-frame flex relative flex-col',
+              !linkselfUrl && collapseMenu === '1' && !channelsOpen
+                ? 'group sidebar w-[100px]'
+                : 'w-[260px]',
+              channelsOpen && !linkselfUrl
+                ? 'mobile:fixed mobile:inset-x-0 mobile:bottom-0 mobile:z-[150] mobile:w-full mobile:max-h-[80vh] mobile:rounded-t-[16px] mobile:overflow-hidden'
+                : 'mobile:hidden'
             )}
           >
-            <div className="flex items-center">
-              <h2 className="group-[.sidebar]:hidden flex-1 text-[20px] font-[500]">
-                {t('channels')}
-              </h2>
-              <div
-                onClick={() => setChannelsOpen(false)}
-                className="hidden mobile:flex text-btnText bg-btnSimple rounded-[6px] w-[28px] h-[28px] items-center justify-center cursor-pointer select-none"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
+            <div
+              className={clsx(
+                'bg-newBgColorInner p-[20px] flex flex-col gap-[15px] transition-all absolute start-0 top-0 w-full h-full mobile:static mobile:h-auto mobile:max-h-[80vh] mobile:pb-[80px] overflow-x-hidden overflow-y-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor'
+              )}
+            >
+              <div className="flex items-center">
+                <h2 className="group-[.sidebar]:hidden flex-1 text-[20px] font-[500]">
+                  {t('channels')}
+                </h2>
+                <div
+                  onClick={() => setChannelsOpen(false)}
+                  className="hidden mobile:flex text-btnText bg-btnSimple rounded-[6px] w-[28px] h-[28px] items-center justify-center cursor-pointer select-none"
                 >
-                  <path
-                    d="M1 1L11 11M11 1L1 11"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-              <div
-                onClick={() =>
-                  setCollapseMenu(collapseMenu === '1' ? '0' : '1')
-                }
-                className="group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto mobile:hidden text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="7"
-                  height="13"
-                  viewBox="0 0 7 13"
-                  fill="none"
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                  >
+                    <path
+                      d="M1 1L11 11M11 1L1 11"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <div
+                  onClick={() =>
+                    setCollapseMenu(collapseMenu === '1' ? '0' : '1')
+                  }
+                  className="group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto mobile:hidden text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
                 >
-                  <path
-                    d="M6 11.5L1 6.5L6 1.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="7"
+                    height="13"
+                    viewBox="0 0 7 13"
+                    fill="none"
+                  >
+                    <path
+                      d="M6 11.5L1 6.5L6 1.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-[8px] group-[.sidebar]:mx-auto group-[.sidebar]:w-[44px]">
-              <AddProviderButton update={() => update(true)} />
-              <div className="flex gap-[8px] group-[.sidebar]:flex-col mobile:hidden">
-                {sortedIntegrations?.length > 0 && <NewPost />}
-                {sortedIntegrations?.length > 0 &&
-                  user?.tier?.ai &&
-                  billingEnabled && <GeneratorComponent />}
+              <div className="flex flex-col gap-[8px] group-[.sidebar]:mx-auto group-[.sidebar]:w-[44px]">
+                <AddProviderButton update={() => update(true)} />
+                <div className="flex gap-[8px] group-[.sidebar]:flex-col mobile:hidden">
+                  {sortedIntegrations?.length > 0 && <NewPost />}
+                  {sortedIntegrations?.length > 0 &&
+                    user?.tier?.ai &&
+                    billingEnabled && <GeneratorComponent />}
+                </div>
               </div>
-            </div>
-            <div className="gap-[32px] flex flex-col select-none flex-1">
-              {sortedIntegrations.length === 0 &&
-                (collapseMenu === '0' || channelsOpen) && (
-                  <div className="flex-1 max-h-[500px] justify-center items-center flex">
-                    <div className="flex flex-col gap-[12px] text-center">
-                      <img
-                        src={
-                          mode === 'dark'
-                            ? '/no-channels.svg'
-                            : '/no-channels-colors.svg'
-                        }
-                        alt="No channels"
-                        className="blueprint-empty-art mx-auto min-w-[100%]"
-                      />
-                      <div className="font-[600] text-[20px]">
-                        <span className="blueprint-note">{t('no_channels', 'No channels yet')}</span>
-                      </div>
-                      <div className="text-[14px]">
-                        {t('connect_your_accounts')}
+              <div className="gap-[32px] flex flex-col select-none flex-1">
+                {sortedIntegrations.length === 0 &&
+                  (linkselfUrl || collapseMenu === '0' || channelsOpen) && (
+                    <div className="flex-1 max-h-[500px] justify-center items-center flex">
+                      <div className="flex flex-col gap-[12px] text-center">
+                        <img
+                          src={
+                            mode === 'dark'
+                              ? '/no-channels.svg'
+                              : '/no-channels-colors.svg'
+                          }
+                          alt="No channels"
+                          className="glass-empty-art mx-auto min-w-[100%]"
+                        />
+                        <div className="font-[600] text-[20px]">
+                          <span className="glass-note">
+                            {t('no_channels', 'No channels yet')}
+                          </span>
+                        </div>
+                        <div className="text-[14px]">
+                          {t('connect_your_accounts')}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              {menuIntegrations.map((menu) => (
-                <MenuGroupComponent
-                  collapsed={collapseMenu === '1' && !channelsOpen}
-                  changeItemGroup={changeItemGroup}
-                  key={menu.name}
-                  group={menu}
-                  mutate={mutate}
-                  continueIntegration={continueIntegration}
-                  update={update}
-                  refreshChannel={refreshChannel}
-                  totalNonDisabledChannels={totalNonDisabledChannels}
-                />
-              ))}
-            </div>
-            <div className="mt-[5px] text-center flex flex-col mobile:hidden">
-              {billingEnabled && user?.isLifetime && (
-                <div>{capitalize(user?.tier?.current || '')} tier</div>
-              )}
-              <div>
-                {process.env.NEXT_PUBLIC_VERSION
-                  ? process.env.NEXT_PUBLIC_VERSION
-                  : ''}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="blueprint-calendar-panel bg-newBgColorInner flex-1 min-w-0 flex-col flex p-[20px] mobile:p-[12px] gap-[12px] mobile:min-h-[600px]">
-          <div className="hidden mobile:flex gap-[8px]">
-            <div
-              onClick={() => setChannelsOpen(true)}
-              className="cursor-pointer h-[44px] px-[12px] bg-btnSimple text-btnText rounded-[8px] flex items-center gap-[8px] select-none"
-            >
-              <div className="flex -space-x-[10px] rtl:space-x-reverse">
-                {sortedIntegrations.slice(0, 3).map((integration: any) => (
-                  <ImageWithFallback
-                    key={integration.id}
-                    fallbackSrc={`/icons/platforms/${integration.identifier}.png`}
-                    src={integration.picture}
-                    className="rounded-full border-2 border-btnSimple"
-                    alt={integration.identifier}
-                    width={24}
-                    height={24}
+                  )}
+                {menuIntegrations.map((menu) => (
+                  <MenuGroupComponent
+                    collapsed={
+                      !linkselfUrl && collapseMenu === '1' && !channelsOpen
+                    }
+                    changeItemGroup={changeItemGroup}
+                    key={menu.name}
+                    group={menu}
+                    mutate={mutate}
+                    continueIntegration={continueIntegration}
+                    update={update}
+                    refreshChannel={refreshChannel}
+                    totalNonDisabledChannels={totalNonDisabledChannels}
                   />
                 ))}
               </div>
-              <div className="text-[14px] font-[500]">
-                {sortedIntegrations.length || t('channels')}
+              <div className="mt-[5px] text-center flex flex-col mobile:hidden">
+                {billingEnabled && user?.isLifetime && (
+                  <div>{capitalize(user?.tier?.current || '')} tier</div>
+                )}
+                <div>
+                  {process.env.NEXT_PUBLIC_VERSION
+                    ? process.env.NEXT_PUBLIC_VERSION
+                    : ''}
+                </div>
               </div>
             </div>
-            {sortedIntegrations?.length > 0 ? (
-              <>
-                <NewPost />
-                {user?.tier?.ai && billingEnabled && <GeneratorComponent />}
-              </>
-            ) : (
-              <div className="flex-1">
-                <AddProviderButton update={() => update(true)} />
+          </div>
+          <div className="glass-calendar-panel bg-newBgColorInner flex-1 min-w-0 flex-col flex p-[20px] mobile:p-[12px] gap-[12px] mobile:min-h-[600px]">
+            <div className="hidden mobile:flex gap-[8px]">
+              <div
+                onClick={() => {
+                  if (linkselfUrl) {
+                    document
+                      .getElementById('calendar-channels')
+                      ?.scrollIntoView({ block: 'start' });
+                    document
+                      .getElementById('calendar-channels')
+                      ?.focus({ preventScroll: true });
+                  } else {
+                    setChannelsOpen(true);
+                  }
+                }}
+                className="cursor-pointer h-[44px] px-[12px] bg-btnSimple text-btnText rounded-[8px] flex items-center gap-[8px] select-none"
+              >
+                <div className="flex -space-x-[10px] rtl:space-x-reverse">
+                  {sortedIntegrations.slice(0, 3).map((integration: any) => (
+                    <ImageWithFallback
+                      key={integration.id}
+                      fallbackSrc={`/icons/platforms/${integration.identifier}.png`}
+                      src={integration.picture}
+                      className="rounded-full border-2 border-btnSimple"
+                      alt={integration.identifier}
+                      width={24}
+                      height={24}
+                    />
+                  ))}
+                </div>
+                <div className="text-[14px] font-[500]">
+                  {sortedIntegrations.length || t('channels')}
+                </div>
               </div>
-            )}
+              {sortedIntegrations?.length > 0 ? (
+                <>
+                  <NewPost />
+                  {user?.tier?.ai && billingEnabled && <GeneratorComponent />}
+                </>
+              ) : (
+                <div className="flex-1">
+                  <AddProviderButton update={() => update(true)} />
+                </div>
+              )}
+            </div>
+            <Filters />
+            <div className="glass-calendar glass-frame flex-1 flex">
+              <Calendar />
+            </div>
           </div>
-          <Filters />
-          <div className="blueprint-calendar blueprint-frame flex-1 flex">
-            <Calendar />
-          </div>
+          <ScheduledPosts />
         </div>
       </CalendarWeekProvider>
     </DNDProvider>

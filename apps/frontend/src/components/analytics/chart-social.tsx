@@ -59,22 +59,22 @@ export const ChartSocial: FC<{
   const colors = colorSchemes[color];
 
   useEffect(() => {
-    const blueprint = document.documentElement.dataset.linkselfTheme === 'blueprint';
+    const glass = document.documentElement.dataset.linkselfTheme === 'glass-frame';
     const tokens = getComputedStyle(document.body);
     const studioColor = (name: string) => tokens.getPropertyValue(`--studio-${name}`).trim();
-    const chartColors = blueprint ? { start: studioColor('marker'), end: studioColor('panel'), border: studioColor(color === 'green' ? 'success' : color === 'blue' ? 'text' : 'accent') } : colors;
+    const chartColors = glass ? { start: studioColor('chart'), end: studioColor('panel'), border: studioColor(color === 'green' ? 'success' : color === 'blue' ? 'text' : 'accent') } : colors;
     const ctx = ref.current.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, ref.current.height);
     gradient.addColorStop(0, chartColors.start);
     gradient.addColorStop(1, chartColors.end);
 
     chart.current = new DrawChart(ref.current!, {
-      type: 'line',
+      type: glass ? 'bar' : 'line',
       options: {
         maintainAspectRatio: false,
         responsive: true,
         animation: {
-          duration: blueprint ? 0 : 750,
+          duration: glass ? 0 : 750,
           easing: 'easeOutQuart',
         },
         interaction: {
@@ -108,21 +108,21 @@ export const ChartSocial: FC<{
           },
           tooltip: {
             enabled: true,
-            backgroundColor: blueprint ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',
-            titleColor: blueprint ? studioColor('text') : mode === 'dark' ? '#fff' : '#000',
-            bodyColor: blueprint ? studioColor('muted') : mode === 'dark' ? '#9c9c9c' : '#777',
-            borderColor: blueprint ? studioColor('line') : mode === 'dark' ? '#2b2b2b' : '#e7e9eb',
+            backgroundColor: glass ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',
+            titleColor: glass ? studioColor('text') : mode === 'dark' ? '#fff' : '#000',
+            bodyColor: glass ? studioColor('muted') : mode === 'dark' ? '#9c9c9c' : '#777',
+            borderColor: glass ? studioColor('line') : mode === 'dark' ? '#2b2b2b' : '#e7e9eb',
             borderWidth: 1,
             padding: 10,
-            cornerRadius: blueprint ? 0 : 8,
+            cornerRadius: glass ? 14 : 8,
             displayColors: false,
             titleFont: {
-              ...(blueprint && { family: getComputedStyle(document.body).fontFamily }),
-              size: 12,
+              ...(glass && { family: getComputedStyle(document.body).fontFamily }),
+              size: glass ? 14 : 12,
               weight: 'normal',
             },
             bodyFont: {
-              ...(blueprint && { family: getComputedStyle(document.body).fontFamily }),
+              ...(glass && { family: getComputedStyle(document.body).fontFamily }),
               size: 14,
               weight: 'bold',
             },
@@ -136,14 +136,15 @@ export const ChartSocial: FC<{
             borderColor: chartColors.border,
             borderWidth: 2,
             label: 'Total',
-            backgroundColor: gradient,
+            backgroundColor: glass ? list.map((_, index) => studioColor(index === list.length - 1 ? 'accent' : 'chart')) : gradient,
+            ...(glass && { borderRadius: 14, borderWidth: 0 }),
             fill: true,
             data: list.map((row) => row.total),
             tension: 0.4,
             pointRadius: 0,
             pointHoverRadius: 6,
             pointHoverBackgroundColor: chartColors.border,
-            pointHoverBorderColor: blueprint ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',
+            pointHoverBorderColor: glass ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',
             pointHoverBorderWidth: 2,
           },
         ],

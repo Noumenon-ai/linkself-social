@@ -115,8 +115,8 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
     return (
       <div className="flex flex-1 items-center justify-center text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] blueprint-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
         </div>
         <div className="relative z-10 text-center">
           <div className="flex justify-center mb-[24px]">
@@ -137,8 +137,8 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
     return (
       <div className="flex flex-1 items-center justify-center text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] blueprint-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
         </div>
         <div className="relative z-10 text-center">
           <div className="flex justify-center mb-[24px]">
@@ -175,8 +175,8 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
   return (
     <div className="flex flex-1 items-center justify-center text-white relative overflow-hidden">
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] blueprint-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
-        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] blueprint-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+        <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-[500px] mx-auto px-[20px]">
@@ -240,7 +240,7 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
                   <button
                     onClick={() => handleAction('approve')}
                     disabled={submitting}
-                    className="flex-1 blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+                    className="flex-1 glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
                   >
                     Authorize
                   </button>
@@ -255,7 +255,7 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
               ) : (
                 <button
                   onClick={signIn}
-                  className="blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+                  className="glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
                 >
                   Sign in to {APP_NAME}
                 </button>

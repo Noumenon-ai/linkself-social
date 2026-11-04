@@ -1,11 +1,11 @@
 'use client';
 
-import { BlueprintBrand } from '@gitroom/frontend/components/ui/blueprint-brand';
+import { GlassBrand } from '@gitroom/frontend/components/ui/glass-brand';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 import SafeImage from '@gitroom/react/helpers/safe.image';
 
 export const Logo = () => (
-  <><BlueprintBrand /><span className="blueprint-upstream-brand"><SafeImage
+  <><GlassBrand /><span className="glass-upstream-brand"><SafeImage
     src="/logo.svg"
     width={60}
     height={60}

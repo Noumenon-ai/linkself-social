@@ -17,7 +17,7 @@ export interface MobileTopBarAction {
 
 const actionColors = {
   primary: 'bg-btnPrimary text-white',
-  secondary: 'blueprint-accent bg-[var(--studio-accent,#D82D7E)] text-white',
+  secondary: 'glass-accent bg-[var(--studio-accent,#D82D7E)] text-white',
   tertiary: 'bg-btnSimple text-btnText',
 };
 

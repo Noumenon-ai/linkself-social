@@ -1,8 +1,8 @@
-// Resolve legacy and stock utilities through semantic Blueprint tokens. The
+// Resolve legacy and stock utilities through semantic Glass tokens. The
 // fallbacks preserve upstream themes; network preview roots unset these tokens.
-const blueprintPalette = (palette, kind, family = '') => Object.fromEntries(
+const glassPalette = (palette, kind, family = '') => Object.fromEntries(
   Object.entries(palette).map(([name, value]) => {
-    if (typeof value === 'object') return [name, blueprintPalette(value, kind, name)];
+    if (typeof value === 'object') return [name, glassPalette(value, kind, name)];
     if (typeof value !== 'string') return [name, value];
     const legacy = /^var\(--color-custom/.test(value);
     const literal = /^#([\da-f]{3}|[\da-f]{6})$/i.test(value);
@@ -28,15 +28,15 @@ module.exports = {
   content: ['./src/**/*.{ts,tsx,html}', '../../libraries/**/*.{ts,tsx,html}'],
   theme: {
     extend: {
-      backgroundColor: ({ theme }) => blueprintPalette(theme('colors'), 'bg'),
-      textColor: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
-      borderColor: ({ theme }) => blueprintPalette(theme('colors'), 'border'),
-      ringColor: ({ theme }) => blueprintPalette(theme('colors'), 'border'),
-      divideColor: ({ theme }) => blueprintPalette(theme('colors'), 'border'),
-      placeholderColor: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
-      gradientColorStops: ({ theme }) => blueprintPalette(theme('colors'), 'bg'),
-      fill: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
-      stroke: ({ theme }) => blueprintPalette(theme('colors'), 'text'),
+      backgroundColor: ({ theme }) => glassPalette(theme('colors'), 'bg'),
+      textColor: ({ theme }) => glassPalette(theme('colors'), 'text'),
+      borderColor: ({ theme }) => glassPalette(theme('colors'), 'border'),
+      ringColor: ({ theme }) => glassPalette(theme('colors'), 'border'),
+      divideColor: ({ theme }) => glassPalette(theme('colors'), 'border'),
+      placeholderColor: ({ theme }) => glassPalette(theme('colors'), 'text'),
+      gradientColorStops: ({ theme }) => glassPalette(theme('colors'), 'bg'),
+      fill: ({ theme }) => glassPalette(theme('colors'), 'text'),
+      stroke: ({ theme }) => glassPalette(theme('colors'), 'text'),
       colors: {
         primary: 'var(--color-primary)',
         secondary: 'var(--color-secondary)',
@@ -156,9 +156,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Helvetica Neue'],
-        blueprint: ['var(--font-blueprint-body)', 'Arial', 'sans-serif'],
-        blueprintMono: ['var(--font-blueprint-mono)', 'monospace'],
-        blueprintNote: ['var(--font-blueprint-note)', 'cursive'],
+        figtree: ['var(--font-figtree)', 'sans-serif'],
       },
       animation: {
         fade: 'fadeOut 0.5s ease-in-out',

@@ -1,6 +1,9 @@
 'use client';
 
-import { FC, ReactNode } from 'react';
+import Link from 'next/link';
+import { LogoutComponent } from '@gitroom/frontend/components/layout/logout.component';
+import { FC, ReactNode, useEffect, useRef } from 'react';
+import { useHasOpenModal } from '@gitroom/frontend/components/layout/new-modal';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
@@ -228,10 +231,38 @@ export const useMenuItem = () => {
 export const TopMenu: FC = () => {
   const user = useUser();
   const { firstMenu, secondMenu } = useMenuItem();
-  const { isGeneral, billingEnabled } = useVariables();
+  const { isGeneral, billingEnabled, linkselfUrl } = useVariables();
+  const toolsRef = useRef<HTMLDetailsElement>(null);
+  const hasOpenModal = useHasOpenModal();
+  useEffect(() => {
+    if (hasOpenModal && toolsRef.current) toolsRef.current.open = false;
+  }, [hasOpenModal]);
+  useEffect(() => {
+    if (!linkselfUrl) return;
+    const outside = (event: PointerEvent) => {
+      if (
+        toolsRef.current &&
+        !toolsRef.current.contains(event.target as Node)
+      ) {
+        toolsRef.current.open = false;
+      }
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && toolsRef.current?.open) {
+        toolsRef.current.open = false;
+        toolsRef.current.querySelector('summary')?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', outside);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('keydown', escape);
+    };
+  }, [linkselfUrl]);
   return (
     <>
-      <div className="flex flex-1 flex-col minCustom:gap-[20px] custom:gap-[8px] blurMe">
+      <div className="glass-rail-primary flex flex-1 flex-col minCustom:gap-[20px] custom:gap-[8px] blurMe">
         {
           // @ts-ignore
           user?.orgId &&
@@ -264,7 +295,47 @@ export const TopMenu: FC = () => {
               ))
         }
       </div>
-      <div className="flex flex-col minCustom:gap-[20px] custom:gap-[8px] blurMe">
+      {linkselfUrl && (
+        <details className="glass-tools" ref={toolsRef}>
+          <summary
+            aria-label="All tools"
+            onClick={(event) => {
+              if (hasOpenModal) event.preventDefault();
+            }}
+          >
+            All tools
+          </summary>
+          <nav
+            aria-label="All tools"
+            onClick={(event) => {
+              if (
+                (event.target as Element).closest('a, button') &&
+                toolsRef.current
+              ) {
+                toolsRef.current.open = false;
+              }
+            }}
+          >
+            {[...firstMenu, ...secondMenu]
+              .filter(
+                (item) =>
+                  !item.hide &&
+                  (!item.requireBilling || (billingEnabled && isGeneral)) &&
+                  (!item.role || item.role.includes(user?.role!))
+              )
+              .map((item) => (
+                <Link key={item.path} href={item.path}>
+                  {item.name}
+                </Link>
+              ))}
+            <Link href="/plugs">Plugs</Link>
+            <Link href="/settings?tab=sets">Sets</Link>
+            <Link href="/settings?tab=signatures">Signatures and settings</Link>
+            <LogoutComponent />
+          </nav>
+        </details>
+      )}
+      <div className="glass-rail-bottom flex flex-col minCustom:gap-[20px] custom:gap-[8px] blurMe">
         {secondMenu
           .filter((f) => {
             if (f.hide) {
@@ -290,6 +361,17 @@ export const TopMenu: FC = () => {
               onClick={item.onClick}
             />
           ))}
+        {linkselfUrl && (
+          <>
+            <LogoutComponent isIcon />
+            <span
+              className="glass-avatar"
+              aria-label={user?.email || 'Account'}
+            >
+              {(user?.email || 'LS').slice(0, 2).toUpperCase()}
+            </span>
+          </>
+        )}
       </div>
     </>
   );

@@ -1,0 +1,456 @@
+apps/frontend/src/components/developer/developer.component.tsx:251:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/developer/developer.component.tsx:264:              className="cursor-pointer px-[20px] h-[44px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] transition-colors text-white rounded-[8px] text-[15px] font-[600]"
+apps/frontend/src/components/developer/developer.component.tsx:366:                className="cursor-pointer px-[20px] h-[44px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] transition-colors text-white rounded-[8px] text-[15px] font-[600]"
+apps/frontend/src/components/developer/developer.component.tsx:414:              className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/developer/developer.component.tsx:490:                className="cursor-pointer px-[20px] h-[44px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] transition-colors text-white rounded-[8px] text-[15px] font-[600]"
+apps/frontend/src/components/launches/statistics.tsx:118:                      <div className="flex flex-col h-full bg-newTableHeader border border-newTableBorder rounded-[12px] overflow-hidden transition-all duration-200 hover:border-[var(--studio-accent,#612bd380)]">
+apps/frontend/src/components/launches/statistics.tsx:123:                                color === 'purple' ? 'glass-accent bg-[var(--studio-accent,#612bd3)]' : ''
+apps/frontend/src/components/launches/statistics.tsx:124:                              } ${color === 'green' ? 'bg-[var(--studio-success,#32d583)]' : ''} ${
+apps/frontend/src/components/launches/statistics.tsx:125:                                color === 'blue' ? 'bg-[var(--studio-hover,#1d9bf0)]' : ''
+apps/frontend/src/app/(app)/auth/layout.tsx:23:      <div className="glass-auth bg-[var(--studio-panel,#0E0E0E)] flex flex-1 p-[12px] gap-[12px] min-h-screen w-screen text-white">
+apps/frontend/src/app/(app)/auth/layout.tsx:26:        <div className="glass-frame flex flex-col py-[40px] px-[20px] flex-1 lg:w-[600px] lg:flex-none rounded-[12px] text-white p-[12px] bg-[var(--studio-panel,#1A1919)]">
+apps/frontend/src/components/launches/ai.image.tsx:112:                  ? 'glass-accent bg-[var(--studio-accent,#612BD3)] border-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/launches/ai.image.tsx:165:            <Loading height={15} width={15} type="spin" color="var(--studio-text,#fff)" />
+apps/frontend/src/components/launches/tags.component.tsx:246:                className="text-[14px] font-[600] text-[var(--studio-text,#fff)] px-[12px] pt-[4px] pb-[6px] rounded-[6px] text-shadow-tags break-all"
+apps/frontend/src/components/launches/tags.component.tsx:260:          className="cursor-pointer gap-[8px] flex w-full h-[44px] rounded-[8px] px-[16px] justify-center items-center glass-accent bg-[var(--studio-accent,#D82D7E)] text-white select-none"
+apps/frontend/src/components/launches/tags.component.tsx:276:        isOpen ? 'border-[var(--studio-accent,#612BD3)]' : 'border-newTextColor/10'
+apps/frontend/src/components/launches/tags.component.tsx:295:                <span className="text-shadow-tags text-[var(--studio-text,#fff)]">
+apps/frontend/src/components/launches/tags.component.tsx:321:                  className="text-[var(--studio-text,#fff)] px-[8px] rounded-[8px] text-shadow-tags"
+apps/frontend/src/components/launches/tags.component.tsx:345:            className="cursor-pointer gap-[8px] flex w-full h-[34px] rounded-[8px] mt-[12px] px-[16px] justify-center items-center glass-accent bg-[var(--studio-accent,#612BD3)] text-white"
+apps/frontend/src/components/launches/tags.component.tsx:369:        value && 'glass-accent bg-[var(--studio-accent,#612BD3)]'
+apps/frontend/src/components/launches/tags.component.tsx:624:  const [color, setColor] = useState<string>(theColor || '#942828');
+apps/frontend/src/components/new-launch/select.current.tsx:117:                  ? 'text-[var(--studio-muted,#A3A3A3)]'
+apps/frontend/src/components/new-launch/select.current.tsx:118:                  : 'border mobile:border-[1.5px] border-[var(--studio-accent,#FC69FF)] text-[var(--studio-text,#FC69FF)]'
+apps/frontend/src/components/new-launch/select.current.tsx:136:                  ? 'border-[var(--studio-accent,#FC69FF)] text-[var(--studio-text,#FC69FF)]'
+apps/frontend/src/components/new-launch/select.current.tsx:218:      className="w-[8px] h-[8px] glass-accent bg-[var(--studio-accent,#FC69FF)] -top-[1px] -end-[3px] absolute rounded-full"
+apps/frontend/src/components/new-launch/mobile.top.bar.tsx:20:  secondary: 'glass-accent bg-[var(--studio-accent,#D82D7E)] text-white',
+apps/frontend/src/components/new-launch/mobile.top.bar.tsx:42:        className="w-[24px] h-[24px] flex justify-center items-center cursor-pointer text-[var(--studio-muted,#A3A3A3)]"
+apps/frontend/src/components/analytics/chart.tsx:24:    gradient.addColorStop(0, glass ? studioColor('chart') : 'rgba(114, 118, 137, 1)'); // Start color with some transparency
+apps/frontend/src/components/analytics/chart.tsx:25:    gradient.addColorStop(1, glass ? studioColor('panel') : 'rgb(9, 11, 19, 1)');
+apps/frontend/src/components/analytics/chart.tsx:59:            borderColor: glass ? studioColor('accent') : '#fff',
+apps/frontend/src/components/public-api/public.component.tsx:380:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:388:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:399:              className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:423:                      ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/public-api/public.component.tsx:456:                  className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[8px]"
+apps/frontend/src/components/public-api/public.component.tsx:490:                    ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/public-api/public.component.tsx:555:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:565:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:575:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:662:            className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:680:                  ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/public-api/public.component.tsx:820:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/public-api/public.component.tsx:830:                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+apps/frontend/src/components/launches/select.customer.tsx:94:                  selected ? 'border-[var(--studio-accent,#FC69FF)]' : 'border-newTextColor/20'
+apps/frontend/src/components/launches/select.customer.tsx:98:                  <div className="w-[12px] h-[12px] rounded-full glass-accent bg-[var(--studio-accent,#FC69FF)]" />
+apps/frontend/src/components/launches/select.customer.tsx:116:          open ? 'border-[var(--studio-accent,#612BD3)]' : 'border-newColColor'
+apps/frontend/src/components/launches/launches.component.tsx:65:          <stop stopColor="var(--studio-text,#662FDA)" />
+apps/frontend/src/components/launches/launches.component.tsx:66:          <stop offset="1" stopColor="var(--studio-text,#5720CB)" />
+apps/frontend/src/components/launches/launches.component.tsx:76:          <stop stopColor="var(--studio-text,#8C66FF)" />
+apps/frontend/src/components/launches/launches.component.tsx:79:            stopColor="var(--studio-text,#8C66FF)"
+apps/frontend/src/components/billing/first.billing.component.tsx:136:          <span className="text-[var(--studio-text,#FC69FF)]">
+apps/frontend/src/components/billing/first.billing.component.tsx:282:                  <div className="glass-accent bg-[var(--studio-accent,#AA0FA4)] text-[white] px-[8px] rounded-[4px] mobile:hidden">
+apps/frontend/src/components/billing/first.billing.component.tsx:297:                        ? 'border-[1.5px] border-[var(--studio-text,#618DFF)]'
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:28:        isPositive ? 'text-[var(--studio-success,#32d583)]' : 'text-[var(--studio-error,#f97066)]'
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:71:          hover:border-[var(--studio-accent,#612bd380)]
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:80:                ${color === 'purple' ? 'glass-accent bg-[var(--studio-accent,#612bd3)]' : ''}
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:81:                ${color === 'green' ? 'bg-[var(--studio-success,#32d583)]' : ''}
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:82:                ${color === 'blue' ? 'bg-[var(--studio-hover,#1d9bf0)]' : ''}
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:132:      <div className="w-[48px] h-[48px] mb-[16px] rounded-full bg-[var(--studio-marker,#612bd31a)] flex items-center justify-center">
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:140:          className="text-[var(--studio-text,#612bd3)]"
+apps/frontend/src/components/platform-analytics/render.analytics.tsx:157:          className="inline-flex items-center gap-[6px] px-[16px] py-[8px] text-[14px] font-medium text-white glass-accent bg-[var(--studio-accent,#612bd3)] hover:bg-[var(--studio-hover,#5023b8)] rounded-[8px] transition-colors"
+apps/frontend/src/components/new-launch/delay.component.tsx:92:          currentDelay > 0 && 'glass-accent bg-[var(--studio-accent,#D82D7E)] text-white rounded-full'
+apps/frontend/src/components/new-launch/delay.component.tsx:106:                  currentDelay === option.value && 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white hover:bg-[var(--studio-hover,#612BD3)]'
+apps/frontend/src/components/new-launch/delay.component.tsx:123:                  'flex-1 w-full h-[32px] px-[8px] rounded-[4px] bg-newBgColor border text-[13px] outline-none focus:border-[var(--studio-accent,#612BD3)]',
+apps/frontend/src/components/new-launch/delay.component.tsx:124:                  isCustomDelay ? 'border-[var(--studio-accent,#612BD3)]' : 'border-newTextColor/10'
+apps/frontend/src/components/new-launch/delay.component.tsx:136:                className="h-[32px] px-[10px] rounded-[4px] glass-accent bg-[var(--studio-accent,#612BD3)] text-white text-[12px] font-[600] hover:bg-[var(--studio-hover,#612BD3cc)]"
+apps/frontend/src/components/launches/repeat.component.tsx:98:                  selected ? 'border-[var(--studio-accent,#FC69FF)]' : 'border-newTextColor/20'
+apps/frontend/src/components/launches/repeat.component.tsx:102:                  <div className="w-[12px] h-[12px] rounded-full glass-accent bg-[var(--studio-accent,#FC69FF)]" />
+apps/frontend/src/components/launches/repeat.component.tsx:117:        isOpen ? 'border-[var(--studio-accent,#612BD3)]' : 'border-newTextColor/10',
+apps/frontend/src/components/billing/main.billing.component.tsx:157:      <div className="w-[48px] h-[48px] rounded-full bg-[var(--studio-marker,#612bd31a)] text-[var(--studio-text,#612bd3)] flex items-center justify-center shrink-0 mobile:hidden">
+apps/frontend/src/components/billing/main.billing.component.tsx:227:  primary: 'bg-btnPrimary text-white hover:bg-[var(--studio-hover,#5023b8)]',
+apps/frontend/src/components/billing/main.billing.component.tsx:278:            <span className="w-[6px] h-[6px] rounded-full bg-[var(--studio-success,#32D583)]" />
+apps/frontend/src/components/billing/main.billing.component.tsx:359:                current ? 'text-white/75' : 'text-[var(--studio-text,#8b5cf6)]'
+apps/frontend/src/components/billing/main.billing.component.tsx:902:            <div className="glass-accent bg-[var(--studio-accent,#AA0FA4)] text-white text-[12px] px-[6px] rounded-[4px]">
+apps/frontend/src/components/billing/main.billing.component.tsx:909:        <div className="flex items-center gap-[12px] rounded-[12px] border border-[var(--studio-warning,#FFAC304c)] bg-[var(--studio-warning,#FFAC301a)] px-[16px] py-[12px] text-[14px]">
+apps/frontend/src/components/billing/main.billing.component.tsx:910:          <div className="w-[8px] h-[8px] rounded-full bg-[var(--studio-warning,#FFAC30)] shrink-0" />
+apps/frontend/src/components/billing/main.billing.component.tsx:975:          <div className="w-[48px] h-[48px] rounded-full bg-[var(--studio-marker,#612bd31a)] text-[var(--studio-text,#612bd3)] flex items-center justify-center shrink-0 mobile:hidden">
+apps/frontend/src/components/oauth/self.hosted.component.tsx:79:      className="border-t border-[var(--studio-line,#2A2929)] pt-[16px] flex flex-col gap-[16px]"
+apps/frontend/src/components/oauth/self.hosted.component.tsx:149:          className="flex-1 glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+apps/frontend/src/components/oauth/self.hosted.component.tsx:157:          className="flex-1 bg-[var(--studio-panel,#2A2929)] hover:bg-[var(--studio-hover,#3A3939)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+apps/frontend/public/glass-icon.svg:2:  <rect rx="56" width="192" height="192" fill="#F4F7FC"/>
+apps/frontend/public/glass-icon.svg:3:  <g fill="none" stroke="#10151F" stroke-width="12" stroke-linecap="round">
+apps/frontend/src/components/new-launch/add.post.button.tsx:19:        className="select-none cursor-pointer h-[34px] rounded-[6px] flex glass-accent bg-[var(--studio-accent,#D82D7E)] gap-[8px] justify-center items-center pl-[16px] pr-[20px] text-[13px] font-[600] mt-[12px] mobile:w-[40px] mobile:h-[40px] mobile:p-0 mobile:mt-0 mobile:rounded-[8px]"
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:235:          className="glass-action group flex items-center gap-[12px] bg-gradient-to-r from-[#622aff] to-[#8b5cf6] hover:from-[#7c3aff] hover:to-[#9d6eff] text-white font-semibold px-[32px] py-[14px] rounded-[12px] text-[16px] transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:402:            className="cursor-pointer px-[24px] h-[44px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[14px] font-[600] flex items-center gap-[8px] shrink-0"
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:462:        className="cursor-pointer px-[24px] h-[44px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[14px] font-[600] flex items-center gap-[8px] shrink-0"
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:496:                    ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:586:                    ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:588:                    ? 'bg-btnSimple text-[var(--studio-text,#a78bfa)] hover:bg-boxHover hover:text-[var(--studio-text,#c4b5fd)]'
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:607:                      ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:676:          className="glass-action group flex items-center gap-[12px] bg-gradient-to-r from-[#622aff] to-[#8b5cf6] hover:from-[#7c3aff] hover:to-[#9d6eff] text-white font-semibold px-[32px] py-[14px] rounded-[12px] text-[16px] transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+apps/frontend/src/components/onboarding/onboarding.modal.tsx:758:          className="glass-action group flex items-center gap-[12px] bg-gradient-to-r from-[#10b981] to-[#059669] hover:from-[#34d399] hover:to-[#10b981] text-white font-semibold px-[32px] py-[14px] rounded-[12px] text-[16px] transition-all shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+apps/frontend/src/components/new-launch/manage.modal.tsx:888:      className="hidden mobile:flex shrink-0 w-[32px] h-[44px] justify-end items-center cursor-pointer text-[var(--studio-muted,#A3A3A3)]"
+apps/frontend/src/components/new-launch/manage.modal.tsx:900:        mobileTab === 'preview' ? 'text-[var(--studio-text,#FC69FF)]' : 'text-[var(--studio-muted,#A3A3A3)]'
+apps/frontend/src/components/new-launch/manage.modal.tsx:1051:                        'glass-accent bg-[var(--studio-accent,#612BD3)] rounded-[12px] flex items-center gap-[8px] cursor-pointer p-[12px] mobile:hidden',
+apps/frontend/src/components/new-launch/manage.modal.tsx:1102:                <CloseIcon onClick={askClose} className="text-[var(--studio-muted,#A3A3A3)]" />
+apps/frontend/src/components/new-launch/manage.modal.tsx:1137:                className="cursor-pointer flex text-[var(--studio-error,#FF3F3F)] gap-[8px] items-center text-[15px] font-[600]"
+apps/frontend/src/components/new-launch/manage.modal.tsx:1166:                className="text-white text-[15px] font-[600] min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] glass-accent bg-[var(--studio-accent,#612BD3)] ps-[20px] pe-[16px]"
+apps/frontend/src/components/new-launch/manage.modal.tsx:1182:                  className="text-white relative min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] glass-accent bg-[var(--studio-accent,#612BD3)] ps-[20px] pe-[16px]"
+apps/frontend/src/components/new-launch/manage.modal.tsx:1228:                    <div className="text-white rounded-[8px] glass-accent bg-[var(--studio-accent,#D82D7E)] h-[44px] w-full flex justify-center items-center post-now">
+apps/frontend/src/components/new-launch/manage.modal.tsx:1295:                className="flex items-center gap-[12px] py-[8px] cursor-pointer text-[var(--studio-error,#FF3F3F)]"
+apps/frontend/src/components/launches/general.preview.component.tsx:40:          return `<span class="font-bold font-[arial]" style="color: var(--link, #ae8afc)">${match1}</span>`;
+apps/frontend/src/components/launches/general.preview.component.tsx:44:        return `<span class="font-bold font-[arial]" style="color: var(--link, #ae8afc)">${match1}</span>`;
+apps/frontend/src/components/billing/embedded.billing.tsx:67:                ...(linkselfUrl && { colorPrimary: '#2F95FF', colorDanger: '#FF9B8F', colorTextSecondary: '#BBC7D8' }),
+apps/frontend/src/components/billing/embedded.billing.tsx:68:                colorText: linkselfUrl ? '#F4F7FC' : mode === 'dark' ? '#ffffff' : '#0e0e0e',
+apps/frontend/src/components/billing/embedded.billing.tsx:70:                colorBackground: linkselfUrl ? '#222E40' : mode === 'dark' ? '#1E1E1E' : '#FFFFFF',
+apps/frontend/src/components/billing/embedded.billing.tsx:80:                  backgroundColor: linkselfUrl ? '#222E40' : mode === 'dark' ? '#1E1E1E' : '#FFFFFF',
+apps/frontend/src/components/billing/embedded.billing.tsx:186:                fill="var(--studio-text,#635BFF)"
+apps/frontend/src/components/billing/embedded.billing.tsx:381:      <div className="flex items-center gap-[12px] p-[16px] rounded-[12px] border border-[var(--studio-line,#AA0FA44d)] bg-[var(--studio-marker,#AA0FA41a)]">
+apps/frontend/src/components/billing/embedded.billing.tsx:390:              stroke="var(--studio-text,#FC69FF)"
+apps/frontend/src/components/billing/embedded.billing.tsx:398:            <span className="font-[600] text-[var(--studio-text,#FC69FF)]">{appliedCode}</span>
+apps/frontend/src/components/billing/embedded.billing.tsx:614:      <div className="w-full h-full border-t border-newColColor bg-newBgColorInner px-[80px] tablet:px-[33px] mobile:!px-[16px] flex mobile:flex-col gap-[32px] mobile:gap-[16px] justify-end items-center font-[400] text-[14px] text-[var(--studio-muted,#A3A3A3)] mobile:py-[16px]">
+apps/frontend/src/components/oauth/authorize.component.tsx:118:          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+apps/frontend/src/components/oauth/authorize.component.tsx:119:          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+apps/frontend/src/components/oauth/authorize.component.tsx:129:            <div className="w-[48px] h-[48px] border-[3px] border-[var(--studio-accent,#612BD3)] border-t-transparent rounded-full animate-spin" />
+apps/frontend/src/components/oauth/authorize.component.tsx:140:          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+apps/frontend/src/components/oauth/authorize.component.tsx:141:          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+apps/frontend/src/components/oauth/authorize.component.tsx:178:        <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+apps/frontend/src/components/oauth/authorize.component.tsx:179:        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+apps/frontend/src/components/oauth/authorize.component.tsx:187:        <div className="bg-[var(--studio-panel,#1A1919)] rounded-[16px] p-[32px] flex flex-col gap-[24px]">
+apps/frontend/src/components/oauth/authorize.component.tsx:196:              <div className="w-[64px] h-[64px] rounded-full bg-[var(--studio-panel,#2A2929)] flex items-center justify-center text-[24px] text-gray-400">
+apps/frontend/src/components/oauth/authorize.component.tsx:226:              <div className="border-t border-[var(--studio-line,#2A2929)] pt-[16px]">
+apps/frontend/src/components/oauth/authorize.component.tsx:243:                    className="flex-1 glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+apps/frontend/src/components/oauth/authorize.component.tsx:250:                    className="flex-1 bg-[var(--studio-panel,#2A2929)] hover:bg-[var(--studio-hover,#3A3939)] disabled:opacity-50 text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+apps/frontend/src/components/oauth/authorize.component.tsx:258:                  className="glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7B3FF2)] text-white rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
+apps/frontend/src/components/notifications/notification.component.tsx:58:        <div className="w-[8px] h-[8px] mt-[6px] rounded-full glass-accent bg-[var(--studio-accent,#FF3EA2)] shrink-0" />
+apps/frontend/src/components/notifications/notification.component.tsx:102:          <div className="h-[20px] min-w-[20px] px-[6px] rounded-full glass-accent bg-[var(--studio-accent,#FF3EA2)] text-white text-[12px] font-[600] flex items-center justify-center">
+apps/frontend/src/components/notifications/notification.component.tsx:116:            <div className="w-[48px] h-[48px] rounded-full bg-[var(--studio-marker,#612bd31a)] flex items-center justify-center text-[var(--studio-text,#612bd3)]">
+apps/frontend/src/components/notifications/notification.component.tsx:196:              fill="var(--studio-text,#FF3EA2)"
+apps/frontend/tailwind.config.cjs:21:    return [name, `rgb(var(--studio-${role}-rgb, ${rgb}) / <alpha-value>)`];
+apps/frontend/tailwind.config.cjs:119:        newTextColor: 'rgb(var(--new-textColor) / <alpha-value>)',
+apps/frontend/tailwind.config.cjs:175:        yellow: '0 0 60px 20px #6b6237',
+apps/frontend/tailwind.config.cjs:176:        yellowToast: '0px 0px 50px rgba(252, 186, 3, 0.3)',
+apps/frontend/tailwind.config.cjs:177:        greenToast: '0px 0px 50px rgba(60, 124, 90, 0.3)',
+apps/frontend/tailwind.config.cjs:183:          '0 0 6px rgba(250,204,21,0.6)',
+apps/frontend/tailwind.config.cjs:184:          '0 0 12px rgba(250,204,21,0.5)',
+apps/frontend/tailwind.config.cjs:185:          '0 0 24px rgba(250,204,21,0.4)',
+apps/frontend/src/components/third-parties/third-party.media-library.tsx:122:                          ? 'border-[var(--studio-accent,#612BD3)]'
+apps/frontend/src/components/third-parties/third-party.media-library.tsx:137:                      <div className="text-white flex z-[10] justify-center items-center text-[14px] font-[500] w-[24px] h-[24px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)] absolute -bottom-[2px] -end-[2px]">
+apps/frontend/src/components/third-parties/third-party.media-library.tsx:170:          className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center glass-accent bg-[var(--studio-accent,#612BD3)] flex rounded-[10px] gap-[8px]"
+apps/frontend/src/components/new-launch/editor.tsx:433:            <div className="w-[8px] h-[8px] rounded-full glass-accent bg-[var(--studio-accent,#FC69FF)]" />
+apps/frontend/src/components/new-launch/editor.tsx:506:              <div className="text-white rounded-[8px] h-[44px] px-[20px] glass-accent bg-[var(--studio-accent,#D82D7E)] cursor-pointer flex justify-center items-center">
+apps/frontend/src/components/new-launch/editor.tsx:592:                    className="cursor-pointer text-[var(--studio-error,#FF3F3F)]"
+apps/frontend/src/components/launches/filters.tsx:513:              ? 'border-[var(--studio-accent,#612BD3)] text-[var(--studio-text,#612BD3)]'
+apps/frontend/src/components/launches/filters.tsx:519:            <div className="absolute top-[6px] end-[6px] w-[6px] h-[6px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)]" />
+apps/frontend/src/components/media/media.component.tsx:132:          className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 gap-1 ps-2.5 text-gray-400 hover:text-white border-[var(--studio-line,#1F1F1F)] hover:bg-forth"
+apps/frontend/src/components/media/media.component.tsx:172:          className="text-textColor hover:text-white group cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 gap-1 pe-2.5 text-gray-400 border-[var(--studio-line,#1F1F1F)] hover:bg-forth"
+apps/frontend/src/components/media/media.component.tsx:493:              className="w-full h-[44px] px-[14px] rounded-[8px] bg-newBgColorInner border border-newColColor text-[14px] outline-none focus:border-[var(--studio-accent,#612BD3)]"
+apps/frontend/src/components/media/media.component.tsx:518:              className="hidden mobile:flex basis-full justify-center items-center gap-[8px] h-[24px] text-[15px] font-[600] text-[var(--studio-error,#FF3F3F)] cursor-pointer select-none"
+apps/frontend/src/components/media/media.component.tsx:633:                        ? 'border-[var(--studio-accent,#612BD3)]'
+apps/frontend/src/components/media/media.component.tsx:639:                      <div className="text-white flex z-[101] justify-center items-center text-[14px] font-[500] w-[24px] h-[24px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)] absolute -bottom-[10px] -end-[10px]">
+apps/frontend/src/components/media/media.component.tsx:678:                              fill="var(--studio-text,#F1F5F9)"
+apps/frontend/src/components/media/media.component.tsx:725:                className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center glass-accent bg-[var(--studio-accent,#612BD3)] flex rounded-[10px] mobile:h-[44px] mobile:rounded-[8px] mobile:font-[600] mobile:disabled:opacity-100 mobile:disabled:bg-btnSimple mobile:disabled:text-textItemBlur"
+apps/frontend/src/components/settings/signatures.component.tsx:232:                '!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[var(--studio-accent,#612AD5)] bg-bigStrip outline-none'
+apps/frontend/src/components/settings/apps.component.tsx:28:                  ? 'glass-accent bg-[var(--studio-accent,#612BD3)] text-white'
+apps/frontend/src/components/launches/continue.integration.tsx:286:          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:287:          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:325:          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:326:          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:331:          <div className="bg-[var(--studio-panel,#1A1919)] rounded-[16px] p-[32px] flex flex-col gap-[24px]">
+apps/frontend/src/components/launches/continue.integration.tsx:383:          <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:384:          <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:422:        <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] glass-accent bg-[var(--studio-accent,#612BD3)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:423:        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] glass-accent bg-[var(--studio-accent,#FC69FF)] rounded-full blur-[120px]" />
+apps/frontend/src/components/launches/continue.integration.tsx:435:          <div className="w-[48px] h-[48px] border-[3px] border-[var(--studio-accent,#612BD3)] border-t-transparent rounded-full animate-spin" />
+apps/frontend/src/components/launches/creation.method.badge.tsx:36:        creationMethod === 'WEB' && 'bg-[var(--studio-panel,#6b7280)]',
+apps/frontend/src/components/launches/creation.method.badge.tsx:37:        creationMethod === 'API' && 'bg-[var(--studio-hover,#2563eb)]',
+apps/frontend/src/components/launches/creation.method.badge.tsx:38:        creationMethod === 'MCP' && 'glass-accent bg-[var(--studio-accent,#9333ea)]',
+apps/frontend/src/components/launches/creation.method.badge.tsx:39:        creationMethod === 'AUTOPOST' && 'bg-[var(--studio-warning,#d97706)]',
+apps/frontend/src/components/launches/creation.method.badge.tsx:40:        creationMethod === 'CLI' && 'bg-[var(--studio-hover,#0f766e)]',
+apps/frontend/src/components/launches/time.table.tsx:133:          <DelayIcon size={18} className="text-[var(--studio-text,#612BD3)]" />
+apps/frontend/src/components/launches/time.table.tsx:173:            className="h-[42px] px-[16px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7640e0)] transition-colors rounded-[8px] flex items-center gap-[6px] text-white text-[14px] font-medium"
+apps/frontend/src/components/launches/time.table.tsx:200:                  'hover:border-[var(--studio-accent,#612BD366)] transition-colors'
+apps/frontend/src/components/launches/time.table.tsx:204:                  <div className="w-[8px] h-[8px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)]" />
+apps/frontend/src/components/launches/calendar.tsx:1432:          canDrop && 'border border-[var(--studio-accent,#612BD3)]'
+apps/frontend/src/app/colors.scss:4:    --new-back-drop: #000;
+apps/frontend/src/app/colors.scss:5:    --new-settings: #242323;
+apps/frontend/src/app/colors.scss:6:    --new-border: #252525;
+apps/frontend/src/app/colors.scss:7:    --new-bgColor: #0e0e0e;
+apps/frontend/src/app/colors.scss:8:    --new-bgColorInner: #1a1919;
+apps/frontend/src/app/colors.scss:9:    --new-sep: #454444;
+apps/frontend/src/app/colors.scss:10:    --new-bgLineColor: #212121;
+apps/frontend/src/app/colors.scss:11:    --new-textItemFocused: #1a1919;
+apps/frontend/src/app/colors.scss:12:    --new-textItemBlur: #999999;
+apps/frontend/src/app/colors.scss:13:    --new-boxFocused: #fff;
+apps/frontend/src/app/colors.scss:15:    --new-blockSeparator: #272626;
+apps/frontend/src/app/colors.scss:16:    --new-btn-simple: #313030;
+apps/frontend/src/app/colors.scss:17:    --new-btn-text: #ffffff;
+apps/frontend/src/app/colors.scss:18:    --new-btn-primary: #612bd3;
+apps/frontend/src/app/colors.scss:19:    --new-ai-btn: #d82d7e;
+apps/frontend/src/app/colors.scss:20:    --new-box-hover: #201f1f;
+apps/frontend/src/app/colors.scss:21:    --new-table-border: #2b2b2b;
+apps/frontend/src/app/colors.scss:22:    --new-table-header: #1e1d1d;
+apps/frontend/src/app/colors.scss:23:    --new-table-text: #9c9c9c;
+apps/frontend/src/app/colors.scss:24:    --new-table-text-focused: #fc69ff;
+apps/frontend/src/app/colors.scss:25:    --new-small-strips: #191818;
+apps/frontend/src/app/colors.scss:26:    --new-big-strips: #161515;
+apps/frontend/src/app/colors.scss:27:    --new-col-color: #2c2b2b;
+apps/frontend/src/app/colors.scss:28:    --new-menu-dots: #696868;
+apps/frontend/src/app/colors.scss:29:    --new-menu-hover: #fff;
+apps/frontend/src/app/colors.scss:30:    --menu-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.5);
+apps/frontend/src/app/colors.scss:31:    --popup-color: rgba(65, 64, 66, 0.3);
+apps/frontend/src/app/colors.scss:34:    --linkedin-border: #2e3438;
+apps/frontend/src/app/colors.scss:35:    --linkedin-bg: #1b1f23;
+apps/frontend/src/app/colors.scss:36:    --linkedin-text: #c6c7c8;
+apps/frontend/src/app/colors.scss:37:    --facebook-bg: #242526;
+apps/frontend/src/app/colors.scss:38:    --facebook-bg-comment: #333334;
+apps/frontend/src/app/colors.scss:39:    --instagram-bg: #0b1014;
+apps/frontend/src/app/colors.scss:40:    --tiktok-item-bg: #2a2a2a;
+apps/frontend/src/app/colors.scss:41:    --tiktok-item-icon-bg: #FFF;
+apps/frontend/src/app/colors.scss:42:    --youtube-bg: #0F0F0F;
+apps/frontend/src/app/colors.scss:43:    --youtube-button: #F1F1F1;
+apps/frontend/src/app/colors.scss:44:    --youtube-action-color: #272727;
+apps/frontend/src/app/colors.scss:45:    --youtube-svg-border: #A0A0A0;
+apps/frontend/src/app/colors.scss:49:    --new-back-drop: #2d1b57;
+apps/frontend/src/app/colors.scss:50:    --new-settings: #eceef1;
+apps/frontend/src/app/colors.scss:51:    --new-sep: #d5d9dd;
+apps/frontend/src/app/colors.scss:52:    --new-border: #eaecee;
+apps/frontend/src/app/colors.scss:53:    --new-bgColor: #f0f2f4;
+apps/frontend/src/app/colors.scss:54:    --new-bgColorInner: #ffffff;
+apps/frontend/src/app/colors.scss:55:    --new-bgLineColor: #e7e9eb;
+apps/frontend/src/app/colors.scss:56:    --new-textItemFocused: #3900b2;
+apps/frontend/src/app/colors.scss:57:    --new-textItemBlur: #777b7f;
+apps/frontend/src/app/colors.scss:58:    --new-boxFocused: #ebe8ff;
+apps/frontend/src/app/colors.scss:60:    --new-blockSeparator: #f2f2f4;
+apps/frontend/src/app/colors.scss:61:    --new-btn-simple: #eceef1;
+apps/frontend/src/app/colors.scss:62:    --new-btn-text: #0e0e0e;
+apps/frontend/src/app/colors.scss:63:    --new-btn-primary: #612bd3;
+apps/frontend/src/app/colors.scss:64:    --new-ai-btn: #d82d7e;
+apps/frontend/src/app/colors.scss:65:    --new-box-hover: #f4f6f8;
+apps/frontend/src/app/colors.scss:66:    --new-table-border: #e7e9eb;
+apps/frontend/src/app/colors.scss:67:    --new-table-header: #f5f7f9;
+apps/frontend/src/app/colors.scss:68:    --new-table-text: #777b7f;
+apps/frontend/src/app/colors.scss:69:    --new-table-text-focused: #fc69ff;
+apps/frontend/src/app/colors.scss:70:    --new-small-strips: #191818;
+apps/frontend/src/app/colors.scss:71:    --new-big-strips: #f5f7f9;
+apps/frontend/src/app/colors.scss:72:    --new-col-color: #eff1f3;
+apps/frontend/src/app/colors.scss:73:    --new-menu-dots: #696868;
+apps/frontend/src/app/colors.scss:74:    --new-menu-hover: #000;
+apps/frontend/src/app/colors.scss:75:    --menu-shadow: -22px 83px 24px 0 rgba(55, 52, 75, 0),
+apps/frontend/src/app/colors.scss:76:      -14px 53px 22px 0 rgba(55, 52, 75, 0.01),
+apps/frontend/src/app/colors.scss:77:      -8px 30px 19px 0 rgba(55, 52, 75, 0.05),
+apps/frontend/src/app/colors.scss:78:      -3px 13px 14px 0 rgba(55, 52, 75, 0.09),
+apps/frontend/src/app/colors.scss:79:      -1px 3px 8px 0 rgba(55, 52, 75, 0.1);
+apps/frontend/src/app/colors.scss:80:    --popup-color: rgba(55, 37, 97, 0.2);
+apps/frontend/src/app/colors.scss:81:    --border-preview: #f1f0f3;
+apps/frontend/src/app/colors.scss:82:    --preview-box-shadow: 0 386px 108px 0 rgba(38, 32, 64, 0),
+apps/frontend/src/app/colors.scss:83:      0 247px 99px 0 rgba(38, 32, 64, 0.01),
+apps/frontend/src/app/colors.scss:84:      0 139px 83px 0 rgba(38, 32, 64, 0.03),
+apps/frontend/src/app/colors.scss:85:      0 62px 62px 0 rgba(38, 32, 64, 0.04), 0 15px 34px 0 rgba(38, 32, 64, 0.05);
+apps/frontend/src/app/colors.scss:86:    --linkedin-border: #e9e5df;
+apps/frontend/src/app/colors.scss:87:    --linkedin-bg: #fff;
+apps/frontend/src/app/colors.scss:88:    --linkedin-text: #707070;
+apps/frontend/src/app/colors.scss:89:    --facebook-bg: #fff;
+apps/frontend/src/app/colors.scss:90:    --facebook-bg-comment: #f6f6f6;
+apps/frontend/src/app/colors.scss:91:    --instagram-bg: #fff;
+apps/frontend/src/app/colors.scss:92:    --tiktok-item-bg: #EEF1F0;
+apps/frontend/src/app/colors.scss:93:    --tiktok-item-icon-bg: #454645;
+apps/frontend/src/app/colors.scss:94:    --youtube-bg: #FFF;
+apps/frontend/src/app/colors.scss:95:    --youtube-button: #000;
+apps/frontend/src/app/colors.scss:96:    --youtube-action-color: #F1F1F1;
+apps/frontend/src/app/colors.scss:97:    --youtube-svg-border: #1A1A1A;
+apps/frontend/src/app/colors.scss:104:    --color-primary: #0e0e0e;
+apps/frontend/src/app/colors.scss:105:    --color-secondary: #090b13;
+apps/frontend/src/app/colors.scss:106:    --color-text: #ffffff;
+apps/frontend/src/app/colors.scss:107:    --color-third: #080b13;
+apps/frontend/src/app/colors.scss:108:    --color-forth: #612ad5;
+apps/frontend/src/app/colors.scss:111:    --color-seventh: #7236f1;
+apps/frontend/src/app/colors.scss:112:    --color-gray: #8c8c8c;
+apps/frontend/src/app/colors.scss:114:    --color-input-text: #64748b;
+apps/frontend/src/app/colors.scss:116:    --color-custom1: #324264;
+apps/frontend/src/app/colors.scss:117:    --color-custom2: #141c2c;
+apps/frontend/src/app/colors.scss:118:    --color-custom3: #0b0f1c;
+apps/frontend/src/app/colors.scss:119:    --color-custom4: #8155dd;
+apps/frontend/src/app/colors.scss:120:    --color-custom5: #e9e9f1;
+apps/frontend/src/app/colors.scss:122:    --color-custom7: #7950f2;
+apps/frontend/src/app/colors.scss:124:    --color-custom9: #354258;
+apps/frontend/src/app/colors.scss:125:    --color-custom10: #e4b895;
+apps/frontend/src/app/colors.scss:126:    --color-custom11: #8b90ff;
+apps/frontend/src/app/colors.scss:127:    --color-custom12: #b7c1ff;
+apps/frontend/src/app/colors.scss:128:    --color-custom13: #ffac30;
+apps/frontend/src/app/colors.scss:129:    --color-custom14: #576a9a;
+apps/frontend/src/app/colors.scss:130:    --color-custom15: #0a0a0a;
+apps/frontend/src/app/colors.scss:131:    --color-custom16: #121a2d;
+apps/frontend/src/app/colors.scss:132:    --color-custom17: #d3d3d3;
+apps/frontend/src/app/colors.scss:133:    --color-custom18: #aaaaaa;
+apps/frontend/src/app/colors.scss:134:    --color-custom19: #f97066;
+apps/frontend/src/app/colors.scss:135:    --color-custom20: #121b2c;
+apps/frontend/src/app/colors.scss:136:    --color-custom21: #506490;
+apps/frontend/src/app/colors.scss:137:    --color-custom22: #b91c1c;
+apps/frontend/src/app/colors.scss:138:    --color-custom23: #000000;
+apps/frontend/src/app/colors.scss:139:    --color-custom24: #eaff00;
+apps/frontend/src/app/colors.scss:140:    --color-custom25: #2e3336;
+apps/frontend/src/app/colors.scss:141:    --color-custom26: #1d9bf0;
+apps/frontend/src/app/colors.scss:142:    --color-custom27: #71767b;
+apps/frontend/src/app/colors.scss:143:    --color-custom28: #b69dec;
+apps/frontend/src/app/colors.scss:144:    --color-custom29: #291259;
+apps/frontend/src/app/colors.scss:145:    --color-custom30: #5826c2;
+apps/frontend/src/app/colors.scss:146:    --color-custom31: #0f1727;
+apps/frontend/src/app/colors.scss:147:    --color-custom32: #181818;
+apps/frontend/src/app/colors.scss:148:    --color-custom33: #f2f2f2;
+apps/frontend/src/app/colors.scss:149:    --color-custom34: #334155;
+apps/frontend/src/app/colors.scss:150:    --color-custom35: #242424;
+apps/frontend/src/app/colors.scss:151:    --color-custom36: #6b6b6b;
+apps/frontend/src/app/colors.scss:152:    --color-custom37: #0b1416;
+apps/frontend/src/app/colors.scss:153:    --color-custom38: #d9d9d9;
+apps/frontend/src/app/colors.scss:154:    --color-custom39: #ffffff;
+apps/frontend/src/app/colors.scss:155:    --color-custom40: #0e0e0e;
+apps/frontend/src/app/colors.scss:156:    --color-custom41: #cebdf2;
+apps/frontend/src/app/colors.scss:157:    --color-custom42: #32d583;
+apps/frontend/src/app/colors.scss:158:    --color-custom43: #425379;
+apps/frontend/src/app/colors.scss:159:    --color-custom44: #283450;
+apps/frontend/src/app/colors.scss:160:    --color-custom45: #832ad5;
+apps/frontend/src/app/colors.scss:161:    --color-custom46: #658dac;
+apps/frontend/src/app/colors.scss:162:    --color-custom47: #182034;
+apps/frontend/src/app/colors.scss:163:    --color-custom48: #080b14;
+apps/frontend/src/app/colors.scss:164:    --color-custom49: #0a0b14;
+apps/frontend/src/app/colors.scss:165:    --color-custom50: #262373;
+apps/frontend/src/app/colors.scss:166:    --color-custom51: #4f46e5;
+apps/frontend/src/app/colors.scss:167:    --color-custom52: #eaeef2;
+apps/frontend/src/app/colors.scss:168:    --color-custom53: #7c7d86;
+apps/frontend/src/app/colors.scss:169:    --color-custom54: #afb8c1;
+apps/frontend/src/app/colors.scss:170:    --color-custom55: #1b263b;
+apps/frontend/src/app/colors.scss:171:    --color-modalCustom: #000000;
+apps/frontend/src/app/colors.scss:175:    --color-primary: #f0f2f4;
+apps/frontend/src/app/colors.scss:176:    --color-secondary: #fff;
+apps/frontend/src/app/colors.scss:177:    --color-text: #000;
+apps/frontend/src/app/colors.scss:179:    --color-forth: #612ad5;
+apps/frontend/src/app/colors.scss:182:    --color-seventh: #7236f1;
+apps/frontend/src/app/colors.scss:183:    --color-gray: #8c8c8c;
+apps/frontend/src/app/colors.scss:185:    --color-input-text: #64748b;
+apps/frontend/src/app/colors.scss:186:    --color-table-border: #efefef;
+apps/frontend/src/app/colors.scss:187:    --color-custom1: #324264;
+apps/frontend/src/app/colors.scss:188:    --color-custom2: #f8f8f8;
+apps/frontend/src/app/colors.scss:189:    --color-custom3: #fff;
+apps/frontend/src/app/colors.scss:190:    --color-custom4: #8155dd;
+apps/frontend/src/app/colors.scss:191:    --color-custom5: #e9e9f1;
+apps/frontend/src/app/colors.scss:193:    --color-custom7: #7950f2;
+apps/frontend/src/app/colors.scss:195:    --color-custom9: #354258;
+apps/frontend/src/app/colors.scss:196:    --color-custom10: #e4b895;
+apps/frontend/src/app/colors.scss:197:    --color-custom11: #8b90ff;
+apps/frontend/src/app/colors.scss:198:    --color-custom12: #b7c1ff;
+apps/frontend/src/app/colors.scss:199:    --color-custom13: #ffac30;
+apps/frontend/src/app/colors.scss:200:    --color-custom14: #576a9a;
+apps/frontend/src/app/colors.scss:201:    --color-custom15: #0a0a0a;
+apps/frontend/src/app/colors.scss:202:    --color-custom16: #121a2d;
+apps/frontend/src/app/colors.scss:203:    --color-custom17: #000;
+apps/frontend/src/app/colors.scss:204:    --color-custom18: #000;
+apps/frontend/src/app/colors.scss:205:    --color-custom19: #f97066;
+apps/frontend/src/app/colors.scss:206:    --color-custom20: #f5f5f5;
+apps/frontend/src/app/colors.scss:207:    --color-custom21: #506490;
+apps/frontend/src/app/colors.scss:208:    --color-custom22: #b91c1c;
+apps/frontend/src/app/colors.scss:209:    --color-custom23: #f5f5f5;
+apps/frontend/src/app/colors.scss:210:    --color-custom24: #eaff00;
+apps/frontend/src/app/colors.scss:211:    --color-custom25: #2e3336;
+apps/frontend/src/app/colors.scss:212:    --color-custom26: #1d9bf0;
+apps/frontend/src/app/colors.scss:213:    --color-custom27: #71767b;
+apps/frontend/src/app/colors.scss:214:    --color-custom28: #b69dec;
+apps/frontend/src/app/colors.scss:215:    --color-custom29: #291259;
+apps/frontend/src/app/colors.scss:216:    --color-custom30: #efefef;
+apps/frontend/src/app/colors.scss:217:    --color-custom31: #e0e0e0;
+apps/frontend/src/app/colors.scss:218:    --color-custom32: #181818;
+apps/frontend/src/app/colors.scss:219:    --color-custom33: #f2f2f2;
+apps/frontend/src/app/colors.scss:220:    --color-custom34: #334155;
+apps/frontend/src/app/colors.scss:221:    --color-custom35: #242424;
+apps/frontend/src/app/colors.scss:222:    --color-custom36: #6b6b6b;
+apps/frontend/src/app/colors.scss:223:    --color-custom37: #0b1416;
+apps/frontend/src/app/colors.scss:224:    --color-custom38: #d9d9d9;
+apps/frontend/src/app/colors.scss:225:    --color-custom39: #000;
+apps/frontend/src/app/colors.scss:226:    --color-custom40: #fff;
+apps/frontend/src/app/colors.scss:227:    --color-custom41: #cebdf2;
+apps/frontend/src/app/colors.scss:228:    --color-custom42: #32d583;
+apps/frontend/src/app/colors.scss:229:    --color-custom43: #425379;
+apps/frontend/src/app/colors.scss:230:    --color-custom44: #283450;
+apps/frontend/src/app/colors.scss:231:    --color-custom45: #832ad5;
+apps/frontend/src/app/colors.scss:232:    --color-custom46: #658dac;
+apps/frontend/src/app/colors.scss:233:    --color-custom47: #182034;
+apps/frontend/src/app/colors.scss:234:    --color-custom48: #fff;
+apps/frontend/src/app/colors.scss:235:    --color-custom49: #0a0b14;
+apps/frontend/src/app/colors.scss:236:    --color-custom50: #262373;
+apps/frontend/src/app/colors.scss:237:    --color-custom51: #4f46e5;
+apps/frontend/src/app/colors.scss:238:    --color-custom52: #eaeef2;
+apps/frontend/src/app/colors.scss:239:    --color-custom53: #7c7d86;
+apps/frontend/src/app/colors.scss:240:    --color-custom54: #afb8c1;
+apps/frontend/src/app/colors.scss:241:    --color-custom55: #d5d7e1;
+apps/frontend/src/app/colors.scss:249:  --page: #10151F;
+apps/frontend/src/app/colors.scss:250:  --frame: rgba(31,40,54,.92);
+apps/frontend/src/app/colors.scss:251:  --tile: rgba(52,66,84,.80);
+apps/frontend/src/app/colors.scss:252:  --tile-hover: #3B4B60;
+apps/frontend/src/app/colors.scss:253:  --inset: #222E40;
+apps/frontend/src/app/colors.scss:254:  --popover: #273449;
+apps/frontend/src/app/colors.scss:255:  --text: #F4F7FC;
+apps/frontend/src/app/colors.scss:256:  --muted: #BBC7D8;
+apps/frontend/src/app/colors.scss:257:  --link: #85C2FF;
+apps/frontend/src/app/colors.scss:258:  --accent: #2F95FF;
+apps/frontend/src/app/colors.scss:259:  --button: #2F95FF;
+apps/frontend/src/app/colors.scss:260:  --button-hover: #65B1FF;
+apps/frontend/src/app/colors.scss:261:  --on-accent: #07182B;
+apps/frontend/src/app/colors.scss:262:  --coral: #FF6347;
+apps/frontend/src/app/colors.scss:263:  --lime: #C9E650;
+apps/frontend/src/app/colors.scss:264:  --focus: #C9E650;
+apps/frontend/src/app/colors.scss:265:  --selected-top: #1869B2;
+apps/frontend/src/app/colors.scss:266:  --selected-bottom: #253B52;
+apps/frontend/src/app/colors.scss:267:  --avatar: #3D5573;
+apps/frontend/src/app/colors.scss:268:  --chart-bar: #6087B1;
+apps/frontend/src/app/colors.scss:269:  --line: rgba(200,219,244,.16);
+apps/frontend/src/app/colors.scss:270:  --input-border: #63758D;
+apps/frontend/src/app/colors.scss:271:  --error: #FF9B8F;
+apps/frontend/src/app/colors.scss:272:  --success: #8FE3B8;
+apps/frontend/src/app/colors.scss:273:  --warning: #FFD27A;
+apps/frontend/src/app/colors.scss:274:  --shadow: 0 20px 70px rgba(4,12,25,.20);
+apps/frontend/src/app/colors.scss:275:  --tile-highlight: inset 0 1px 0 rgba(255,255,255,.025);
+apps/frontend/src/app/global.scss:138:  border-color: #fd5956;
+apps/frontend/src/app/global.scss:139:  box-shadow: 0 0 0 2px rgba(253, 86, 83, 0.25);
+apps/frontend/src/app/global.scss:243:  box-shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -4px,
+apps/frontend/src/app/global.scss:244:    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+apps/frontend/src/app/global.scss:276:  background-color: #ffdd00;
+apps/frontend/src/app/global.scss:328://  --copilot-kit-primary-color: #612ad5 !important;
+apps/frontend/src/app/global.scss:329://  --copilot-kit-background-color: #0b0f1c !important;
+apps/frontend/src/app/global.scss:330://  --copilot-kit-separator-color: #1f2941 !important;
+apps/frontend/src/app/global.scss:331://  --copilot-kit-contrast-color: #ffffff !important;
+apps/frontend/src/app/global.scss:332://  --copilot-kit-secondary-contrast-color: #ffffff !important;
+apps/frontend/src/app/global.scss:333://  --copilot-kit-secondary-color: #000 !important;
+apps/frontend/src/app/global.scss:334://  --copilot-kit-response-button-background-color: #000 !important;
+apps/frontend/src/app/global.scss:335://  --copilot-kit-response-button-color: #fff !important;
+apps/frontend/src/app/global.scss:428:  color: rgba(255, 255, 255, 0.5);
+apps/frontend/src/app/global.scss:616:    color: #656464;
+apps/frontend/src/app/global.scss:622:  color: #ae8afc;
+apps/frontend/src/app/global.scss:710:  background: rgba(65, 64, 66, 0.3) !important;
+apps/frontend/src/app/global.scss:752:    color: #ae8afc;
+apps/frontend/src/app/global.scss:809:  background: linear-gradient(180deg, #0e0e0e 0%, rgba(14, 14, 14, 0) 100%);
+apps/frontend/src/app/global.scss:814:  background: linear-gradient(180deg, #0e0e0e 0%, rgba(14, 14, 14, 0) 100%);
+apps/frontend/src/app/global.scss:823:  box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.5);
+apps/frontend/src/app/global.scss:827:  box-shadow: -33px 57px 18px 0 rgba(0, 0, 0, 0.01),
+apps/frontend/src/app/global.scss:828:    -21px 36px 17px 0 rgba(0, 0, 0, 0.06), -12px 20px 14px 0 rgba(0, 0, 0, 0.2),
+apps/frontend/src/app/global.scss:829:    -5px 9px 11px 0 rgba(0, 0, 0, 0.34), -1px 2px 6px 0 rgba(0, 0, 0, 0.39);
+apps/frontend/src/app/global.scss:844:  color: #adb5bd;
+apps/frontend/src/app/global.scss:863:  color: #fff !important;
+apps/frontend/src/app/global.scss:904:        rgba(255, 255, 255, 0.1) 12% 21%,
+apps/frontend/src/app/global.scss:910:        rgba(133, 194, 255, 0.2) 61% 71%,
+apps/frontend/src/app/global.scss:916:        rgba(133, 194, 255, 0.14) 8% 16%,
+apps/frontend/src/app/global.scss:919:      linear-gradient(to bottom, transparent 45%, rgba(30, 134, 220, 0.9) 100%);
+apps/frontend/src/components/analytics/chart-social.tsx:43:      start: 'rgba(97, 43, 211, 0.8)',
+apps/frontend/src/components/analytics/chart-social.tsx:44:      end: 'rgba(97, 43, 211, 0.1)',
+apps/frontend/src/components/analytics/chart-social.tsx:45:      border: 'rgb(97, 43, 211)',
+apps/frontend/src/components/analytics/chart-social.tsx:48:      start: 'rgba(50, 213, 131, 0.8)',
+apps/frontend/src/components/analytics/chart-social.tsx:49:      end: 'rgba(50, 213, 131, 0.1)',
+apps/frontend/src/components/analytics/chart-social.tsx:50:      border: 'rgb(50, 213, 131)',
+apps/frontend/src/components/analytics/chart-social.tsx:53:      start: 'rgba(29, 155, 240, 0.8)',
+apps/frontend/src/components/analytics/chart-social.tsx:54:      end: 'rgba(29, 155, 240, 0.1)',
+apps/frontend/src/components/analytics/chart-social.tsx:55:      border: 'rgb(29, 155, 240)',
+apps/frontend/src/components/analytics/chart-social.tsx:111:            backgroundColor: glass ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',
+apps/frontend/src/components/analytics/chart-social.tsx:112:            titleColor: glass ? studioColor('text') : mode === 'dark' ? '#fff' : '#000',
+apps/frontend/src/components/analytics/chart-social.tsx:113:            bodyColor: glass ? studioColor('muted') : mode === 'dark' ? '#9c9c9c' : '#777',
+apps/frontend/src/components/analytics/chart-social.tsx:114:            borderColor: glass ? studioColor('line') : mode === 'dark' ? '#2b2b2b' : '#e7e9eb',
+apps/frontend/src/components/analytics/chart-social.tsx:147:            pointHoverBorderColor: glass ? studioColor('panel') : mode === 'dark' ? '#1e1d1d' : '#fff',

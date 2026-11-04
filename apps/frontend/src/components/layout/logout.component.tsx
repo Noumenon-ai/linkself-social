@@ -31,12 +31,26 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
           method: 'POST',
         });
       }
-      window.location.href = linkselfUrl ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social` : '/auth/login';
+      window.location.href = linkselfUrl
+        ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social`
+        : '/auth/login';
     }
   }, [fetch, isSecured, linkselfUrl, t]);
   return (
     <>
-      <div className="cursor-pointer" onClick={logout}>
+      <div
+        className="cursor-pointer"
+        role="button"
+        tabIndex={0}
+        aria-label={t('logout', 'Log out')}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            logout();
+          }
+        }}
+        onClick={logout}
+      >
         {isIcon ? (
           <svg
             width="24"

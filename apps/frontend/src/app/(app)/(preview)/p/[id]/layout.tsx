@@ -3,7 +3,7 @@ import { PreviewWrapper } from '@gitroom/frontend/components/preview/preview.wra
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="blueprint-public-preview bg-newBgColor min-h-screen text-newTextColor">
+    <div className="glass-public-preview bg-newBgColor min-h-screen text-newTextColor">
       <PreviewWrapper>{children}</PreviewWrapper>
     </div>
   );

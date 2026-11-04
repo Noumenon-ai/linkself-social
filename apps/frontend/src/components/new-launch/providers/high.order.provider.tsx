@@ -268,7 +268,7 @@ export const withProvider = function <T extends object>(params: {
         <FormProvider {...form}>
           <div
             className={clsx(
-              'blueprint-frame border border-borderPreview rounded-[12px] shadow-previewShadow',
+              'glass-frame border border-borderPreview rounded-[12px] shadow-previewShadow',
               !current && 'hidden'
             )}
           >

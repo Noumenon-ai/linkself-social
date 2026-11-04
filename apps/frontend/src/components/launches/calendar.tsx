@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useMemo,
   useState,
+  CSSProperties,
 } from 'react';
 import {
   CalendarContext,
@@ -61,6 +62,7 @@ import {
   newDayjs,
 } from '@gitroom/frontend/components/layout/set.timezone';
 import { Button } from '@gitroom/react/form/button';
+import { NewPost } from '@gitroom/frontend/components/launches/new.post';
 import { ChevronUpIcon } from '@gitroom/frontend/components/ui/icons';
 
 // Extend dayjs with necessary plugins
@@ -282,9 +284,10 @@ const usePostActions = (onMutate?: () => void) => {
         return;
       }
 
-      await fetch(`/posts/${post.group}`, {
+      const response = await fetch(`/posts/${post.group}`, {
         method: 'DELETE',
       });
+      if (!response.ok) return false;
 
       toaster.show(
         t('post_deleted_successfully', 'Post deleted successfully'),
@@ -292,6 +295,7 @@ const usePostActions = (onMutate?: () => void) => {
       );
 
       mutate();
+      return true;
     },
     [toaster, t, fetch, mutate]
   );
@@ -323,9 +327,7 @@ const usePostActions = (onMutate?: () => void) => {
         classNames: {
           modal: 'w-[100%] max-w-[800px]',
         },
-        children: (
-          <MissingReleaseModal postId={id} onSuccess={mutate} />
-        ),
+        children: <MissingReleaseModal postId={id} onSuccess={mutate} />,
         size: '60%',
       });
     },
@@ -391,7 +393,14 @@ const usePostActions = (onMutate?: () => void) => {
     [fetch, toaster, t]
   );
 
-  return { editPost, deletePost, copyDebugJson, openStatistics, openMissingRelease, openPost };
+  return {
+    editPost,
+    deletePost,
+    copyDebugJson,
+    openStatistics,
+    openMissingRelease,
+    openPost,
+  };
 };
 
 // A day view slot is a minute of the user's day, on the day in view
@@ -541,99 +550,401 @@ export const WeekView = () => {
 
   return (
     <>
-    <div className="blueprint-week-desktop flex flex-col text-textColor flex-1">
-      <div className="flex-1 relative">
-        <div className="blueprint-week-grid grid [grid-template-columns:136px_repeat(7,_minmax(0,_1fr))] tablet:[grid-template-columns:72px_repeat(7,_minmax(100px,_1fr))] gap-[4px] rounded-[10px] absolute h-full start-0 top-0 w-full overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
-          <div className="z-10 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0"><span className="blueprint-hours blueprint-note">{t('hours', 'hours')}</span></div>
-          {localizedDays.map((day, index) => (
-            <div
-              key={day.name}
-              data-today={day.date.isSame(newDayjs(), 'day') || undefined}
-              className="p-2 text-center bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 z-[20]"
-            >
-              <div className="text-[14px] font-[500] text-newTableText">
-                {day.name}
-              </div>
-              <div
-                className={clsx(
-                  'text-[14px] font-[600] flex items-center justify-center gap-[6px]',
-                  day.day === newDayjs().format('L') &&
-                    'text-newTableTextFocused'
-                )}
-              >
-                {day.day === newDayjs().format('L') && (
-                  <div className="w-[6px] h-[6px] bg-newTableTextFocused rounded-full" />
-                )}
-                {day.day}
-              </div>
+      <div className="glass-week-desktop flex flex-col text-textColor flex-1">
+        <div className="flex-1 relative">
+          <div className="glass-week-grid grid [grid-template-columns:136px_repeat(7,_minmax(0,_1fr))] tablet:[grid-template-columns:72px_repeat(7,_minmax(100px,_1fr))] gap-[4px] rounded-[10px] absolute h-full start-0 top-0 w-full overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
+            <div className="z-10 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0">
+              <span className="glass-hours glass-note">
+                {t('hours', 'hours')}
+              </span>
             </div>
-          ))}
-          {hours.map((hour) => (
-            <Fragment key={hour}>
-              <div className="p-2 pe-4 tablet:px-[4px] text-center items-center justify-center flex text-[14px] tablet:text-[12px] tablet:whitespace-nowrap text-newTableText">
-                {convertTimeFormatBasedOnLocality(hour)}
-              </div>
-              {localizedDays.map((day, indexDay) => (
-                <Fragment
-                  key={`${startDate}-${day.date.format('YYYY-MM-DD')}-${hour}`}
+            {localizedDays.map((day, index) => (
+              <div
+                key={day.name}
+                data-today={day.date.isSame(newDayjs(), 'day') || undefined}
+                className="p-2 text-center bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 z-[20]"
+              >
+                <div className="text-[14px] font-[500] text-newTableText">
+                  {day.name}
+                </div>
+                <div
+                  className={clsx(
+                    'text-[14px] font-[600] flex items-center justify-center gap-[6px]',
+                    day.day === newDayjs().format('L') &&
+                      'text-newTableTextFocused'
+                  )}
                 >
-                  <div className="blueprint-calendar-cell relative" data-today={day.date.isSame(newDayjs(), 'day') || undefined}>
-                    <CalendarColumn
-                      getDate={day.date.hour(hour).startOf('hour')}
-                    />
-                  </div>
-                </Fragment>
-              ))}
-            </Fragment>
-          ))}
-          <WeekNowLine days={localizedDays.map((day) => day.date)} />
+                  {day.day === newDayjs().format('L') && (
+                    <div className="w-[6px] h-[6px] bg-newTableTextFocused rounded-full" />
+                  )}
+                  {day.day}
+                </div>
+              </div>
+            ))}
+            {hours.map((hour) => (
+              <Fragment key={hour}>
+                <div className="p-2 pe-4 tablet:px-[4px] text-center items-center justify-center flex text-[14px] tablet:text-[12px] tablet:whitespace-nowrap text-newTableText">
+                  {convertTimeFormatBasedOnLocality(hour)}
+                </div>
+                {localizedDays.map((day, indexDay) => (
+                  <Fragment
+                    key={`${startDate}-${day.date.format(
+                      'YYYY-MM-DD'
+                    )}-${hour}`}
+                  >
+                    <div
+                      className="glass-calendar-cell relative"
+                      data-today={
+                        day.date.isSame(newDayjs(), 'day') || undefined
+                      }
+                    >
+                      <CalendarColumn
+                        getDate={day.date.hour(hour).startOf('hour')}
+                      />
+                    </div>
+                  </Fragment>
+                ))}
+              </Fragment>
+            ))}
+            <WeekNowLine days={localizedDays.map((day) => day.date)} />
+          </div>
         </div>
       </div>
-    </div>
-    {linkselfUrl && <BlueprintWeekAgenda days={localizedDays.map((day) => day.date)} />}
+      {linkselfUrl && (
+        <GlassWeekAgenda days={localizedDays.map((day) => day.date)} />
+      )}
     </>
   );
 };
 
 // On phones, the same week's posts become the reference's single-column agenda.
 // Reuse the calendar actions and timezone-normalized occurrences without fetching.
-const BlueprintWeekAgenda: FC<{ days: dayjs.Dayjs[] }> = ({ days }) => {
+const GlassWeekAgenda: FC<{ days: dayjs.Dayjs[] }> = ({ days }) => {
   const { posts, postDates, integrations, loading } = useCalendar();
   const user = useUser();
   const t = useT();
-  const { editPost, deletePost, copyDebugJson, openStatistics, openMissingRelease, openPost } = usePostActions();
+  const {
+    editPost,
+    deletePost,
+    copyDebugJson,
+    openStatistics,
+    openMissingRelease,
+    openPost,
+  } = usePostActions();
   return (
-    <div className="blueprint-mobile-week">
+    <div className="glass-mobile-week">
       {days.map((day) => {
-        const dayPosts = posts.filter((post) => postDates.get(post)?.isSame(day, 'day'));
+        const dayPosts = posts.filter((post) =>
+          postDates.get(post)?.isSame(day, 'day')
+        );
         return (
-          <section key={day.format('YYYY-MM-DD')} data-today={day.isSame(newDayjs(), 'day') || undefined}>
-            <h2><span>{day.format('dddd')}</span><time dateTime={day.format('YYYY-MM-DD')}>{day.format('L')}</time></h2>
-            {loading ? <div className="bg-newBgColorInner min-h-[44px]" aria-busy="true" /> : dayPosts.length ? dayPosts.map((post) => (
-              <CalendarItem
-                key={`${post.id}-${postDates.get(post)?.valueOf()}`}
-                display="day"
-                isBeforeNow={false}
-                date={postDates.get(post)!}
-                state={post.state}
-                statistics={openStatistics(post.id)}
-                missingRelease={openMissingRelease(post.id)}
-                openPost={openPost(post)}
-                editPost={editPost(post, false)}
-                duplicatePost={editPost(post, true)}
-                copyDebugJson={user?.isSuperAdmin ? copyDebugJson(post) : undefined}
-                post={post}
-                integrations={integrations}
-                deletePost={deletePost(post)}
-                showTime
+          <section
+            key={day.format('YYYY-MM-DD')}
+            data-today={day.isSame(newDayjs(), 'day') || undefined}
+          >
+            <h2>
+              <span>{day.format('dddd')}</span>
+              <time dateTime={day.format('YYYY-MM-DD')}>{day.format('L')}</time>
+            </h2>
+            {loading ? (
+              <div
+                className="bg-newBgColorInner min-h-[44px]"
+                aria-busy="true"
               />
-            )) : <p className="blueprint-note">{t('no_posts', 'No posts')}</p>}
+            ) : dayPosts.length ? (
+              dayPosts.map((post) => (
+                <CalendarItem
+                  key={`${post.id}-${postDates.get(post)?.valueOf()}`}
+                  display="day"
+                  isBeforeNow={false}
+                  date={postDates.get(post)!}
+                  state={post.state}
+                  statistics={openStatistics(post.id)}
+                  missingRelease={openMissingRelease(post.id)}
+                  openPost={openPost(post)}
+                  editPost={editPost(post, false)}
+                  duplicatePost={editPost(post, true)}
+                  copyDebugJson={
+                    user?.isSuperAdmin ? copyDebugJson(post) : undefined
+                  }
+                  post={post}
+                  integrations={integrations}
+                  deletePost={deletePost(post)}
+                  showTime
+                />
+              ))
+            ) : (
+              <p className="glass-note">{t('no_posts', 'No posts')}</p>
+            )}
           </section>
         );
       })}
     </div>
   );
 };
+// This detail popup uses the loaded post; edit and publish actions remain the existing ones.
+const useLoadedPostDetails = () => {
+  const modal = useModals();
+  const {
+    editPost,
+    deletePost,
+    openStatistics,
+    openMissingRelease,
+    openPost,
+    copyDebugJson,
+  } = usePostActions();
+  const { integrations } = useCalendar();
+  const user = useUser();
+  const t = useT();
+  return (post: React.ContextType<typeof CalendarContext>['posts'][number]) =>
+    () =>
+      modal.openModal({
+        id: `post-details-${post.id}`,
+        title: t('post_details', 'Post details'),
+        size: '560px',
+        children: (
+          <div className="glass-post-details">
+            <dl>
+              <div>
+                <dt>{t('channel', 'Channel')}</dt>
+                <dd>{post.integration.name}</dd>
+              </div>
+              <div>
+                <dt>{t('date', 'Date')}</dt>
+                <dd>{fromUtc(post.publishDate).format('dddd, D MMMM YYYY')}</dd>
+              </div>
+              <div>
+                <dt>{t('time', 'Time')}</dt>
+                <dd>{fromUtc(post.publishDate).format('LT')}</dd>
+              </div>
+              <div>
+                <dt>{t('status', 'Status')}</dt>
+                <dd>
+                  {post.state === 'QUEUE'
+                    ? t('scheduled', 'Scheduled')
+                    : post.state === 'PUBLISHED'
+                    ? t('published', 'Published')
+                    : post.state === 'ERROR'
+                    ? t('error', 'Error')
+                    : t('draft', 'Draft')}
+                </dd>
+              </div>
+            </dl>
+            <p>
+              {stripHtmlValidation(
+                'none',
+                post.content || '',
+                false,
+                true,
+                false
+              )}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={editPost(post, false)}>
+                {t('edit_post', 'Edit post')}
+              </Button>
+              <Button secondary onClick={editPost(post, true)}>
+                {t('duplicate', 'Duplicate')}
+              </Button>
+              <Button
+                secondary
+                onClick={() =>
+                  window.open(
+                    `/p/${post.id}?share=true`,
+                    '_blank',
+                    'noopener,noreferrer'
+                  )
+                }
+              >
+                {t('preview', 'Preview')}
+              </Button>
+              {(post.state === 'PUBLISHED' ||
+                (post.state === 'ERROR' &&
+                  post.releaseURL?.startsWith('http'))) && (
+                <Button secondary onClick={openPost(post)}>
+                  {t('open_post', 'Open post')}
+                </Button>
+              )}
+              {post.state === 'PUBLISHED' &&
+                post.releaseId &&
+                integrations.find((item) => item.id === post.integration.id)
+                  ?.hasPostAnalytics && (
+                  <Button
+                    secondary
+                    onClick={
+                      post.releaseId === 'missing'
+                        ? openMissingRelease(post.id)
+                        : openStatistics(post.id)
+                    }
+                  >
+                    {t('statistics', 'Statistics')}
+                  </Button>
+                )}
+              {post.state === 'ERROR' && (
+                <p className="text-red-500">
+                  {post.error ||
+                    t(
+                      'publishing_failed',
+                      'Publishing failed. Edit the post to try again.'
+                    )}
+                </p>
+              )}
+              {user?.isSuperAdmin && (
+                <Button secondary onClick={copyDebugJson(post)}>
+                  {t('copy_debug_json', 'Copy Debug JSON')}
+                </Button>
+              )}
+              <Button
+                secondary
+                onClick={async () => {
+                  if (await deletePost(post)())
+                    modal.closeById(`post-details-${post.id}`);
+                }}
+              >
+                {t('delete', 'Delete')}
+              </Button>
+            </div>
+          </div>
+        ),
+      });
+};
+
+const channelColor = (id: string, integrations: Integrations[]) =>
+  ['var(--accent)', 'var(--coral)', 'var(--lime)'][
+    Math.max(
+      0,
+      integrations.findIndex((item) => item.id === id)
+    ) % 3
+  ];
+
+export const ScheduledPosts = () => {
+  const { linkselfUrl } = useVariables();
+  const {
+    posts,
+    listPosts,
+    display,
+    selectedDay,
+    setSelectedDay,
+    startDate,
+    integrations,
+    loading,
+  } = useCalendar();
+  const showDetails = useLoadedPostDetails();
+  const t = useT();
+  const addProvider = useAddProvider();
+  const day = newDayjs(display === 'day' ? startDate : selectedDay);
+  const dayPosts = useMemo(
+    () =>
+      (display === 'list' ? listPosts : posts)
+        .filter((post) => fromUtc(post.publishDate).isSame(day, 'day'))
+        .sort(
+          (a, b) =>
+            fromUtc(a.publishDate).valueOf() - fromUtc(b.publishDate).valueOf()
+        ),
+    [display, listPosts, posts, day.valueOf()]
+  );
+  if (!linkselfUrl) return null;
+  return (
+    <aside
+      className="glass-schedule glass-frame"
+      aria-label={t('scheduled', 'Scheduled')}
+    >
+      <header>
+        <p>{day.format('dddd, D MMMM YYYY')}</p>
+        <h2>{t('scheduled', 'Scheduled')}</h2>
+        <label className="sr-only" htmlFor="schedule-day">
+          {t('select_day', 'Select day')}
+        </label>
+        <input
+          id="schedule-day"
+          type="date"
+          value={day.format('YYYY-MM-DD')}
+          onChange={(event) =>
+            event.target.value && setSelectedDay(event.target.value)
+          }
+          className="w-full"
+        />
+      </header>
+      {loading ? (
+        <div
+          className="glass-schedule-placeholder"
+          role="status"
+          aria-label={t('loading', 'Loading')}
+        />
+      ) : dayPosts.length ? (
+        dayPosts.map((post) => (
+          <div key={`${post.id}-${post.publishDate}`}>
+            <p className="glass-time-rule">
+              {fromUtc(post.publishDate).format('LT')}
+            </p>
+            <article
+              className="glass-event"
+              style={
+                {
+                  '--event-color': channelColor(
+                    post.integration.id,
+                    integrations
+                  ),
+                } as CSSProperties
+              }
+            >
+              <h3>{post.integration.name}</h3>
+              <p>{post.integration.providerIdentifier}</p>
+              <p className="line-clamp-4">
+                {stripHtmlValidation(
+                  'none',
+                  post.content || '',
+                  false,
+                  true,
+                  false
+                )}
+              </p>
+              <footer data-state={post.state}>
+                {post.state === 'QUEUE'
+                  ? t('scheduled', 'Scheduled')
+                  : post.state === 'PUBLISHED'
+                  ? t('published', 'Published')
+                  : post.state === 'ERROR'
+                  ? t('error', 'Error')
+                  : t('draft', 'Draft')}
+              </footer>
+              <button
+                type="button"
+                className="glass-secondary mt-3 px-3"
+                onClick={showDetails(post)}
+              >
+                {t('post_details', 'Post details')}
+              </button>
+            </article>
+          </div>
+        ))
+      ) : (
+        <div className="glass-empty mt-4">
+          <p>{t('no_loaded_posts', 'No loaded posts for this day.')}</p>
+          {integrations.length ? (
+            <NewPost
+              date={
+                day.isSame(newDayjs(), 'day') &&
+                day.hour(12).isBefore(newDayjs().add(10, 'minute'))
+                  ? newDayjs().add(10, 'minute')
+                  : day.hour(12)
+              }
+            />
+          ) : (
+            <button
+              type="button"
+              className="glass-action"
+              onClick={addProvider}
+            >
+              {t('add_channel', 'Add channel')}
+            </button>
+          )}
+        </div>
+      )}
+    </aside>
+  );
+};
+
 export const MonthView = () => {
   const { startDate } = useCalendar();
   const t = useT();
@@ -689,7 +1000,7 @@ export const MonthView = () => {
     <div className="flex flex-col text-textColor flex-1">
       <div className="flex-1 flex relative">
         {/* on phones the whole month fits the width, posts show as channel avatars */}
-        <div className="grid grid-cols-7 tablet:[grid-template-columns:repeat(7,_minmax(100px,_1fr))] mobile:!grid-cols-7 grid-rows-[62px_auto] mobile:grid-rows-[36px_auto] gap-[4px] mobile:gap-[2px] rounded-[10px] absolute start-0 top-0 overflow-auto w-full h-full scrollbar scrollbar-thumb-tableBorder scrollbar-track-secondary">
+        <div className="glass-month-grid grid grid-cols-7 tablet:[grid-template-columns:repeat(7,_minmax(100px,_1fr))] mobile:!grid-cols-7 grid-rows-[62px_auto] mobile:grid-rows-[36px_auto] gap-[4px] mobile:gap-[2px] rounded-[10px] absolute start-0 top-0 overflow-auto w-full h-full scrollbar scrollbar-thumb-tableBorder scrollbar-track-secondary">
           {localizedDays.map((day) => (
             <div
               key={day.name}
@@ -729,7 +1040,14 @@ export const ListView = () => {
       : t('no_posts', 'No posts');
 
   // Use shared post actions hook
-  const { editPost, deletePost, copyDebugJson, openStatistics, openMissingRelease, openPost } = usePostActions();
+  const {
+    editPost,
+    deletePost,
+    copyDebugJson,
+    openStatistics,
+    openMissingRelease,
+    openPost,
+  } = usePostActions();
 
   // Group posts by date
   const groupedPosts = useMemo(() => {
@@ -755,7 +1073,9 @@ export const ListView = () => {
   if (listPosts.length === 0) {
     return (
       <div className="flex flex-col flex-1 items-center justify-center">
-        <div className="blueprint-note text-textColor text-[16px]">{emptyMessage}</div>
+        <div className="glass-note text-textColor text-[16px]">
+          {emptyMessage}
+        </div>
       </div>
     );
   }
@@ -766,7 +1086,9 @@ export const ListView = () => {
         {groupedPosts.map(([dateKey, datePosts]) => (
           <Fragment key={dateKey}>
             <div className="text-center text-[14px] min-h-[21px] text-textColor font-[500] mt-[10px]">
-              {newDayjs(dateKey).format(isUSCitizen() ? 'dddd, MMMM D, YYYY' : 'dddd, D MMMM YYYY')}
+              {newDayjs(dateKey).format(
+                isUSCitizen() ? 'dddd, MMMM D, YYYY' : 'dddd, D MMMM YYYY'
+              )}
             </div>
             <div className="flex flex-col gap-[10px] mb-[20px] px-[10px]">
               {datePosts.map((post) => (
@@ -781,7 +1103,9 @@ export const ListView = () => {
                   openPost={openPost(post)}
                   editPost={editPost(post, false)}
                   duplicatePost={editPost(post, true)}
-                  copyDebugJson={user?.isSuperAdmin ? copyDebugJson(post) : undefined}
+                  copyDebugJson={
+                    user?.isSuperAdmin ? copyDebugJson(post) : undefined
+                  }
                   post={post}
                   integrations={integrations}
                   deletePost={deletePost(post)}
@@ -819,6 +1143,7 @@ export const CalendarColumn: FC<{
   const t = useT();
 
   const { getDate, randomHour } = props;
+  const { linkselfUrl } = useVariables();
   const user = useUser();
   const {
     integrations,
@@ -831,12 +1156,22 @@ export const CalendarColumn: FC<{
     signature,
     loading,
     currentHour,
+    startDate,
+    selectedDay,
+    setSelectedDay,
   } = useCalendar();
   const modal = useModals();
   const fetch = useFetch();
 
   // Use shared post actions hook
-  const { editPost, deletePost, copyDebugJson, openStatistics, openMissingRelease, openPost } = usePostActions();
+  const {
+    editPost,
+    deletePost,
+    copyDebugJson,
+    openStatistics,
+    openMissingRelease,
+    openPost,
+  } = usePostActions();
   const postList = useMemo(() => {
     if (display === 'week') {
       const start = getDate.startOf('hour').valueOf();
@@ -848,9 +1183,7 @@ export const CalendarColumn: FC<{
     }
     const format = display === 'day' ? 'YYYY-MM-DD HH:mm' : 'DD/MM/YYYY';
     const cell = getDate.format(format);
-    return posts.filter(
-      (post) => postDates.get(post).format(format) === cell
-    );
+    return posts.filter((post) => postDates.get(post).format(format) === cell);
   }, [posts, postDates, display, getDate]);
   const [showAll, setShowAll] = useState(false);
   const showAllFunc = useCallback(() => {
@@ -873,107 +1206,116 @@ export const CalendarColumn: FC<{
     [getDate, currentHour]
   );
 
-  const [{ canDrop }, drop] = useDrop(() => ({
-    accept: 'post',
-    drop: async (item: any) => {
-      if (isBeforeNow) return;
+  const [{ canDrop }, drop] = useDrop(
+    () => ({
+      accept: 'post',
+      drop: async (item: any) => {
+        if (isBeforeNow) return;
 
-      // Find the post to check its state
-      const post = posts.find((p) => p.id === item.id);
-      let action: 'schedule' | 'update' = 'schedule';
+        // Find the post to check its state
+        const post = posts.find((p) => p.id === item.id);
+        let action: 'schedule' | 'update' = 'schedule';
 
-      // Check if post is already published or queued in the past
-      if (
-        post &&
-        (post.state === 'PUBLISHED' ||
-          (post.state === 'QUEUE' && dayjs().isAfter(dayjs.utc(post.publishDate))))
-      ) {
-        const whatToDo = await new Promise<'schedule' | 'update' | 'cancel'>(
-          (resolve) => {
-            modal.openModal({
-              title: t('what_do_you_want_to_do', 'What do you want to do?'),
-              children: (
-                <div className="flex flex-col">
-                  <div className="text-[20px] mb-[20px]">
-                    {t(
-                      'post_already_published_republish_warning',
-                      'This post was already published. Republishing will publish it again to'
-                    )}{' '}
-                    {post.integration?.name}{' '}
-                    {t('republish_at', 'at')} {getDate.format('DD/MM/YYYY HH:mm')}.
-                    {(!!item.interval || !!post.intervalInDays) && (
-                      <div className="mt-[10px]">
-                        {t(
-                          'republish_recurring_note',
-                          'This is a recurring post: your changes apply to all future recurrences starting now.'
-                        )}
+        // Check if post is already published or queued in the past
+        if (
+          post &&
+          (post.state === 'PUBLISHED' ||
+            (post.state === 'QUEUE' &&
+              dayjs().isAfter(dayjs.utc(post.publishDate))))
+        ) {
+          const whatToDo = await new Promise<'schedule' | 'update' | 'cancel'>(
+            (resolve) => {
+              modal.openModal({
+                title: t('what_do_you_want_to_do', 'What do you want to do?'),
+                children: (
+                  <div className="flex flex-col">
+                    <div className="text-[20px] mb-[20px]">
+                      {t(
+                        'post_already_published_republish_warning',
+                        'This post was already published. Republishing will publish it again to'
+                      )}{' '}
+                      {post.integration?.name} {t('republish_at', 'at')}{' '}
+                      {getDate.format('DD/MM/YYYY HH:mm')}.
+                      {(!!item.interval || !!post.intervalInDays) && (
+                        <div className="mt-[10px]">
+                          {t(
+                            'republish_recurring_note',
+                            'This is a recurring post: your changes apply to all future recurrences starting now.'
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex w-full gap-[10px]">
+                      <div className="flex-1 flex">
+                        <Button
+                          type="button"
+                          className="flex-1"
+                          onClick={() => {
+                            modal.closeAll();
+                            resolve('update');
+                          }}
+                        >
+                          {t(
+                            'just_update_post_details',
+                            'Just update the post details'
+                          )}
+                        </Button>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex w-full gap-[10px]">
-                    <div className="flex-1 flex">
-                      <Button
-                        type="button"
-                        className="flex-1"
-                        onClick={() => {
-                          modal.closeAll();
-                          resolve('update');
-                        }}
-                      >
-                        {t('just_update_post_details', 'Just update the post details')}
-                      </Button>
-                    </div>
-                    <div className="flex-1 flex">
-                      <Button
-                        type="button"
-                        className="flex-1"
-                        onClick={() => {
-                          modal.closeAll();
-                          resolve('schedule');
-                        }}
-                      >
-                        {t('reschedule_post', 'Reschedule the post')}
-                      </Button>
+                      <div className="flex-1 flex">
+                        <Button
+                          type="button"
+                          className="flex-1"
+                          onClick={() => {
+                            modal.closeAll();
+                            resolve('schedule');
+                          }}
+                        >
+                          {t('reschedule_post', 'Reschedule the post')}
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ),
-              onClose: () => resolve('cancel'),
-            });
+                ),
+                onClose: () => resolve('cancel'),
+              });
+            }
+          );
+
+          if (whatToDo === 'cancel') {
+            return;
           }
-        );
+          action = whatToDo;
+        }
 
-        if (whatToDo === 'cancel') {
+        if (!item.interval) {
+          changeDate(item.id, getDate);
+        }
+        const { status } = await fetch(`/posts/${item.id}/date`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            date: getDate.utc().format('YYYY-MM-DDTHH:mm:ss'),
+            action,
+            // published posts always confirm via the modal before reaching here;
+            // for QUEUE posts the flag is a no-op on the server
+            ...(action === 'schedule' ? { republish: true } : {}),
+          }),
+        });
+        if (status !== 500) {
+          if (item.interval || action === 'schedule') {
+            reloadCalendarView();
+            return;
+          }
           return;
         }
-        action = whatToDo;
-      }
-
-      if (!item.interval) {
-        changeDate(item.id, getDate);
-      }
-      const { status } = await fetch(`/posts/${item.id}/date`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          date: getDate.utc().format('YYYY-MM-DDTHH:mm:ss'),
-          action,
-          // published posts always confirm via the modal before reaching here;
-          // for QUEUE posts the flag is a no-op on the server
-          ...(action === 'schedule' ? { republish: true } : {}),
-        }),
-      });
-      if (status !== 500) {
-        if (item.interval || action === 'schedule') {
-          reloadCalendarView();
-          return;
-        }
-        return;
-      }
-    },
-    collect: (monitor) => ({
-      canDrop: isBeforeNow ? false : !!monitor.canDrop() && !!monitor.isOver(),
+      },
+      collect: (monitor) => ({
+        canDrop: isBeforeNow
+          ? false
+          : !!monitor.canDrop() && !!monitor.isOver(),
+      }),
     }),
-  }), [posts, isBeforeNow]);
+    [posts, isBeforeNow]
+  );
 
   const addModal = useCallback(async () => {
     const set: any = !sets.length
@@ -1054,15 +1396,37 @@ export const CalendarColumn: FC<{
     <div
       className={clsx(
         'flex flex-col w-full min-h-full relative',
+        display === 'month' && 'glass-date-tile',
         isBeforeNow && 'repeated-strip',
         loading && 'animate-pulse',
         isBeforeNow
           ? 'cursor-not-allowed'
           : 'border border-newTextColor/5 rounded-[8px]'
       )}
+      data-today={getDate.isSame(currentHour, 'day') || undefined}
+      data-selected={getDate.format('YYYY-MM-DD') === selectedDay || undefined}
+      data-outside={
+        (display === 'month' &&
+          !getDate.isSame(newDayjs(startDate), 'month')) ||
+        undefined
+      }
+      onClickCapture={() =>
+        linkselfUrl && setSelectedDay(getDate.format('YYYY-MM-DD'))
+      }
       ref={drop as any}
     >
-      {display === 'month' && (
+      {display === 'month' && linkselfUrl && (
+        <button
+          type="button"
+          className="glass-date-number"
+          aria-label={getDate.format('dddd, D MMMM YYYY')}
+          aria-pressed={getDate.format('YYYY-MM-DD') === selectedDay}
+          onClick={() => setSelectedDay(getDate.format('YYYY-MM-DD'))}
+        >
+          {getDate.date()}
+        </button>
+      )}
+      {display === 'month' && !linkselfUrl && (
         <div
           className={clsx(
             'pt-[3px] text-[14px] mobile:pt-[2px] mobile:text-[12px] flex justify-center'
@@ -1124,7 +1488,9 @@ export const CalendarColumn: FC<{
                   openPost={openPost(post)}
                   editPost={editPost(post, false)}
                   duplicatePost={editPost(post, true)}
-                  copyDebugJson={user?.isSuperAdmin ? copyDebugJson(post) : undefined}
+                  copyDebugJson={
+                    user?.isSuperAdmin ? copyDebugJson(post) : undefined
+                  }
                   post={post}
                   integrations={integrations}
                   deletePost={deletePost(post)}
@@ -1163,7 +1529,7 @@ export const CalendarColumn: FC<{
         </div>
         {!isBeforeNow && (
           <div
-            className="pb-[2.5px] px-[5px] flex-1 flex"
+            className="glass-slot-label pb-[2.5px] px-[5px] flex-1 flex"
             onClick={integrations.length ? addModal : addProvider}
           >
             <div
@@ -1260,6 +1626,9 @@ const CalendarItem: FC<{
   };
 }> = memo((props) => {
   const t = useT();
+  const { linkselfUrl } = useVariables();
+  const { setSelectedDay } = useCalendar();
+  const showDetails = useLoadedPostDetails();
   const {
     editPost,
     statistics,
@@ -1300,12 +1669,70 @@ const CalendarItem: FC<{
     }),
     []
   );
+  if (linkselfUrl && display === 'month') {
+    return (
+      <div
+        ref={dragRef as any}
+        role="button"
+        tabIndex={0}
+        className="glass-month-tick"
+        data-state={state}
+        data-tooltip-id={state === 'ERROR' ? 'tooltip' : undefined}
+        data-tooltip-content={
+          state === 'ERROR'
+            ? post.error ||
+              t(
+                'publishing_failed',
+                'Publishing failed. Edit the post to try again.'
+              )
+            : undefined
+        }
+        style={
+          {
+            opacity,
+            '--event-color': channelColor(
+              post.integration.id,
+              props.integrations
+            ),
+          } as CSSProperties
+        }
+        aria-label={`${post.integration.name}, ${fromUtc(
+          post.publishDate
+        ).format('LT')}, ${post.state}${
+          state === 'ERROR'
+            ? `: ${
+                post.error ||
+                t(
+                  'publishing_failed',
+                  'Publishing failed. Edit the post to try again.'
+                )
+              }`
+            : ''
+        }`}
+        onClick={(event) => {
+          event.stopPropagation();
+          setSelectedDay(date.format('YYYY-MM-DD'));
+          showDetails(post)();
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.stopPropagation();
+            setSelectedDay(date.format('YYYY-MM-DD'));
+            showDetails(post)();
+          }
+        }}
+      >
+        <span>{post.integration.name}</span>
+      </div>
+    );
+  }
   return (
     <div
       // @ts-ignore
       ref={dragRef}
       className={clsx(
-        'blueprint-frame blueprint-post w-full flex h-full flex-1 flex-col group',
+        'glass-frame glass-post w-full flex h-full flex-1 flex-col group',
         'relative',
         state === 'ERROR' && 'rounded-[10px] ring-2 ring-red-500',
         state === 'PUBLISHED' && 'rounded-[10px] ring-2 ring-green-500'
@@ -1322,7 +1749,9 @@ const CalendarItem: FC<{
           )}
           data-tooltip-id="tooltip"
           data-tooltip-class-name="!max-w-[400px] break-words"
-          data-tooltip-content={post.error || 'An error occurred while publishing this post'}
+          data-tooltip-content={
+            post.error || 'An error occurred while publishing this post'
+          }
         >
           !
         </div>
@@ -1351,7 +1780,9 @@ const CalendarItem: FC<{
           display === 'month' && 'mobile:hidden'
         )}
         style={{
-          backgroundColor: `var(--studio-marker, ${post?.tags?.[0]?.tag?.color || 'transparent'})`,
+          backgroundColor: `var(--studio-marker, ${
+            post?.tags?.[0]?.tag?.color || 'transparent'
+          })`,
         }}
       >
         <div
@@ -1386,7 +1817,7 @@ const CalendarItem: FC<{
               <OpenPost />
             </div>
           )}{' '}
-        {(!hasPostAnalytics || state !== 'PUBLISHED' || !post.releaseId) ? (
+        {!hasPostAnalytics || state !== 'PUBLISHED' || !post.releaseId ? (
           <></>
         ) : post.releaseId === 'missing' && missingRelease ? (
           <div
@@ -1468,16 +1899,18 @@ const CalendarItem: FC<{
           <div className="text-start">
             {state === 'DRAFT' ? t('draft', 'Draft') + ': ' : ''}
           </div>
-            <div className="w-full relative">
-              <div className="absolute top-0 start-0 w-full text-ellipsis break-words line-clamp-1 text-start">
-                {stripHtmlValidation('none', post.content, false, true, false) ||
-                  t('no_content', 'no content')}
-              </div>
+          <div className="w-full relative">
+            <div className="absolute top-0 start-0 w-full text-ellipsis break-words line-clamp-1 text-start">
+              {stripHtmlValidation('none', post.content, false, true, false) ||
+                t('no_content', 'no content')}
             </div>
+          </div>
         </div>
         {showTime && (
           <div className="text-textColor/50 text-[12px] whitespace-nowrap flex items-center">
-            {fromUtc(post.publishDate).format(isUSCitizen() ? 'hh:mm A' : 'HH:mm')}
+            {fromUtc(post.publishDate).format(
+              isUSCitizen() ? 'hh:mm A' : 'HH:mm'
+            )}
           </div>
         )}
       </div>
@@ -1492,10 +1925,7 @@ const DebugJsonModal: FC<{ post: any }> = ({ post }) => {
 
   const copyPostId = useCallback(() => {
     copy(post.id);
-    toaster.show(
-      t('post_id_copied', 'Post ID copied to clipboard'),
-      'success'
-    );
+    toaster.show(t('post_id_copied', 'Post ID copied to clipboard'), 'success');
     closeCurrent();
   }, [post, toaster, t, closeCurrent]);
 

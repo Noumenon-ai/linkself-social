@@ -51,12 +51,13 @@ export const Button: FC<
         `${
           secondary ? 'bg-third' : 'bg-forth text-white'
         } px-[24px] h-[40px] cursor-pointer items-center justify-center flex relative`,
-        secondary ? 'blueprint-secondary' : 'blueprint-action',
+        secondary ? 'glass-secondary' : 'glass-action',
         props?.className
       )}
     >
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
+          <span className="glass-busy-label">Working...</span>
           <ReactLoading
             type="spin"
             color="var(--studio-text,#fff)"

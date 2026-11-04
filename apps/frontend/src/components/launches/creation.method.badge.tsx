@@ -35,7 +35,7 @@ export const CreationMethodBadge: FC<Props> = ({
         sizeClasses,
         creationMethod === 'WEB' && 'bg-[var(--studio-panel,#6b7280)]',
         creationMethod === 'API' && 'bg-[var(--studio-hover,#2563eb)]',
-        creationMethod === 'MCP' && 'blueprint-accent bg-[var(--studio-accent,#9333ea)]',
+        creationMethod === 'MCP' && 'glass-accent bg-[var(--studio-accent,#9333ea)]',
         creationMethod === 'AUTOPOST' && 'bg-[var(--studio-warning,#d97706)]',
         creationMethod === 'CLI' && 'bg-[var(--studio-hover,#0f766e)]',
         className

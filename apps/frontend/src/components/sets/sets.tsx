@@ -171,7 +171,7 @@ export const Sets: FC = () => {
       <div className="text-customColor18 mt-[4px]">
         Manage your content sets for easy reuse across posts.
       </div>
-      <div className="blueprint-frame my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] flex gap-[24px]">
+      <div className="glass-frame my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] flex gap-[24px]">
         <div className="flex flex-col w-full">
           {!!data?.length && (
             <div className="grid grid-cols-[2fr,1fr,1fr] w-full gap-y-[10px]">
@@ -183,12 +183,12 @@ export const Sets: FC = () => {
                   <div className="flex flex-col justify-center">{p.name}</div>
                   <div className="flex flex-col justify-center">
                     <div>
-                      <Button className="blueprint-secondary" onClick={addSet(p)}>{t('edit', 'Edit')}</Button>
+                      <Button className="glass-secondary" onClick={addSet(p)}>{t('edit', 'Edit')}</Button>
                     </div>
                   </div>
                   <div className="flex flex-col justify-center">
                     <div>
-                      <Button className="blueprint-secondary" onClick={deleteSet(p)}>
+                      <Button className="glass-secondary" onClick={deleteSet(p)}>
                         {t('delete', 'Delete')}
                       </Button>
                     </div>

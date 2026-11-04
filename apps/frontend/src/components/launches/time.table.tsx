@@ -170,7 +170,7 @@ export const TimeTable: FC<{
           <button
             type="button"
             onClick={addHour}
-            className="h-[42px] px-[16px] blueprint-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7640e0)] transition-colors rounded-[8px] flex items-center gap-[6px] text-white text-[14px] font-medium"
+            className="h-[42px] px-[16px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#7640e0)] transition-colors rounded-[8px] flex items-center gap-[6px] text-white text-[14px] font-medium"
           >
             <PlusIcon size={14} />
             {t('add', 'Add')}
@@ -201,7 +201,7 @@ export const TimeTable: FC<{
                 )}
               >
                 <div className="flex items-center gap-[12px]">
-                  <div className="w-[8px] h-[8px] rounded-full blueprint-accent bg-[var(--studio-accent,#612BD3)]" />
+                  <div className="w-[8px] h-[8px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)]" />
                   <span className="text-[15px] font-medium tabular-nums">
                     {timeSlot.formatted}
                   </span>

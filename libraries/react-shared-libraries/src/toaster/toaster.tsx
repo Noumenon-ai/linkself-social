@@ -35,7 +35,7 @@ export const Toaster = () => {
       role="status"
       data-state={toasterType}
       className={clsx(
-        'blueprint-toast animate-fadeDown rounded-[8px] gap-[18px] flex items-center overflow-hidden bg-customColor8 p-[16px] min-w-[319px] fixed start-[50%] text-white z-[900] top-[32px] -translate-x-[50%] h-[56px]',
+        'glass-toast animate-fadeDown rounded-[8px] gap-[18px] flex items-center overflow-hidden bg-customColor8 p-[16px] min-w-[319px] fixed start-[50%] text-white z-[900] top-[32px] -translate-x-[50%] h-[56px]',
         toasterType === 'success' ? 'shadow-greenToast' : 'shadow-yellowToast'
       )}
     >

@@ -628,7 +628,7 @@ export const MediaBox: FC<{
                 >
                   <div
                     className={clsx(
-                      'blueprint-frame w-full h-full rounded-[6px] border-[4px] relative',
+                      'glass-frame w-full h-full rounded-[6px] border-[4px] relative',
                       !!selected.find((p) => p.id === media.id)
                         ? 'border-[var(--studio-accent,#612BD3)]'
                         : 'border-transparent'
@@ -636,7 +636,7 @@ export const MediaBox: FC<{
                     onClick={addRemoveSelected(media)}
                   >
                     {!!selected.find((p: any) => p.id === media.id) ? (
-                      <div className="text-white flex z-[101] justify-center items-center text-[14px] font-[500] w-[24px] h-[24px] rounded-full blueprint-accent bg-[var(--studio-accent,#612BD3)] absolute -bottom-[10px] -end-[10px]">
+                      <div className="text-white flex z-[101] justify-center items-center text-[14px] font-[500] w-[24px] h-[24px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)] absolute -bottom-[10px] -end-[10px]">
                         {selected.findIndex((z: any) => z.id === media.id) + 1}
                       </div>
                     ) : (
@@ -722,7 +722,7 @@ export const MediaBox: FC<{
               <button
                 onClick={standalone ? () => {} : addMedia}
                 disabled={selected.length === 0}
-                className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center blueprint-accent bg-[var(--studio-accent,#612BD3)] flex rounded-[10px] mobile:h-[44px] mobile:rounded-[8px] mobile:font-[600] mobile:disabled:opacity-100 mobile:disabled:bg-btnSimple mobile:disabled:text-textItemBlur"
+                className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center glass-accent bg-[var(--studio-accent,#612BD3)] flex rounded-[10px] mobile:h-[44px] mobile:rounded-[8px] mobile:font-[600] mobile:disabled:opacity-100 mobile:disabled:bg-btnSimple mobile:disabled:text-textItemBlur"
               >
                 {t('add_selected_media', 'Add selected media')}
               </button>

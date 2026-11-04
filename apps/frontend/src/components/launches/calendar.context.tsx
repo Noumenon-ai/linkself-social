@@ -25,7 +25,10 @@ import {
   newDayjs,
 } from '@gitroom/frontend/components/layout/set.timezone';
 import { timer } from '@gitroom/helpers/utils/timer';
-import { expandPostsList, expandPosts } from '@gitroom/helpers/utils/posts.list.minify';
+import {
+  expandPostsList,
+  expandPosts,
+} from '@gitroom/helpers/utils/posts.list.minify';
 extend(isoWeek);
 extend(weekOfYear);
 
@@ -34,6 +37,8 @@ export type ListStateFilter = 'all' | 'scheduled' | 'draft' | 'published';
 export const CalendarContext = createContext({
   startDate: newDayjs().startOf('isoWeek').format('YYYY-MM-DD'),
   endDate: newDayjs().endOf('isoWeek').format('YYYY-MM-DD'),
+  selectedDay: newDayjs().format('YYYY-MM-DD'),
+  setSelectedDay: (day: string) => {},
   customer: null as string | null,
   loading: true,
   sets: [] as { name: string; id: string; content: string[] }[],
@@ -123,10 +128,11 @@ export interface Integrations {
 }
 
 // Helper function to get start and end dates based on display type
-function getDateRange(display: string, referenceDate?: string) {
+export const getDateRange = (display: string, referenceDate?: string) => {
   const date = referenceDate ? newDayjs(referenceDate) : newDayjs();
 
   switch (display) {
+    case 'list':
     case 'day':
       return {
         startDate: date.format('YYYY-MM-DD'),
@@ -148,7 +154,13 @@ function getDateRange(display: string, referenceDate?: string) {
         endDate: date.endOf('isoWeek').format('YYYY-MM-DD'),
       };
   }
-}
+};
+
+// Navigation always anchors Scheduled to today in the range, or its first day.
+export const selectedDayForRange = (startDate: string, endDate: string) => {
+  const today = newDayjs().format('YYYY-MM-DD');
+  return today >= startDate && today <= endDate ? today : startDate;
+};
 
 // The current time rounded down to the unit. It checks on every minute, so it
 // also catches up within a minute after the computer wakes up from sleep.
@@ -203,9 +215,13 @@ export const CalendarWeekProvider: FC<{
       ? { startDate: initStartDate, endDate: initEndDate }
       : getDateRange(display);
 
-  const [selectedChannels, setSelectedChannelsRaw] = useState<
-    string[] | null
-  >(null);
+  const [selectedDay, setSelectedDay] = useState(() =>
+    selectedDayForRange(initialRange.startDate, initialRange.endDate)
+  );
+
+  const [selectedChannels, setSelectedChannelsRaw] = useState<string[] | null>(
+    null
+  );
   const setSelectedChannels = useCallback((next: string[] | null) => {
     setSelectedChannelsRaw(next);
     setListPage(0);
@@ -265,16 +281,12 @@ export const CalendarWeekProvider: FC<{
     data: calendarData,
     isLoading: calendarIsLoading,
     mutate: mutateCalendar,
-  } = useSWR(
-    filters.display !== 'list' ? `/posts-${params}` : null,
-    loadData,
-    {
-      refreshInterval: 3600000,
-      refreshWhenOffline: false,
-      refreshWhenHidden: false,
-      revalidateOnFocus: false,
-    }
-  );
+  } = useSWR(filters.display !== 'list' ? `/posts-${params}` : null, loadData, {
+    refreshInterval: 3600000,
+    refreshWhenOffline: false,
+    refreshWhenHidden: false,
+    revalidateOnFocus: false,
+  });
 
   // SWR for list view
   const {
@@ -324,6 +336,15 @@ export const CalendarWeekProvider: FC<{
       display: 'week' | 'month' | 'day' | 'list';
       customer: string | null;
     }) => {
+      if (
+        newFilters.startDate !== filters.startDate ||
+        newFilters.endDate !== filters.endDate ||
+        newFilters.display !== filters.display
+      ) {
+        setSelectedDay(
+          selectedDayForRange(newFilters.startDate, newFilters.endDate)
+        );
+      }
       setDisplaySaved(newFilters.display);
       setFilters(newFilters);
       setInternalData([]);
@@ -341,7 +362,27 @@ export const CalendarWeekProvider: FC<{
       ].filter((f) => f);
       window.history.replaceState(null, '', `/launches?${path.join('&')}`);
     },
-    []
+    [filters.startDate, filters.endDate, filters.display, setDisplaySaved]
+  );
+
+  const selectDay = useCallback(
+    (day: string) => {
+      // List queries are paginated rather than date-bound; use day view to load a picked date.
+      const display = filters.display === 'list' ? 'day' : filters.display;
+      if (
+        day < filters.startDate ||
+        day > filters.endDate ||
+        filters.display === 'list'
+      ) {
+        setFiltersWrapper({
+          ...filters,
+          ...getDateRange(display, day),
+          display: display as 'day' | 'week' | 'month',
+        });
+      }
+      setSelectedDay(day);
+    },
+    [filters, setFiltersWrapper]
   );
 
   const filterByChannels = useCallback(
@@ -353,7 +394,10 @@ export const CalendarWeekProvider: FC<{
   );
 
   const posts = useMemo(() => calendarData?.posts || [], [calendarData?.posts]);
-  const comments = useMemo(() => calendarData?.comments || [], [calendarData?.comments]);
+  const comments = useMemo(
+    () => calendarData?.comments || [],
+    [calendarData?.comments]
+  );
 
   // List view data
   const listPosts = useMemo(() => listData?.posts || [], [listData?.posts]);
@@ -390,7 +434,8 @@ export const CalendarWeekProvider: FC<{
   }, [mutateCalendar, mutateList]);
 
   // Determine loading state based on current view
-  const loading = filters.display === 'list' ? listIsLoading : calendarIsLoading;
+  const loading =
+    filters.display === 'list' ? listIsLoading : calendarIsLoading;
 
   // one clock for every calendar cell, instead of a timer per cell
   const currentHour = useNow('hour');
@@ -408,6 +453,8 @@ export const CalendarWeekProvider: FC<{
   return (
     <CalendarContext.Provider
       value={{
+        selectedDay,
+        setSelectedDay: selectDay,
         trendings,
         reloadCalendarView,
         ...filters,

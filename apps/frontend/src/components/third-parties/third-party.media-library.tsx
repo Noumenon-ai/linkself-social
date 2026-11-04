@@ -134,7 +134,7 @@ const ThirdPartyMediaLibraryBrowser: FC<{
                       )}
                     </div>
                     {isSelected && (
-                      <div className="text-white flex z-[10] justify-center items-center text-[14px] font-[500] w-[24px] h-[24px] rounded-full blueprint-accent bg-[var(--studio-accent,#612BD3)] absolute -bottom-[2px] -end-[2px]">
+                      <div className="text-white flex z-[10] justify-center items-center text-[14px] font-[500] w-[24px] h-[24px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)] absolute -bottom-[2px] -end-[2px]">
                         {selected.findIndex((s) => s.id === item.id) + 1}
                       </div>
                     )}
@@ -167,7 +167,7 @@ const ThirdPartyMediaLibraryBrowser: FC<{
         <button
           onClick={importSelected}
           disabled={!selected.length || importing}
-          className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center blueprint-accent bg-[var(--studio-accent,#612BD3)] flex rounded-[10px] gap-[8px]"
+          className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center glass-accent bg-[var(--studio-accent,#612BD3)] flex rounded-[10px] gap-[8px]"
         >
           {importing && (
             <div className="animate-spin h-[16px] w-[16px] border-2 border-white border-t-transparent rounded-full" />

@@ -120,7 +120,7 @@ export const StatisticsModal: FC<{
                           <div className="flex items-center gap-[10px]">
                             <div
                               className={`w-[8px] h-[8px] rounded-full ${
-                                color === 'purple' ? 'blueprint-accent bg-[var(--studio-accent,#612bd3)]' : ''
+                                color === 'purple' ? 'glass-accent bg-[var(--studio-accent,#612bd3)]' : ''
                               } ${color === 'green' ? 'bg-[var(--studio-success,#32d583)]' : ''} ${
                                 color === 'blue' ? 'bg-[var(--studio-hover,#1d9bf0)]' : ''
                               }`}
