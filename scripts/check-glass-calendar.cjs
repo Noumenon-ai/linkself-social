@@ -561,7 +561,7 @@ const destinations = nodes(menu)
 check(
   JSON.stringify(destinations) ===
     JSON.stringify([
-      'https://example.test/dashboard/links',
+      'https://example.test/dashboard',
       '/launches',
       '/analytics',
       '/media',

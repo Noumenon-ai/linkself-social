@@ -307,7 +307,7 @@ export const TopMenu: FC = () => {
         <div className="glass-rail-primary">
           <MenuItem
             label="My page"
-            path={`${linkselfUrl.replace(/\/$/, '')}/dashboard/links`}
+            path={`${linkselfUrl.replace(/\/$/, '')}/dashboard`}
             icon={
               <svg
                 width="20"
