@@ -1000,8 +1000,14 @@ async function checkChannelDialog() {
         `${label}: preserved time in a past hour is rejected before changes or requests`
       );
     }
-    for (const hour of [14, 18]) {
-      const source = newDayjs(`2026-11-20T${hour}:30:00`).utc().format();
+    // Relative to the clock: a fixed hour turns into the past later in the day.
+    const currentHour = now().hour();
+    for (const hour of new Set([currentHour, Math.min(currentHour + 1, 23)])) {
+      const source = newDayjs(
+        `2026-11-20T${String(hour).padStart(2, '0')}:30:00`
+      )
+        .utc()
+        .format();
       await runDrop({ source, target: now().endOf('day') });
       check(
         dropRequests.length === 1 &&
