@@ -71,7 +71,7 @@ export const SignaturesComponent: FC<{
         <div className="flex flex-col w-full">
           {!!data?.length && (
             <div
-              className={`grid ${
+              className={`glass-signatures-table grid ${
                 !!appendSignature
                   ? 'grid-cols-[1fr,1fr,1fr,1fr,1fr]'
                   : 'grid-cols-[1fr,1fr,1fr,1fr]'

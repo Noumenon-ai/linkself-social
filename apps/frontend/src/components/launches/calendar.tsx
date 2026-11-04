@@ -494,7 +494,7 @@ export const DayView = () => {
   }, [options, startDate, now]);
 
   return (
-    <div className="flex flex-col gap-[10px] flex-1 relative">
+    <div className="glass-day-view flex flex-col gap-[10px] flex-1 relative">
       <div className="absolute start-0 top-0 w-full h-full flex flex-col overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
         {options.map((option, index) => (
           <Fragment key={option[0].time}>
@@ -583,8 +583,10 @@ export const WeekView = () => {
             ))}
             {hours.map((hour) => (
               <Fragment key={hour}>
-                <div className="p-2 pe-4 tablet:px-[4px] text-center items-center justify-center flex text-[14px] tablet:text-[12px] tablet:whitespace-nowrap text-newTableText">
-                  {convertTimeFormatBasedOnLocality(hour)}
+                <div className="glass-hour-label p-2 pe-4 tablet:px-[4px] text-center items-center justify-center flex text-[14px] tablet:text-[12px] tablet:whitespace-nowrap text-newTableText">
+                  {linkselfUrl
+                    ? `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'}`
+                    : convertTimeFormatBasedOnLocality(hour)}
                 </div>
                 {localizedDays.map((day, indexDay) => (
                   <Fragment
@@ -1081,7 +1083,7 @@ export const ListView = () => {
   }
 
   return (
-    <div className="flex flex-col gap-[10px] flex-1 relative">
+    <div className="glass-list-view flex flex-col gap-[10px] flex-1 relative">
       <div className="absolute start-0 top-0 w-full h-full flex flex-col overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
         {groupedPosts.map(([dateKey, datePosts]) => (
           <Fragment key={dateKey}>

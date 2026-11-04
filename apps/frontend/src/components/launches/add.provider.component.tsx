@@ -712,7 +712,7 @@ export const AddProviderComponent: FC<{
   const t = useT();
 
   return (
-    <div className="w-full flex flex-col gap-[20px] rounded-[4px] relative]">
+    <div className="glass-add-channel w-full flex flex-col gap-[20px] rounded-[4px] relative">
       {limits && limits.channels !== -1 && (
         <div className="flex items-center gap-[12px] text-[14px]">
           <span>
@@ -731,6 +731,7 @@ export const AddProviderComponent: FC<{
       <div className="flex flex-col">
         <div
           className={clsx(
+            'glass-provider-grid',
             isMobile && 'gap-[20px] flex flex-col',
             !isMobile &&
               'grid grid-cols-5 gap-[10px] justify-items-center justify-center mobile:!grid-cols-3',
@@ -753,6 +754,15 @@ export const AddProviderComponent: FC<{
             .map((item) => (
               <div
                 key={item.identifier}
+                role="button"
+                tabIndex={0}
+                aria-label={item.name}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    event.currentTarget.click();
+                  }
+                }}
                 onClick={getSocialLink(
                   props.invite,
                   item.identifier,
@@ -764,10 +774,13 @@ export const AddProviderComponent: FC<{
                 {...(!!item.toolTip
                   ? {
                       'data-tooltip-id': 'tooltip',
-                      'data-tooltip-content': item.toolTip,
+                      'data-tooltip-content': linkselfUrl
+                        ? `${item.name}: ${item.toolTip}`
+                        : item.toolTip,
                     }
                   : {})}
                 className={clsx(
+                  'glass-provider-tile',
                   isMobile
                     ? 'flex-row h-[72px] p-[16px]'
                     : 'flex-col p-[10px] h-[100px] justify-center mobile:text-[13px] mobile:leading-[1.2]',
@@ -791,10 +804,12 @@ export const AddProviderComponent: FC<{
                 <div
                   className={clsx(
                     isMobile ? '' : 'whitespace-pre-wrap',
-                    'text-center'
+                    'glass-provider-name text-center'
                   )}
                 >
-                  {item.name}
+                  {linkselfUrl && item.toolTip
+                    ? item.name.replace(/\s*\([^)]*\)\s*$/, '')
+                    : item.name}
                   {!!item.toolTip && !isMobile && (
                     <svg
                       width="15"

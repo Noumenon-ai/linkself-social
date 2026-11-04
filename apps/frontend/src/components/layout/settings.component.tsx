@@ -20,7 +20,7 @@ import clsx from 'clsx';
 import { TeamsComponent } from '@gitroom/frontend/components/settings/teams.component';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { LogoutComponent } from '@gitroom/frontend/components/layout/logout.component';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { PublicComponent } from '@gitroom/frontend/components/public-api/public.component';
 import Link from 'next/link';
@@ -58,6 +58,7 @@ export const SettingsPopup: FC<{
     return modal.closeAll();
   }, []);
   const url = useSearchParams();
+  const router = useRouter();
   const showLogout = !url.get('onboarding') || user?.tier?.current === 'FREE';
   const loadProfile = useCallback(async () => {
     const personal = await (await fetch('/user/personal')).json();
@@ -133,6 +134,14 @@ export const SettingsPopup: FC<{
   });
 
   useEffect(() => {
+    if (!linkselfUrl) return;
+    const requested = url.get('tab');
+    if (requested && list.some((item) => item.tab === requested))
+      setTab(requested);
+    else if (!requested) setTab('global_settings');
+  }, [url, list, linkselfUrl]);
+
+  useEffect(() => {
     loadProfile();
   }, []);
 
@@ -141,17 +150,26 @@ export const SettingsPopup: FC<{
   }, [limits, tab]);
 
   return (
-    <>
-      <div className="bg-newBgColorInner p-[20px] mobile:p-[12px] flex flex-col transition-all w-[260px] mobile:w-full">
-        <div className="flex flex-1 flex-col gap-[15px] mobile:flex-row mobile:gap-[8px] mobile:overflow-x-auto mobile:pb-[6px] scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
+    <div className={linkselfUrl ? 'glass-settings' : 'contents'}>
+      <div className="glass-settings-nav bg-newBgColorInner p-[20px] mobile:p-[12px] flex flex-col transition-all w-[260px] mobile:w-full">
+        <div className="glass-settings-tabs flex flex-1 flex-col gap-[15px] mobile:flex-row mobile:gap-[8px] mobile:overflow-x-auto mobile:pb-[6px] scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
           {list.map(({ tab: tabKey, label }) => (
-            <div
+            <button
+              type="button"
+              aria-current={tabKey === tab ? 'page' : undefined}
               key={tabKey}
               className={clsx(
                 'cursor-pointer flex items-center gap-[12px] group/profile hover:bg-boxHover rounded-e-[8px] mobile:shrink-0 mobile:whitespace-nowrap mobile:rounded-[8px] mobile:px-[12px] mobile:py-[8px]',
                 tabKey === tab && 'bg-boxHover'
               )}
-              onClick={() => setTab(tabKey)}
+              onClick={() => {
+                setTab(tabKey);
+                if (linkselfUrl) {
+                  const query = new URLSearchParams(url.toString());
+                  query.set('tab', tabKey);
+                  router.replace(`/settings?${query}`, { scroll: false });
+                }
+              }}
             >
               <div
                 className={clsx(
@@ -162,18 +180,18 @@ export const SettingsPopup: FC<{
                 <SVGLine />
               </div>
               {label}
-            </div>
+            </button>
           ))}
         </div>
         <div>
-          {showLogout && (
+          {showLogout && !linkselfUrl && (
             <div className="mt-4 mobile:mt-[8px]">
               <LogoutComponent />
             </div>
           )}
         </div>
       </div>
-      <div className="bg-newBgColorInner flex-1 min-w-0 flex-col flex p-[20px] mobile:p-[12px] gap-[12px]">
+      <div className="glass-settings-content bg-newBgColorInner flex-1 min-w-0 flex-col flex p-[20px] mobile:p-[12px] gap-[12px]">
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(submit)}>
             {!!getRef && (
@@ -262,7 +280,7 @@ export const SettingsPopup: FC<{
           </form>
         </FormProvider>
       </div>
-    </>
+    </div>
   );
 };
 export const SettingsComponent = () => {

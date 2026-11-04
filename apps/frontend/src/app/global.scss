@@ -1051,7 +1051,7 @@ html[data-linkself-theme='glass-frame'] {
   }
   .glass-rail {
     z-index: 40;
-    width: 64px;
+    width: 56px;
     flex-shrink: 0;
     background: transparent;
     border: 0;
@@ -1059,7 +1059,7 @@ html[data-linkself-theme='glass-frame'] {
   }
   #left-menu {
     position: static;
-    width: 64px;
+    width: 56px;
     height: 100%;
   }
   #left-menu > div {
@@ -1116,31 +1116,6 @@ html[data-linkself-theme='glass-frame'] {
   .glass-rail-link:focus-visible::after {
     display: block;
   }
-  .glass-tools {
-    position: relative;
-  }
-  .glass-tools summary {
-    cursor: pointer;
-    list-style: none;
-    font-size: 13px;
-    text-align: center;
-    padding: 8px 0;
-  }
-  .glass-tools nav {
-    position: absolute;
-    inset-inline-start: 64px;
-    top: 0;
-    z-index: 40;
-    width: 240px;
-    padding: 16px;
-    background: var(--popover);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-small);
-  }
-  .glass-tools nav a {
-    display: block;
-    padding: 8px;
-  }
   .glass-avatar {
     width: 44px;
     height: 44px;
@@ -1151,7 +1126,7 @@ html[data-linkself-theme='glass-frame'] {
   }
   .glass-launches {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 260px;
+    grid-template-columns: minmax(0, 1fr) 240px;
     gap: 24px;
     width: 100%;
     min-width: 0;
@@ -1591,7 +1566,7 @@ html[data-linkself-theme='glass-frame'] {
     gap: 4px;
   }
   .glass-calendar-cell {
-    min-height: 58px;
+    min-height: 44px;
   }
   .glass-post {
     background: var(--tile);
@@ -1966,7 +1941,14 @@ html[data-linkself-theme='glass-frame'] {
       :disabled,
       [aria-disabled='true'],
       [aria-busy='true'],
-      :is(button:disabled, [aria-disabled='true'], [aria-busy='true']) *
+      :is(button:disabled, [aria-disabled='true'], [aria-busy='true']) *,
+      .glass-editor #social-content *,
+      .glass-editor #wrapper-settings *,
+      .glass-settings-content .grid *,
+      .glass-settings-content .glass-accent,
+      .glass-plug-row *,
+      .glass-calendar-actions .bg-ai,
+      .glass-schedule *
     ):hover {
     background: var(--button-hover) !important;
     color: var(--on-accent) !important;
@@ -1995,7 +1977,7 @@ html[data-linkself-theme='glass-frame'] {
     box-shadow: none !important;
     cursor: not-allowed;
   }
-  body:has(.bg-popup, .mantine-Modal-root, .swal2-container) .glass-tools {
+  body:has(.bg-popup, .mantine-Modal-root, .swal2-container) .glass-navigation {
     pointer-events: none;
   }
   @media (max-width: 1200px) {
@@ -2081,13 +2063,6 @@ html[data-linkself-theme='glass-frame'] {
       top: 48px;
       inset-inline-start: auto;
       inset-inline-end: 0;
-    }
-    .glass-tools nav {
-      position: fixed;
-      inset: 100px 24px auto;
-      width: auto;
-      max-height: calc(100dvh - 124px);
-      overflow-y: auto;
     }
     .glass-topbar {
       gap: 12px;
@@ -2189,5 +2164,898 @@ html[data-linkself-theme='glass-frame'] {
       transition: none !important;
       animation: none !important;
     }
+  }
+}
+
+// Owner's compact app addendum. All overrides remain within LinkSelf mode.
+html[data-linkself-theme='glass-frame'] {
+  .glass-shell {
+    width: calc(100% - 32px);
+    max-width: none;
+    min-height: calc(100dvh - 32px);
+    margin: 16px;
+    padding: 20px;
+    border-radius: 28px;
+  }
+  .glass-shell-layout {
+    gap: 20px;
+  }
+  .glass-workspace {
+    gap: 16px;
+  }
+  .glass-workspace-content {
+    gap: 12px;
+    min-height: 480px;
+  }
+  .glass-topbar {
+    min-height: 40px;
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .glass-title {
+    font-size: 24px;
+    line-height: 1.25;
+  }
+  .glass-footer {
+    margin-top: 16px;
+    gap: 12px;
+  }
+  .glass-source-link {
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .glass-auth .glass-source-link {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+  }
+  .glass-navigation {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 16px;
+  }
+  #left-menu > div {
+    gap: 16px;
+  }
+  .glass-rail-primary,
+  .glass-rail-bottom {
+    gap: 8px;
+    padding: 7px;
+  }
+  #left-menu .glass-rail-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    min-width: 40px;
+    flex-shrink: 0;
+    padding: 0;
+    border-radius: var(--radius-pill);
+  }
+  #left-menu .glass-rail-link > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: none;
+  }
+  #left-menu .glass-rail-link > svg {
+    width: 20px;
+    height: 20px;
+  }
+  .glass-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .glass-frame,
+  .glass-content-panel,
+  .glass-workspace-content > .bg-newBgColorInner {
+    border-radius: 16px;
+  }
+  .glass-workspace {
+    border-radius: 0;
+  }
+
+  :is(
+      .glass-shell,
+      .glass-modal,
+      .glass-editor,
+      .mantine-Modal-content,
+      .swal2-popup
+    ) {
+    font-size: 14px;
+    line-height: 1.5;
+    :is(button, [role='button'], .glass-secondary, .bg-btnSimple):not(
+        .network-preview *
+      ) {
+      min-height: 36px;
+      font-size: 14px;
+    }
+    :is(
+        button.bg-btnPrimary,
+        button.glass-accent,
+        .glass-action,
+        .glass-accent.cursor-pointer
+      ):not(.network-preview *) {
+      padding: 8px 14px;
+      min-height: 36px;
+      height: auto;
+      white-space: nowrap;
+    }
+    :is(
+        input:not([type='checkbox'], [type='radio'], [type='range']),
+        select
+      ):not(.network-preview *) {
+      min-height: 36px;
+      height: 36px;
+      padding: 6px 12px;
+      font-size: 14px;
+      max-width: 420px;
+      width: 100%;
+    }
+    :is(.glass-field-row, .grid > *, form, pre):not(.network-preview *) {
+      min-width: 0;
+      max-width: 100%;
+    }
+    :where([class*='p-[24px]'], [class*='p-[20px]']):not(:where(.network-preview *)) {
+      padding: 16px;
+    }
+    :where(
+        [class*='gap-[24px]'],
+        [class*='gap-[30px]'],
+        [class*='gap-[40px]'],
+        [class*='gap-[20px]']
+      ):not(:where(.network-preview *)) {
+      gap: 12px;
+    }
+  }
+  :is(.glass-modal-close, .mantine-Modal-close, .swal2-close) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px !important;
+    flex-shrink: 0;
+    border-radius: var(--radius-pill);
+  }
+  :is(.glass-modal-close, .mantine-Modal-close) svg {
+    display: block;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .glass-modal {
+    padding: 16px;
+  }
+  .glass-modal-title {
+    font-size: 20px;
+    padding-inline-end: 44px;
+    margin-bottom: 12px;
+  }
+  .glass-modal-close {
+    top: 12px;
+    inset-inline-end: 12px;
+  }
+  .glass-provider-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 8px;
+  }
+  .glass-provider-tile {
+    height: 76px;
+    min-height: 76px;
+    padding: 8px;
+    gap: 4px;
+    justify-content: flex-start;
+    border-radius: 12px;
+  }
+  .glass-provider-tile > div:first-child {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .glass-provider-tile img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+  }
+  .glass-provider-name {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+  }
+  .glass-add-channel {
+    gap: 12px;
+  }
+  .glass-modal:has(.glass-add-channel) {
+    width: min(840px, calc(100vw - 24px)) !important;
+  }
+  .glass-modal:has(.glass-add-channel) > div:first-child {
+    min-height: 40px;
+  }
+
+  .glass-launches {
+    gap: 12px;
+  }
+  .glass-calendar-panel,
+  .glass-schedule {
+    padding: 16px;
+  }
+  .glass-calendar-actions {
+    gap: 8px;
+  }
+  .glass-calendar-filters {
+    display: contents;
+  }
+  .glass-calendar-heading {
+    width: auto;
+    margin: 0;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .glass-calendar-heading h2 {
+    font-size: 14px;
+    margin: 0 4px 0 0;
+    white-space: nowrap;
+  }
+  .glass-calendar-heading .glass-calendar-arrow {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .glass-calendar-actions > button.bg-btnPrimary {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+    max-height: 40px;
+  }
+  .glass-calendar-actions > :is(div, button) {
+    flex-shrink: 0;
+  }
+  .glass-channels-button {
+    min-height: 36px;
+    padding: 8px 12px;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .glass-channel-stack {
+    display: none;
+  }
+  .glass-calendar-actions :is([class*='h-[42px]'], [class*='h-[44px]']) {
+    height: 36px;
+  }
+  .glass-calendar-actions [class*='min-w-[300px]'] {
+    min-width: 0;
+  }
+  .glass-calendar-cell {
+    min-height: 44px;
+  }
+  .glass-hour-label {
+    padding: 8px 4px;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .glass-week-grid {
+    grid-auto-rows: minmax(44px, auto);
+  }
+  .glass-week-grid > .sticky {
+    height: 44px;
+    padding: 4px;
+    font-size: 13px;
+  }
+  .glass-week-grid > .sticky div {
+    font-size: 13px;
+  }
+  .glass-schedule h2 {
+    font-size: 20px;
+    margin: 8px 0 12px;
+  }
+  .glass-schedule .bg-btnPrimary {
+    background: var(--inset) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--input-border);
+    flex: 0 0 auto;
+  }
+  .glass-empty {
+    padding: 16px;
+  }
+  .glass-event {
+    padding: 12px;
+  }
+  .glass-event h3 {
+    font-size: 16px;
+  }
+  .glass-event::before {
+    height: 3px;
+    margin-bottom: 8px;
+  }
+  .glass-time-rule {
+    margin: 12px 0 8px;
+  }
+
+  .glass-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+  .glass-settings-nav {
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    min-width: 0;
+  }
+  .glass-settings-tabs {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 4px;
+  }
+  .glass-settings-tabs > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-height: 36px;
+    height: 36px;
+    padding: 8px 12px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 500;
+  }
+  .glass-settings-tabs > button > div {
+    display: none;
+  }
+  .glass-settings-tabs > button[aria-current='page'] {
+    background: var(--tile-hover);
+    color: var(--text);
+  }
+  .glass-settings-content {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--tile);
+  }
+  .glass-settings-content :is(.grid, [class*='gap-[40px]']) {
+    gap: 12px;
+  }
+  .glass-settings-content .grid:not([class*='grid-cols-[']) {
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  }
+  .glass-settings-content :is(.grid > *, .flex > *) {
+    min-width: 0;
+  }
+  .glass-settings-content :is([class*='h-[300px]'], [class*='h-[200px]']) {
+    height: auto;
+  }
+  .glass-settings-content :is(p, pre, code, .grid > *) {
+    overflow-wrap: anywhere;
+  }
+  .glass-settings-content button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .glass-global-settings {
+    gap: 12px;
+  }
+  .glass-global-settings > :is(div, p) {
+    margin: 0;
+    padding: 12px;
+  }
+  .glass-global-settings > h3 {
+    grid-column: 1 / -1;
+  }
+  .glass-plug-list,
+  .glass-settings-content .glass-plug-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .glass-plug-row {
+    height: auto;
+  }
+  .glass-plug-row > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 16px;
+    padding: 12px 16px;
+  }
+  .glass-plug-row > div > div:first-child {
+    grid-column: 1;
+    gap: 12px;
+    align-items: center;
+  }
+  .glass-plug-row > div > div:first-child > div:first-child {
+    font-size: 16px;
+    margin: 0;
+  }
+  .glass-plug-row > div > div:nth-child(2) {
+    grid-column: 1;
+    color: var(--muted);
+  }
+  .glass-plug-row > div > button {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    background: var(--inset) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--input-border);
+  }
+  .glass-plug-channels > div {
+    padding: 4px 12px;
+    min-height: 36px;
+    border-radius: var(--radius-pill);
+    opacity: 1;
+  }
+  .glass-plug-channels img:not(.absolute) {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+  }
+  .glass-plug-channels img.absolute {
+    width: 12px;
+    height: 12px;
+  }
+
+  .glass-editor-overlay {
+    padding: 16px;
+  }
+  .glass-editor-header {
+    background: var(--popover);
+    height: 48px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 18px;
+  }
+  .glass-editor #social-content {
+    gap: 12px;
+    padding: 16px;
+  }
+  .glass-editor-channels {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .glass-editor-channels button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+  }
+  .glass-editor-channels button[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--tile-hover);
+  }
+  .glass-editor-channel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .glass-editor-channel > button {
+    position: relative;
+  }
+  .glass-editor-channel img {
+    border-radius: var(--radius-pill);
+  }
+  .glass-editor-channel-badge {
+    position: absolute;
+    bottom: 0;
+    inset-inline-end: -2px;
+  }
+  .glass-editor-channel input {
+    width: 16px;
+    height: 16px;
+  }
+  .glass-editor #social-content > div:last-of-type {
+    flex: 0 0 auto;
+  }
+  .glass-compose-stack,
+  .glass-compose-field {
+    flex: 0 0 auto;
+    width: 100%;
+    gap: 12px;
+  }
+  .glass-compose-field .tiptap {
+    min-height: 160px;
+    height: auto;
+  }
+  .glass-editor
+    :is(#social-content, #wrapper-settings)
+    :is(.glass-action, .glass-accent, .bg-btnPrimary, .bg-ai) {
+    background: var(--inset) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--input-border);
+  }
+  .glass-editor .glass-editor-settings-toggle {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    width: auto;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-pill);
+  }
+  .glass-editor #wrapper-settings {
+    padding: 0 16px 12px;
+  }
+  .glass-editor #wrapper-settings > div {
+    background: transparent;
+  }
+  .glass-editor #social-settings {
+    background: transparent;
+    gap: 0;
+  }
+  .glass-editor #social-settings > [data-id] {
+    background: transparent;
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .glass-editor #social-settings > [data-id] > .flex:first-of-type:has(img) {
+    display: none;
+  }
+  .glass-channel-settings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0 !important;
+    text-align: start;
+    background: transparent;
+  }
+  .glass-channel-settings-toggle img {
+    border-radius: var(--radius-pill);
+  }
+  .glass-channel-settings-toggle span {
+    flex: 1;
+  }
+  .glass-editor #social-settings :is(.glass-field-row, .mb-5) {
+    max-width: 420px;
+    width: 100%;
+    margin: 0;
+  }
+  .glass-editor-actions {
+    min-height: 60px;
+    height: auto;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .glass-editor-actions > div {
+    padding: 0;
+    flex-wrap: wrap;
+  }
+  .glass-post-targets {
+    color: var(--muted);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .glass-editor > .glass-post-targets {
+    padding: 8px 16px;
+  }
+  button.glass-switch {
+    width: 40px;
+    height: 24px;
+    min-width: 40px;
+    min-height: 24px !important;
+    padding: 3px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-pill);
+    background: var(--inset);
+    display: flex;
+    align-items: center;
+  }
+  .glass-switch-thumb {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-pill);
+    background: var(--muted);
+  }
+  button.glass-switch[aria-checked='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .glass-switch[aria-checked='true'] .glass-switch-thumb {
+    transform: translateX(16px);
+    background: var(--on-accent);
+  }
+  [dir='rtl'] .glass-switch[aria-checked='true'] .glass-switch-thumb {
+    transform: translateX(-16px);
+  }
+  :is(
+      .dropdown-menu,
+      .mantine-Menu-dropdown,
+      .mantine-Popover-dropdown,
+      .react-tooltip
+    ) {
+    font-size: 14px;
+    padding: 8px;
+  }
+  :is(.dropdown-menu, .mantine-Menu-dropdown) :is(button, [role='menuitem']) {
+    min-height: 36px;
+    padding: 8px 12px;
+  }
+  .glass-channel-menu-dropdown [role='menuitem'] {
+    min-height: 36px;
+  }
+  .mantine-Notification-root {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 16px;
+  }
+  @media (min-width: 900px) {
+    .glass-global-settings {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+    .glass-editor #social-settings > [data-id] > .flex-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 420px));
+      gap: 12px;
+    }
+    .glass-editor
+      #social-settings
+      > [data-id]
+      > .flex-col
+      > :not(:has(input, select)) {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 760px) {
+    .glass-shell {
+      width: calc(100% - 24px);
+      margin: 12px;
+      padding: 12px;
+    }
+    .glass-shell-layout {
+      gap: 12px;
+    }
+    .glass-navigation {
+      flex-direction: row;
+      overflow-x: auto;
+      min-width: 0;
+      padding: 4px;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      background: var(--inset);
+    }
+    .glass-rail-primary,
+    .glass-rail-bottom {
+      display: flex;
+      flex-direction: row;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      gap: 8px;
+    }
+    .glass-rail-link::after {
+      position: fixed;
+      top: 88px;
+      inset-inline-start: 24px;
+      inset-inline-end: auto;
+    }
+    .glass-calendar-heading {
+      max-width: 100%;
+    }
+    .glass-calendar-heading h2 {
+      font-size: 14px;
+    }
+    .glass-calendar-panel,
+    .glass-schedule {
+      padding: 12px;
+    }
+    .glass-editor-overlay {
+      padding: 0;
+    }
+    .glass-editor-actions {
+      display: none;
+    }
+    .glass-provider-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    .glass-plug-row > div {
+      gap: 4px 8px;
+      padding: 12px;
+    }
+  }
+
+  .glass-toast {
+    min-height: 40px;
+    height: auto;
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    padding: 8px 12px;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .glass-settings-content [class*='grid-cols-[2fr,1fr,1fr]'] {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .glass-settings-content .glass-webhooks-table {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto auto;
+  }
+  .glass-settings-content .grid :is(button.glass-action, button.bg-btnPrimary) {
+    background: var(--inset) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--input-border);
+  }
+  @media (max-width: 760px) {
+    .glass-settings-content .glass-webhooks-table {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+    .glass-settings-content .glass-webhooks-table > div:nth-child(4n + 1) {
+      grid-column: 1 / -1;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+    }
+    .glass-settings-content .glass-webhooks-table > div:nth-child(-n + 4) {
+      display: none;
+    }
+  }
+
+  .glass-editor #wrapper-settings {
+    display: flex !important;
+  }
+  .glass-settings-content .glass-autopost-table {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto auto 56px;
+  }
+  .glass-settings-content .glass-signatures-table {
+    grid-template-columns: minmax(0, 2fr) minmax(64px, 1fr) auto auto;
+  }
+  .glass-settings-content
+    .glass-signatures-table[class*='grid-cols-[1fr,1fr,1fr,1fr,1fr]'] {
+    grid-template-columns: minmax(0, 2fr) minmax(64px, 1fr) auto auto auto;
+  }
+  .glass-analytics-channels {
+    width: 200px;
+  }
+  .glass-analytics-channels.sidebar {
+    width: 64px;
+  }
+  .glass-analytics-channels .group\/profile {
+    min-height: 36px;
+    gap: 8px;
+    opacity: 1;
+  }
+  .glass-analytics-channels .group\/profile img:not(.absolute) {
+    width: 28px;
+    height: 28px;
+  }
+  .glass-analytics-channels .group\/profile img.absolute {
+    width: 12px;
+    height: 12px;
+  }
+  .glass-analytics-content .grid {
+    gap: 12px;
+  }
+  .glass-analytics-content .grid > div {
+    min-width: 0;
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .glass-media button {
+    height: 36px;
+    padding: 8px 12px;
+  }
+  .glass-media [class*='h-[52px]'] {
+    height: 36px;
+  }
+  .glass-media [class*='mt-[32px]'] {
+    margin-top: 12px;
+  }
+  .glass-media :is([class*='gap-[30px]'], [class*='gap-[20px]']) {
+    gap: 12px;
+  }
+  @media (max-width: 1025px) {
+    .glass-settings-content .glass-signatures-table,
+    .glass-settings-content
+      .glass-signatures-table[class*='grid-cols-[1fr,1fr,1fr,1fr,1fr]'] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .glass-analytics-channels,
+    .glass-analytics-channels.sidebar {
+      width: 100%;
+    }
+  }
+  @media (max-width: 760px) {
+    .glass-settings-content .glass-autopost-table {
+      grid-template-columns: auto auto minmax(40px, 1fr);
+    }
+    .glass-settings-content .glass-autopost-table > div:nth-child(5n + 1),
+    .glass-settings-content .glass-autopost-table > div:nth-child(5n + 2) {
+      grid-column: 1 / -1;
+    }
+    .glass-settings-content .glass-autopost-table > div:nth-child(5n + 1) {
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+    }
+    .glass-settings-content .glass-autopost-table > div:nth-child(-n + 5) {
+      display: none;
+    }
+  }
+
+  .glass-calendar-actions [class*='w-[74px]'] {
+    width: auto;
+    padding: 4px 12px;
+    min-height: 28px;
+  }
+  .glass-calendar-actions > .border {
+    padding: 3px;
+  }
+  .glass-calendar-actions [class*='min-w-[80px]'] {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+  .glass-list-view .glass-post {
+    padding: 8px 12px;
+    border-radius: 12px;
+  }
+  .glass-list-view [class*='mb-[20px]'] {
+    margin-bottom: 12px;
+  }
+  .glass-global-settings .glass-metrics {
+    gap: 12px;
+  }
+  @media (min-width: 900px) {
+    .glass-global-settings .glass-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .glass-global-settings .glass-metric-field {
+    display: block;
+    min-width: 0;
+  }
+  .glass-global-settings > div {
+    overflow-wrap: anywhere;
+  }
+  .glass-settings-content .glass-accent {
+    background: var(--inset) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--input-border);
+  }
+
+  .glass-calendar-cell [class*='min-h-[70px]'] {
+    min-height: 42px;
+  }
+  .glass-calendar-actions .bg-ai {
+    width: 36px;
+    height: 36px;
+    background: var(--inset) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--input-border);
+  }
+  .glass-list-view .glass-post {
+    height: auto;
+    flex: 0 0 auto;
+  }
+  .glass-day-view [class*='min-h-[60px]'] {
+    min-height: 44px;
+    margin-bottom: 12px;
   }
 }

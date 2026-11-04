@@ -20,7 +20,7 @@ export const GlobalSettings = () => {
   const { emailEnabled, dub, linkselfUrl } = useVariables();
   const t = useT();
   return (
-    <div className="flex flex-col">
+    <div className="glass-global-settings flex flex-col">
       <h3 className="text-[20px]">{t('global_settings', 'Global Settings')}</h3>
       <AuthenticationComponent />
       <MetricComponent />

@@ -1025,10 +1025,12 @@ export const LaunchesComponent = () => {
                   continueIntegration={continueIntegration}
                   update={update}
                 />
-                {sortedIntegrations.length > 0 && <NewPost />}
+                <Filters />
                 {sortedIntegrations.length > 0 &&
                   user?.tier?.ai &&
                   billingEnabled && <GeneratorComponent />}
+
+                {sortedIntegrations.length > 0 && <NewPost />}
               </div>
             ) : (
               <div className="hidden mobile:flex gap-[8px]">
@@ -1065,7 +1067,7 @@ export const LaunchesComponent = () => {
                 )}
               </div>
             )}
-            <Filters />
+            {!linkselfUrl && <Filters />}
             <div className="glass-calendar glass-frame flex-1 flex">
               <Calendar />
             </div>

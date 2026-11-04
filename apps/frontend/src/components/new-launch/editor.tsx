@@ -456,7 +456,7 @@ export const EditorWrapper: FC<{
     <div
       className={clsx(
         // on phones the toolbar is fixed at the bottom, the posts leave room for it
-        'relative flex-col gap-[20px] flex-1 min-w-0 mobile:flex mobile:gap-0 mobile:pb-[64px]',
+        'glass-compose-stack relative flex-col gap-[20px] flex-1 min-w-0 mobile:flex mobile:gap-0 mobile:pb-[64px]',
         (items.length === 1 || !canEdit || !comments) && 'flex',
         ((!canEdit && !isCreateSet) || !comments) &&
           'bg-newSettings mobile:bg-transparent rounded-[12px]'
@@ -919,7 +919,7 @@ export const Editor: FC<{
   return (
     <div
       className={clsx(
-        'flex flex-col gap-[20px] flex-1 min-w-0',
+        'glass-compose-field flex flex-col gap-[20px] flex-1 min-w-0',
         flat && 'flat-editor'
       )}
       onClick={flat ? focusOnEmpty : undefined}

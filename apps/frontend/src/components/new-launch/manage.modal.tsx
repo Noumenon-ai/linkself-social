@@ -72,8 +72,22 @@ import {
   useMediaSettingsValues,
 } from '@gitroom/frontend/components/new-launch/media.settings.section';
 
+const PostTargets: FC<{ count: number; mobile?: boolean }> = ({
+  count,
+  mobile,
+}) => (
+  <span
+    className={clsx('glass-post-targets', mobile && 'hidden mobile:block')}
+    aria-live="polite"
+  >
+    {count
+      ? `Posts to ${count} ${count === 1 ? 'channel' : 'channels'}`
+      : 'Pick a channel'}
+  </span>
+);
+
 export const ManageModal: FC<AddEditModalProps> = (props) => {
-  const { aiEnabled } = useVariables();
+  const { aiEnabled, linkselfUrl } = useVariables();
   const t = useT();
   const fetch = useFetch();
   const ref = useRef(null);
@@ -82,6 +96,9 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   const toaster = useToaster();
   const modal = useModals();
   const [showSettings, setShowSettings] = useState(false);
+  const [openSettingsChannel, setOpenSettingsChannel] = useState<string | null>(
+    null
+  );
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
   const [mobileSheet, setMobileSheet] = useState<
     'channels' | 'settings' | 'tags' | 'repeat' | 'date' | null
@@ -652,6 +669,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
             focus(item.id, 'fix');
             setLoading(false);
             setShowSettings(true);
+            if (linkselfUrl) setOpenSettingsChannel(item.id);
             return;
           }
 
@@ -905,8 +923,11 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   );
 
   return (
-    <div className="w-full h-full flex-1 p-[40px] mobile:p-0 mobile:h-auto mobile:min-h-full flex relative">
+    <div className="glass-editor-overlay w-full h-full flex-1 p-[40px] mobile:p-0 mobile:h-auto mobile:min-h-full flex relative">
       <div className="glass-frame glass-editor flex flex-1 min-w-0 bg-newBgColorInner rounded-[20px] mobile:rounded-none flex-col">
+        {linkselfUrl && (
+          <PostTargets count={selectedIntegrations.length} mobile />
+        )}
         <MobileTopBar
           onBack={askClose}
           actions={mobileActions}
@@ -929,7 +950,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
               mobileTab === 'preview' && 'mobile:flex-none'
             )}
           >
-            <div className="bg-newBgColor h-[65px] rounded-s-[20px] !rounded-b-[0] mobile:hidden flex items-center gap-[12px] px-[20px] text-[20px] font-[600]">
+            <div className="glass-editor-header bg-newBgColor h-[65px] rounded-s-[20px] !rounded-b-[0] mobile:hidden flex items-center gap-[12px] px-[20px] text-[20px] font-[600]">
               {t('create_post_title', 'Create Post')}
               <CreationMethodBadge
                 creationMethod={existingData?.posts?.[0]?.creationMethod}
@@ -954,9 +975,11 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                       !existingData.integration && 'mobile:hidden'
                     )}
                   >
-                    <div className="flex flex-1">
-                      <PicksSocialsComponent toolTip={true} />
-                    </div>
+                    {!linkselfUrl && (
+                      <div className="flex flex-1">
+                        <PicksSocialsComponent toolTip={true} />
+                      </div>
+                    )}
                     <div className="mobile:hidden">
                       {/* an existing post keeps its channels */}
                       {!dummy && !existingData.integration && (
@@ -985,7 +1008,8 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                     <div className="flex mobile:items-center mobile:gap-[4px]">
                       <div className="flex-1 mobile:flex-initial mobile:min-w-0">
                         {(!existingData.integration ||
-                          !!existingData.siblings?.length) && <SelectCurrent />}
+                          !!existingData.siblings?.length ||
+                          !!linkselfUrl) && <SelectCurrent />}
                       </div>
                       {!existingData.integration && (
                         <>
@@ -1045,10 +1069,12 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                         onClose={() => setShowSettings(false)}
                       />
                     </div>
-                    <div
+                    <button
+                      type="button"
+                      aria-expanded={showSettings}
                       onClick={() => setShowSettings(!showSettings)}
                       className={clsx(
-                        'glass-accent bg-[var(--studio-accent,#612BD3)] rounded-[12px] flex items-center gap-[8px] cursor-pointer p-[12px] mobile:hidden',
+                        'glass-editor-settings-toggle glass-accent bg-[var(--studio-accent,#612BD3)] rounded-[12px] flex items-center gap-[8px] cursor-pointer p-[12px] mobile:hidden',
                         showSettings ? '!rounded-b-none' : ''
                       )}
                     >
@@ -1061,7 +1087,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                           className="text-white"
                         />
                       </div>
-                    </div>
+                    </button>
                     <div
                       className={clsx(
                         !showSettings ? 'hidden' : 'flex-1',
@@ -1073,7 +1099,44 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                         <div
                           id="social-settings"
                           className="flex flex-col gap-[20px] bg-newBgColor mobile:bg-transparent"
-                        />
+                        >
+                          {linkselfUrl &&
+                            selectedIntegrations.map(
+                              ({ integration }, index) => (
+                                <button
+                                  key={integration.id}
+                                  type="button"
+                                  className="glass-channel-settings-toggle"
+                                  style={{ order: index * 2 }}
+                                  aria-expanded={
+                                    openSettingsChannel === integration.id
+                                  }
+                                  onClick={() =>
+                                    setOpenSettingsChannel(
+                                      openSettingsChannel === integration.id
+                                        ? null
+                                        : integration.id
+                                    )
+                                  }
+                                >
+                                  <img
+                                    width={24}
+                                    height={24}
+                                    src={
+                                      integration.picture || '/no-picture.jpg'
+                                    }
+                                    alt=""
+                                  />
+                                  <span>{integration.name}</span>
+                                  <ChevronDownIcon
+                                    rotated={
+                                      openSettingsChannel === integration.id
+                                    }
+                                  />
+                                </button>
+                              )
+                            )}
+                        </div>
                       </div>
                     </div>
                     <div className="hidden mobile:contents">
@@ -1083,7 +1146,20 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                       />
                     </div>
                     <style>
-                      {`#social-settings [data-id="${current}"] {display: block !important;}`}
+                      {linkselfUrl
+                        ? selectedIntegrations
+                            .map(
+                              ({ integration }, index) =>
+                                `#social-settings > [data-id="${
+                                  integration.id
+                                }"] {display: ${
+                                  openSettingsChannel === integration.id
+                                    ? 'block'
+                                    : 'none'
+                                } !important; order: ${index * 2 + 1};}`
+                            )
+                            .join('\n')
+                        : `#social-settings [data-id="${current}"] {display: block !important;}`}
                     </style>
                   </div>
                 </div>
@@ -1096,11 +1172,16 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
               mobileTab === 'edit' && 'mobile:hidden'
             )}
           >
-            <div className="bg-newBgColor h-[65px] rounded-e-[20px] !rounded-b-[0] mobile:hidden flex items-center px-[20px] text-[20px] font-[600]">
+            <div className="glass-editor-header bg-newBgColor h-[65px] rounded-e-[20px] !rounded-b-[0] mobile:hidden flex items-center px-[20px] text-[20px] font-[600]">
               <div className="flex-1">{t('post_preview', 'Post Preview')}</div>
-              <div className="cursor-pointer mobile:hidden">
-                <CloseIcon onClick={askClose} className="text-[var(--studio-muted,#A3A3A3)]" />
-              </div>
+              <button
+                type="button"
+                aria-label="Close dialog"
+                className="glass-modal-close cursor-pointer mobile:hidden"
+                onClick={askClose}
+              >
+                <CloseIcon className="text-[var(--studio-muted,#A3A3A3)]" />
+              </button>
             </div>
             <div className="flex-1 relative">
               <Scrollable
@@ -1112,7 +1193,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
             </div>
           </div>
         </div>
-        <div className="select-none h-[84px] py-[20px] border-t border-newBorder flex items-center mobile:hidden">
+        <div className="glass-editor-actions select-none h-[84px] py-[20px] border-t border-newBorder flex items-center mobile:hidden">
           <div className="flex-1 flex ps-[20px] gap-[8px]">
             {/* keep a single tags component mounted, the tags sheet has its own */}
             {!dummy && mobileSheet !== 'tags' && (
@@ -1131,6 +1212,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
             )}
           </div>
           <div className="pe-[20px] flex items-center justify-end gap-[8px]">
+            {linkselfUrl && <PostTargets count={selectedIntegrations.length} />}
             {existingData?.integration && (
               <button
                 onClick={deletePost}
@@ -1193,7 +1275,9 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                     )}
                   >
                     {selectedIntegrations.length === 0
-                      ? t('check_circles_above', 'Check the circles above')
+                      ? linkselfUrl
+                        ? 'Pick a channel'
+                        : t('check_circles_above', 'Check the circles above')
                       : scheduleLabel}
                   </div>
                   {!dummy && (

@@ -1,12 +1,16 @@
-// The link mark from the approved Glass reference, shared by studio and auth.
+// The owner-approved two-part S logo, shared by studio and auth.
 export const GlassBrand = ({ wordmark = false }: { wordmark?: boolean }) => (
   <span className="glass-brand" aria-label="LinkSelf Social">
-    <svg viewBox="0 0 192 192" width="36" height="36" aria-hidden="true">
-      <rect rx="56" width="192" height="192" fill="currentColor" />
-      <g fill="none" stroke="var(--studio-ground)" strokeWidth="12" strokeLinecap="round">
-        <path d="M128 69Q134 53 114 53H84C46 53 46 107 84 107H109" />
-        <path d="M64 123Q58 135 78 135H108C146 135 146 80 108 80H83" />
-      </g>
+    <svg viewBox="0 0 256 256" width="36" height="36" aria-hidden="true">
+      <defs>
+        <linearGradient id="linkself-logo-tile" x1="0" y1="0" x2="1" y2="1">
+          <stop stopColor="#1E4352" />
+          <stop offset="1" stopColor="#101C26" />
+        </linearGradient>
+      </defs>
+      <rect width="256" height="256" rx="57.6" fill="url(#linkself-logo-tile)" />
+      <path d="M136 32A80 80 0 0 0 56 112V120H104V112A32 32 0 0 1 136 80H200V32Z" fill="#85C2FF" />
+      <path d="M136 32A80 80 0 0 0 56 112V120H104V112A32 32 0 0 1 136 80H200V32Z" fill="#C9E650" transform="rotate(180 128 128)" />
     </svg>
     {wordmark && <span>LinkSelf Social</span>}
   </span>

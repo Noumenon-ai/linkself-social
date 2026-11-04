@@ -267,7 +267,7 @@ export const Filters = () => {
   }, [calendar]);
 
   return (
-    <div className="text-textColor flex flex-row flex-wrap gap-[8px] items-center select-none">
+    <div className="glass-calendar-filters text-textColor flex flex-row flex-wrap gap-[8px] items-center select-none">
       {linkselfUrl && !isListView && (
         <div className="glass-calendar-heading">
           <h2>{getDisplayText()}</h2>

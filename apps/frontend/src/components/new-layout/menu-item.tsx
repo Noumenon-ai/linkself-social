@@ -1,17 +1,31 @@
 'use client';
 import { FC, ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import clsx from 'clsx';
 import Link from 'next/link';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 
-export const MenuItem: FC<{ label: string; icon: ReactNode; path: string; onClick?: () => void }> = ({
-  label,
-  icon,
-  path,
-  onClick,
-}) => {
+export const MenuItem: FC<{
+  label: string;
+  icon: ReactNode;
+  path: string;
+  onClick?: () => void;
+}> = ({ label, icon, path, onClick }) => {
   const currentPath = usePathname();
-  const isActive = currentPath.indexOf(path) === 0;
+  const query = useSearchParams();
+  const { linkselfUrl } = useVariables();
+  const [pathname, search] = path.split('?');
+  const settingsTab = query.get('tab') || 'global_settings';
+  const isActive = linkselfUrl
+    ? path === '/plugs'
+      ? currentPath === '/plugs' ||
+        (currentPath === '/settings' && settingsTab === 'plugs')
+      : currentPath === pathname &&
+        (search
+          ? settingsTab === new URLSearchParams(search).get('tab')
+          : pathname !== '/settings' ||
+            !['sets', 'signatures', 'plugs'].includes(settingsTab))
+    : currentPath.indexOf(path) === 0;
 
   const className = clsx(
     'glass-rail-link group w-full minCustom:h-[54px] custom:h-[44px] py-[8px] px-[6px] minCustom:gap-[4px] custom:gap-[2px] flex flex-col font-[600] items-center justify-center rounded-[12px] hover:text-textItemFocused hover:bg-boxFocused transition-colors',
@@ -42,7 +56,7 @@ export const MenuItem: FC<{ label: string; icon: ReactNode; path: string; onClic
       aria-label={label}
       title={label}
       aria-current={isActive ? 'page' : undefined}
-      {...path.indexOf('http') === 0 && { target: '_blank' }}
+      {...(path.indexOf('http') === 0 && { target: '_blank' })}
       className={className}
     >
       {inner}

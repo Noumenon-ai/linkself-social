@@ -1,7 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
-  <rect rx="56" width="192" height="192" fill="#F4F7FC"/>
-  <g fill="none" stroke="#10151F" stroke-width="12" stroke-linecap="round">
-    <path d="M128 69Q134 53 114 53H84C46 53 46 107 84 107H109"/>
-    <path d="M64 123Q58 135 78 135H108C146 135 146 80 108 80H83"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="LinkSelf"><defs><linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1E4352"/><stop offset="1" stop-color="#101C26"/></linearGradient></defs><rect width="256" height="256" rx="57.6" fill="url(#tile)"/><path d="M136 32A80 80 0 0 0 56 112V120H104V112A32 32 0 0 1 136 80H200V32Z" fill="#85C2FF" /><path d="M136 32A80 80 0 0 0 56 112V120H104V112A32 32 0 0 1 136 80H200V32Z" fill="#C9E650" transform="rotate(180 128 128)"/></svg>

@@ -13,5 +13,12 @@ export default async function Index(props: {
   }>;
 }) {
   const searchParams = await props.searchParams;
-  return <><SettingsPopup /><SourceAttribution /></>;
+  return (
+    <>
+      <SettingsPopup />
+      {!(process.env.LINKSELF_URL || process.env.NEXT_PUBLIC_LINKSELF_URL) && (
+        <SourceAttribution />
+      )}
+    </>
+  );
 }

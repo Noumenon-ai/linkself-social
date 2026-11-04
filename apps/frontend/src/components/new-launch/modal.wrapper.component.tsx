@@ -50,7 +50,12 @@ export const ModalWrapperComponent: FC<{
       >
         <div className="flex items-start mb-[24px]">
           <div className="flex-1 text-[24px]">{title}</div>
-          <div className="cursor-pointer" onClick={closeModal}>
+          <button
+            type="button"
+            aria-label="Close dialog"
+            className="glass-modal-close cursor-pointer"
+            onClick={closeModal}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="21"
@@ -66,7 +71,7 @@ export const ModalWrapperComponent: FC<{
                 strokeLinejoin="round"
               />
             </svg>
-          </div>
+          </button>
         </div>
         <div>{children}</div>
       </div>

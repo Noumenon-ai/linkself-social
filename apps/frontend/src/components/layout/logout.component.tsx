@@ -39,7 +39,11 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
   return (
     <>
       <div
-        className="cursor-pointer"
+        className={
+          isIcon && linkselfUrl
+            ? 'glass-rail-link cursor-pointer'
+            : 'cursor-pointer'
+        }
         role="button"
         tabIndex={0}
         aria-label={t('logout', 'Log out')}

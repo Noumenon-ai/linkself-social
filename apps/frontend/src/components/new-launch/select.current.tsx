@@ -1,5 +1,6 @@
 'use client';
 
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { FC, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import {
   SelectedIntegrations,
@@ -52,10 +53,12 @@ export function useHasScroll(ref: RefObject<HTMLElement | null>): boolean {
 }
 
 export const SelectCurrent: FC = () => {
+  const { linkselfUrl } = useVariables();
   const modals = useDecisionModal();
   const existingData = useExistingData();
   const {
     selectedIntegrations,
+    integrations,
     current,
     setCurrent,
     locked,
@@ -64,6 +67,7 @@ export const SelectCurrent: FC = () => {
   } = useLaunchStore(
     useShallow((state) => ({
       selectedIntegrations: state.selectedIntegrations,
+      integrations: state.integrations,
       addOrRemoveSelectedIntegration: state.addOrRemoveSelectedIntegration,
       current: state.current,
       setCurrent: state.setCurrent,
@@ -94,6 +98,87 @@ export const SelectCurrent: FC = () => {
     []
   );
 
+  if (linkselfUrl) {
+    const available = integrations.filter((integration) =>
+      existingData.integration
+        ? integration.id === existingData.integration ||
+          existingData.siblings?.some(
+            (sibling) => sibling.integration === integration.id
+          )
+        : !integration.disabled && !integration.inBetweenSteps
+    );
+    return (
+      <div className="glass-editor-channels" aria-label="Post channels">
+        {!existingData.integration && (
+          <button
+            type="button"
+            disabled={locked}
+            aria-label="Edit shared post"
+            aria-pressed={current === 'global'}
+            onClick={() => {
+              setHide(true);
+              setCurrent('global');
+            }}
+          >
+            <GlobalIcon />
+          </button>
+        )}
+        {available.map((integration) => {
+          const selected = selectedIntegrations.some(
+            (item) => item.integration.id === integration.id
+          );
+          return (
+            <div
+              className="glass-editor-channel"
+              key={integration.id}
+              data-selected={selected || undefined}
+            >
+              <button
+                type="button"
+                disabled={locked}
+                aria-label={`${integration.name}: ${
+                  selected ? 'edit channel post' : 'select channel'
+                }`}
+                aria-pressed={current === integration.id}
+                title={integration.name}
+                onClick={() => {
+                  if (!selected)
+                    addOrRemoveSelectedIntegration(integration, {});
+                  setHide(true);
+                  setCurrent(integration.id);
+                }}
+              >
+                <img
+                  src={integration.picture || '/no-picture.jpg'}
+                  alt=""
+                  width={28}
+                  height={28}
+                />
+                <img
+                  className="glass-editor-channel-badge"
+                  src={`/icons/platforms/${integration.identifier}.png`}
+                  alt={integration.identifier}
+                  width={12}
+                  height={12}
+                />
+              </button>
+              {!existingData.integration && (
+                <input
+                  type="checkbox"
+                  aria-label={`Post to ${integration.name}`}
+                  checked={selected}
+                  disabled={locked}
+                  onChange={() =>
+                    addOrRemoveSelectedIntegration(integration, {})
+                  }
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
   return (
     <>
       <div className="select-none left-0 absolute w-full z-[100] px-[20px] mobile:static mobile:px-0">

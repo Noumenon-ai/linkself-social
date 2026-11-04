@@ -57,39 +57,45 @@ const MetricComponent = () => {
     []
   );
   return (
-    <div className="my-[16px] mt-[16px] bg-sixth border-fifth border rounded-[4px] p-[24px] flex flex-col gap-[24px]">
-      <div className="mt-[4px]">Date Metrics</div>
-      <Select name="metric" disableForm={true} label="" onChange={changeMetric} value={currentMetric ? 'US' : 'GLOBAL'}>
-        {dateMetrics.map((metric) => (
-          <option
-            key={metric.value}
-            value={metric.value}
-          >
-            {metric.label}
+    <div className="glass-metrics my-[16px] mt-[16px] bg-sixth border-fifth border rounded-[4px] p-[24px] flex flex-col gap-[24px]">
+      <div className="contents glass-metric-field">
+        <div className="mt-[4px]">Date Metrics</div>
+        <Select
+          name="metric"
+          disableForm={true}
+          label=""
+          onChange={changeMetric}
+          value={currentMetric ? 'US' : 'GLOBAL'}
+        >
+          {dateMetrics.map((metric) => (
+            <option key={metric.value} value={metric.value}>
+              {metric.label}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <div className="contents glass-metric-field">
+        <div className="mt-[4px]">{t('timezone', 'Timezone')}</div>
+        <Select
+          name="timezone"
+          disableForm={true}
+          label=""
+          onChange={changeTimezone}
+          value={timezone}
+        >
+          <option value="">
+            {t('automatic_timezone', 'Automatic ({{timezone}})', {
+              timezone: browserTimezone(),
+              interpolation: { escapeValue: false },
+            })}
           </option>
-        ))}
-      </Select>
-
-      <div className="mt-[4px]">{t('timezone', 'Timezone')}</div>
-      <Select
-        name="timezone"
-        disableForm={true}
-        label=""
-        onChange={changeTimezone}
-        value={timezone}
-      >
-        <option value="">
-          {t('automatic_timezone', 'Automatic ({{timezone}})', {
-            timezone: browserTimezone(),
-            interpolation: { escapeValue: false },
-          })}
-        </option>
-        {timezoneOptions.map((zone) => (
-          <option key={zone.tzCode} value={zone.tzCode}>
-            {zone.label}
-          </option>
-        ))}
-      </Select>
+          {timezoneOptions.map((zone) => (
+            <option key={zone.tzCode} value={zone.tzCode}>
+              {zone.label}
+            </option>
+          ))}
+        </Select>
+      </div>
     </div>
   );
 };

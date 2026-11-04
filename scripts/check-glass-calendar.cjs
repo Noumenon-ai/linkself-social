@@ -4,6 +4,16 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');
 const React = require('react');
+const RealDate = Date;
+const fixedNow = RealDate.parse('2026-11-04T19:00:00Z');
+global.Date = class extends RealDate {
+  constructor(...args) {
+    super(...(args.length ? args : [fixedNow]));
+  }
+  static now() {
+    return fixedNow;
+  }
+};
 const dayjs = require('dayjs');
 dayjs.extend(require('dayjs/plugin/utc'));
 dayjs.extend(require('dayjs/plugin/isoWeek'));
@@ -519,80 +529,309 @@ for (const mode of ['', 'https://example.test']) {
 }
 linkselfUrl = 'https://example.test';
 
-// The real All tools component closes on every supported dismissal route.
-const listeners = new Map();
-const cleanups = [];
-let hasOpenModal = false;
-let focused = false;
-const toolsElement = {
-  open: true,
-  contains: (target) => target === 'inside',
-  querySelector: () => ({
-    focus: () => {
-      focused = true;
-    },
-  }),
-};
+// Render the real rail for paid, free and upstream modes.
+let menuUser = { orgId: 'org', role: 'ADMIN', tier: { current: 'PRO' } };
 const { TopMenu } = component(
   'apps/frontend/src/components/layout/top.menu.tsx',
   ['TopMenu'],
   {
-    useUser: () => ({ orgId: 'org', role: 'ADMIN', tier: 'PRO' }),
+    useUser: () => menuUser,
     useVariables: () => ({
       linkselfUrl,
       isGeneral: true,
       billingEnabled: true,
     }),
     useMenuItem: () => ({
-      firstMenu: [{ path: '/launches', name: 'Calendar' }],
-      secondMenu: [],
+      firstMenu: [
+        { path: '/launches', name: 'Calendar' },
+        { path: '/analytics', name: 'Analytics' },
+        { path: '/media', name: 'Media' },
+        { path: '/agents', name: 'Agent', hide: true },
+      ],
+      secondMenu: [{ path: '/settings', name: 'Settings', role: ['ADMIN'] }],
     }),
-    useRef: () => ({ current: toolsElement }),
-    useHasOpenModal: () => hasOpenModal,
-    useEffect: (f) => {
-      const cleanup = f();
-      if (cleanup) cleanups.push(cleanup);
-    },
-    document: {
-      addEventListener: (name, fn) => listeners.set(name, fn),
-      removeEventListener: (name) => listeners.delete(name),
-    },
     MenuItem: 'menu-item',
-    Link: 'a',
     LogoutComponent: 'logout',
   }
 );
 let menu = TopMenu();
-listeners.get('pointerdown')({ target: 'inside' });
-check(toolsElement.open, 'All tools stays open on an internal pointer press');
-listeners.get('pointerdown')({ target: 'outside' });
-check(!toolsElement.open, 'All tools closes on outside pointer press');
-toolsElement.open = true;
-listeners.get('keydown')({ key: 'Escape' });
+const destinations = nodes(menu)
+  .filter((n) => n.type === 'menu-item')
+  .map((n) => n.props.path);
 check(
-  !toolsElement.open && focused,
-  'All tools Escape closes and returns focus to summary'
+  JSON.stringify(destinations) ===
+    JSON.stringify([
+      'https://example.test/dashboard/links',
+      '/launches',
+      '/analytics',
+      '/media',
+      '/plugs',
+      '/settings?tab=sets',
+      '/settings?tab=signatures',
+      '/settings',
+    ]),
+  'Paid rail exposes direct destinations in the requested order'
 );
-toolsElement.open = true;
-nodes(menu)
-  .find((n) => n.type === 'nav')
-  .props.onClick({ target: { closest: () => ({}) } });
-check(!toolsElement.open, 'All tools closes on link activation');
-toolsElement.open = true;
-hasOpenModal = true;
+check(
+  !nodes(menu).some((n) => n.type === 'details' || n.type === 'summary') &&
+    !text(menu).includes('All tools'),
+  'LinkSelf has no All tools menu'
+);
+check(
+  nodes(menu).filter((n) => n.type === 'logout').length === 1,
+  'Rail has a single logout'
+);
+menuUser = { ...menuUser, tier: { current: 'FREE' } };
 menu = TopMenu();
-check(!toolsElement.open, 'Opening a modal dismisses All tools');
-let blocked = false;
-nodes(menu)
-  .find((n) => n.type === 'summary')
-  .props.onClick({
-    preventDefault: () => {
-      blocked = true;
+check(
+  !nodes(menu).some((n) =>
+    [
+      '/settings?tab=sets',
+      '/settings?tab=signatures',
+      '/launches',
+      '/analytics',
+      '/media',
+    ].includes(n.props.path)
+  ),
+  'Free plan visibility is retained'
+);
+linkselfUrl = '';
+menu = TopMenu();
+check(
+  !nodes(menu).some(
+    (n) => n.props.path === '/plugs' || n.props.label === 'My page'
+  ),
+  'Upstream menu receives no LinkSelf destinations'
+);
+linkselfUrl = 'https://example.test';
+
+let switchValue;
+const { Slider } = component(
+  'libraries/react-shared-libraries/src/form/slider.tsx',
+  ['Slider'],
+  {
+    useVariables: () => ({ linkselfUrl }),
+    useCallback: (f) => f,
+  }
+);
+for (const value of ['on', 'off']) {
+  const toggle = Slider({
+    value,
+    onChange: (next) => {
+      switchValue = next;
     },
   });
-check(blocked, 'All tools cannot reopen through a modal');
-cleanups.forEach((cleanup) => cleanup());
-check(listeners.size === 0, 'All tools removes document listeners on unmount');
+  check(
+    toggle.type === 'button' &&
+      toggle.props.role === 'switch' &&
+      toggle.props['aria-checked'] === (value === 'on'),
+    `Switch ${value} has native keyboard behavior and state`
+  );
+  check(
+    nodes(toggle).some((node) => node.props.className === 'glass-switch-thumb'),
+    `Switch ${value} has a visible thumb`
+  );
+  toggle.props.onClick();
+  check(
+    switchValue === (value === 'on' ? 'off' : 'on'),
+    `Switch ${value} toggles state`
+  );
+}
+
+// The merged editor row retains both selection and per-channel editing.
+const editorChannels = [
+  { id: 'a', name: 'Channel A', identifier: 'network' },
+  { id: 'b', name: 'Channel B', identifier: 'network' },
+  { id: 'disabled', name: 'Disabled', disabled: true },
+];
+let editorExisting = {};
+const editorStore = {
+  integrations: editorChannels,
+  selectedIntegrations: [{ integration: editorChannels[0] }],
+  current: 'global',
+  locked: false,
+  setHide() {},
+  setCurrent(id) {
+    editorStore.current = id;
+  },
+  addOrRemoveSelectedIntegration(integration) {
+    editorStore.selectedIntegrations = editorStore.selectedIntegrations.some(
+      (p) => p.integration.id === integration.id
+    )
+      ? editorStore.selectedIntegrations.filter(
+          (p) => p.integration.id !== integration.id
+        )
+      : [...editorStore.selectedIntegrations, { integration }];
+  },
+};
+const clsx = (...args) => args.filter(Boolean).join(' ');
+const { SelectCurrent } = component(
+  'apps/frontend/src/components/new-launch/select.current.tsx',
+  ['SelectCurrent'],
+  {
+    useVariables: () => ({ linkselfUrl }),
+    useExistingData: () => editorExisting,
+    useDecisionModal: () => ({ open: async () => true }),
+    useLaunchStore: (selector) => selector(editorStore),
+    useShallow: (selector) => selector,
+    useRef: () => ({ current: null }),
+    useHasScroll: () => false,
+    useCallback: (f) => f,
+    GlobalIcon: 'svg',
+    clsx,
+  }
+);
+let channelPicker = SelectCurrent();
+check(
+  nodes(channelPicker).filter((n) => n.type === 'input').length === 2,
+  'Merged row lists available channels only'
+);
+nodes(channelPicker)
+  .find((n) => n.props['aria-label'] === 'Post to Channel B')
+  .props.onChange();
+check(
+  editorStore.selectedIntegrations.length === 2,
+  'Channel checkbox adds a publishing destination'
+);
+channelPicker = SelectCurrent();
+nodes(channelPicker)
+  .find((n) => n.props['aria-label'] === 'Channel B: edit channel post')
+  .props.onClick();
+check(
+  editorStore.current === 'b' && editorStore.selectedIntegrations.length === 2,
+  'Editing a selected channel does not deselect it'
+);
+nodes(channelPicker)
+  .find((n) => n.props['aria-label'] === 'Edit shared post')
+  .props.onClick();
+check(
+  editorStore.current === 'global',
+  'Merged row retains shared content editing'
+);
+nodes(channelPicker)
+  .find((n) => n.props['aria-label'] === 'Post to Channel B')
+  .props.onChange();
+check(
+  editorStore.selectedIntegrations.length === 1,
+  'Checkbox removes a publishing destination'
+);
+editorExisting = { integration: 'a', siblings: [{ integration: 'b' }] };
+channelPicker = SelectCurrent();
+check(
+  !nodes(channelPicker).some(
+    (n) => n.type === 'input' || n.props['aria-label'] === 'Edit shared post'
+  ),
+  'Existing posts retain fixed channels without a shared editor'
+);
+const { PostTargets } = component(
+  'apps/frontend/src/components/new-launch/manage.modal.tsx',
+  ['PostTargets'],
+  { clsx }
+);
+for (const [count, expected] of [
+  [0, 'Pick a channel'],
+  [1, 'Posts to 1 channel'],
+  [5, 'Posts to 5 channels'],
+]) {
+  const status = PostTargets({ count });
+  check(
+    text(status) === expected && status.props['aria-live'] === 'polite',
+    `Destination count updates for ${count} selected channels`
+  );
+}
+let activeQuery = 'tab=plugs';
+const { MenuItem } = component(
+  'apps/frontend/src/components/new-layout/menu-item.tsx',
+  ['MenuItem'],
+  {
+    usePathname: () => '/settings',
+    useSearchParams: () => new URLSearchParams(activeQuery),
+    useVariables: () => ({ linkselfUrl }),
+    URLSearchParams,
+    clsx,
+    Link: 'a',
+  }
+);
+for (const tab of ['sets', 'signatures', 'plugs', 'global_settings']) {
+  activeQuery = `tab=${tab}`;
+  const paths = [
+    '/settings?tab=sets',
+    '/settings?tab=signatures',
+    '/plugs',
+    '/settings',
+  ];
+  const selected = paths.filter(
+    (path) => MenuItem({ path, label: path }).props['aria-current'] === 'page'
+  );
+  check(
+    selected.length === 1 &&
+      selected[0] ===
+        (tab === 'plugs'
+          ? '/plugs'
+          : tab === 'global_settings'
+          ? '/settings'
+          : `/settings?tab=${tab}`),
+    `Rail tracks ${tab} including redirect routes`
+  );
+}
+
+const { AddProviderComponent } = component(
+  'apps/frontend/src/components/launches/add.provider.component.tsx',
+  ['AddProviderComponent'],
+  {
+    useVariables: () => ({ linkselfUrl }),
+    useOrganizationLimits: () => ({ data: { channels: 25, channelsUsed: 5 } }),
+    useToaster: () => ({}),
+    useRouter: () => ({}),
+    useFetch: () => () => {},
+    useModals: () => ({}),
+    useCallback: (f) => f,
+    useT: () => (_, fallback) => fallback,
+    clsx,
+  }
+);
+const providerChoices = Array.from({ length: 28 }, (_, i) => ({
+  identifier: `network-${i}`,
+  name: `Network ${i}`,
+}));
+providerChoices[0] = {
+  identifier: 'instagram',
+  name: 'Instagram (Facebook Business)',
+  toolTip: 'Connect your business account',
+};
+let providerPicker = AddProviderComponent({
+  social: providerChoices,
+  article: [],
+  invite: false,
+});
+check(
+  nodes(providerPicker).filter((n) => n.props.role === 'button').length === 28,
+  'Compact picker retains every supplied network'
+);
+check(
+  text(providerPicker).includes('Instagram') &&
+    !text(providerPicker).includes('Facebook Business'),
+  'Long channel label is compact'
+);
+check(
+  nodes(providerPicker).some(
+    (n) =>
+      n.props['data-tooltip-content'] ===
+      'Instagram (Facebook Business): Connect your business account'
+  ),
+  'Connection hint remains in the tooltip'
+);
+linkselfUrl = '';
+providerPicker = AddProviderComponent({
+  social: providerChoices,
+  article: [],
+  invite: false,
+});
+check(
+  text(providerPicker).includes('Instagram (Facebook Business)'),
+  'Upstream keeps its original channel label'
+);
+linkselfUrl = 'https://example.test';
 
 let requests = 0;
 let opened;

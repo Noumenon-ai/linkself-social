@@ -154,7 +154,7 @@ async function main() {
   check(
     `${gate} .glass-launches`,
     'grid-template-columns',
-    'minmax(0, 1fr) 260px'
+    'minmax(0, 1fr) 240px'
   );
   check(
     `${gate} .glass-month-grid`,
@@ -162,7 +162,7 @@ async function main() {
     'repeat(7, minmax(0, 1fr))'
   );
   check(`${gate} .glass-month-grid`, 'position', 'static');
-  check(`${gate} .glass-rail`, 'width', '64px');
+  check(`${gate} .glass-rail`, 'width', '56px');
   verify(
     css.includes('@media (max-width: 999px)'),
     'Schedule must stack below 1000px'
@@ -228,7 +228,7 @@ async function main() {
   );
   ruleHas('.glass-channel-grid', 'grid-template-columns', 'repeat(auto-fill, minmax(104px, 1fr))');
   ruleHas('.glass-channel-image', 'border-radius', 'var(--radius-pill)');
-  ruleHas('.glass-channels-button', 'min-height', '44px');
+  ruleHas('.glass-channels-button', 'min-height', '36px');
   ruleHas('.glass-channels-button', 'border-radius', 'var(--radius-pill)');
   ruleHas('.glass-channel-name', 'text-overflow', 'ellipsis');
   ruleHas('.glass-channel-name', 'white-space', 'nowrap');
@@ -257,13 +257,11 @@ async function main() {
     'background',
     'var(--success)'
   );
-  ruleHas('.glass-tools nav', 'inset-inline-start', '64px');
   ruleHas('.glass-rail-link::after', 'inset-inline-start', '56px');
   ruleHas('.glass-rail-link::after', 'inset-inline-end', '0', true);
-  ruleHas('.glass-tools nav', 'z-index', '40');
   ruleHas('.glass-rail', 'z-index', '40');
   ruleHas(
-    'body:has(.bg-popup, .mantine-Modal-root, .swal2-container) .glass-tools',
+    'body:has(.bg-popup, .mantine-Modal-root, .swal2-container) .glass-navigation',
     'pointer-events',
     'none'
   );
@@ -278,12 +276,26 @@ async function main() {
   });
   root.walkRules((rule) => {
     if (!rule.selector.includes(gate)) return;
-    if (rule.selector.includes('.glass-tools nav') || rule.selector.endsWith(' .glass-rail')) {
-      rule.walkDecls('z-index', (decl) => verify(Number(decl.value) < 200, 'Rail and tools stay below the first modal'));
+    if (rule.selector.endsWith(' .glass-rail')) {
+      rule.walkDecls('z-index', (decl) =>
+        verify(
+          Number(decl.value) < 200,
+          'Rail and tools stay below the first modal'
+        )
+      );
     }
-    if (rule.selector.includes(':hover') &&
-      (rule.selector.includes('[class*=\"hover:bg-\"]') || rule.selector.includes('.glass-action') || rule.selector.includes('.glass-secondary'))) {
-      verify(rule.selector.includes(':is(button:disabled, [aria-disabled=true], [aria-busy=true]) *'), 'Hover rules exclude disabled/busy descendants');
+    if (
+      rule.selector.includes(':hover') &&
+      (rule.selector.includes('[class*="hover:bg-"]') ||
+        rule.selector.includes('.glass-action') ||
+        rule.selector.includes('.glass-secondary'))
+    ) {
+      verify(
+        rule.selector.includes(
+          ':is(button:disabled, [aria-disabled=true], [aria-busy=true]) *'
+        ),
+        'Hover rules exclude disabled/busy descendants'
+      );
     }
   });
   const layoutSource = fs.readFileSync(
@@ -293,6 +305,131 @@ async function main() {
   verify(
     !/linkselfUrl[^\n]*\/help/.test(layoutSource),
     'No nonexistent LinkSelf Help footer link'
+  );
+
+  // Compact app addendum: assert the final declarations, not superseded sizes.
+  const lastValue = (selector, property) => {
+    const values = [];
+    root.walkRules(selector, (rule) => {
+      if (rule.parent.type === 'root')
+        rule.walkDecls(property, (decl) => values.push(decl.value));
+    });
+    return values.at(-1);
+  };
+  for (const [selector, property, value] of [
+    ['.glass-shell', 'max-width', 'none'],
+    ['.glass-shell', 'margin', '16px'],
+    ['.glass-shell', 'padding', '20px'],
+    ['.glass-title', 'font-size', '24px'],
+    ['#left-menu .glass-rail-link', 'width', '40px'],
+    ['#left-menu .glass-rail-link', 'height', '40px'],
+    ['#left-menu .glass-rail-link', 'align-items', 'center'],
+    ['#left-menu .glass-rail-link', 'justify-content', 'center'],
+    ['.glass-calendar-cell', 'min-height', '44px'],
+    ['.glass-calendar-filters', 'display', 'contents'],
+    ['.glass-provider-tile', 'height', '76px'],
+    ['.glass-provider-name', 'white-space', 'nowrap'],
+    ['.glass-settings', 'flex-direction', 'column'],
+    ['.glass-settings-tabs', 'flex-wrap', 'nowrap'],
+    ['.glass-settings-tabs > button', 'justify-content', 'center'],
+    ['.glass-editor .glass-editor-settings-toggle', 'width', 'auto'],
+    ['.glass-compose-field .tiptap', 'min-height', '160px'],
+    ['.glass-switch-thumb', 'background', 'var(--muted)'],
+    [
+      '.glass-switch[aria-checked=true] .glass-switch-thumb',
+      'transform',
+      'translateX(16px)',
+    ],
+  ])
+    verify(
+      lastValue(`${gate} ${selector}`, property) === value,
+      `Compact ${selector} ${property}: ${lastValue(
+        `${gate} ${selector}`,
+        property
+      )}`
+    );
+  ruleHas('.glass-modal-close', 'align-items', 'center');
+  ruleHas('.glass-modal-close', 'justify-content', 'center');
+  ruleHas('.glass-modal-close', 'padding', '0');
+  ruleHas('.glass-navigation', 'overflow-x', 'auto', true);
+  ruleHas('.glass-rail-bottom', 'display', 'flex', true);
+  ruleHas(
+    '.glass-plug-row > div',
+    'grid-template-columns',
+    'minmax(0, 1fr) auto'
+  );
+  ruleHas(
+    '.glass-global-settings',
+    'grid-template-columns',
+    'repeat(2, minmax(0, 1fr))'
+  );
+  const menuSource = fs.readFileSync(
+    'apps/frontend/src/components/layout/top.menu.tsx',
+    'utf8'
+  );
+  verify(
+    !menuSource.includes('All tools') && !menuSource.includes('<details'),
+    'Direct LinkSelf rail has no All tools menu'
+  );
+  verify(
+    layoutSource.indexOf('<SourceAttribution />') >
+      layoutSource.indexOf('<footer className="glass-footer">') &&
+      layoutSource.indexOf('<SourceAttribution />') <
+        layoutSource.indexOf('</footer>'),
+    'Studio source offer is inside the footer'
+  );
+  const settingsPage = fs.readFileSync(
+    'apps/frontend/src/app/(app)/(site)/settings/page.tsx',
+    'utf8'
+  );
+  verify(
+    /!\(process\.env\.LINKSELF_URL\s*\|\|\s*process\.env\.NEXT_PUBLIC_LINKSELF_URL\)\s*&&\s*\(?\s*<SourceAttribution\s*\/>/.test(
+      settingsPage
+    ),
+    'Settings attribution is upstream only'
+  );
+  const sourceLink = fs.readFileSync(
+    'apps/frontend/src/components/auth/source-attribution.tsx',
+    'utf8'
+  );
+  verify(
+    sourceLink.includes('Open source') &&
+      sourceLink.includes('https://github.com/Noumenon-ai/linkself-social'),
+    'Quiet source link retains the repository offer'
+  );
+
+  const editorSource = fs.readFileSync(
+    'apps/frontend/src/components/new-launch/manage.modal.tsx',
+    'utf8'
+  );
+  verify(
+    editorSource.includes('setOpenSettingsChannel(item.id)'),
+    'Validation expands the invalid channel settings'
+  );
+  verify(
+    editorSource.includes('openSettingsChannel === integration.id'),
+    'Only the chosen settings row opens'
+  );
+  ruleHas('.glass-editor #wrapper-settings', 'display', 'flex');
+  ruleHas('.glass-editor #social-settings', 'gap', '0');
+  ruleHas(
+    '.glass-editor #social-settings > [data-id]',
+    'border-bottom',
+    '1px solid var(--line)'
+  );
+  ruleHas('.glass-calendar-cell [class*="min-h-[70px]"]', 'min-height', '42px');
+  ruleHas('.glass-media button', 'height', '36px');
+  ruleHas('.glass-settings-nav', 'padding', '0');
+  verify(css.includes(':where([class*="p-[24px]"], [class*="p-[20px]"]):not(:where(.network-preview *))'), 'Generic density padding has low specificity so component and phone sizes win');
+  ruleHas('.glass-toast', 'min-height', '40px');
+  const settingsSource = fs.readFileSync(
+    'apps/frontend/src/components/layout/settings.component.tsx',
+    'utf8'
+  );
+  verify(
+    settingsSource.includes('router.replace(`/settings?${query}`') &&
+      settingsSource.includes("query.set('tab', tabKey)"),
+    'Horizontal tabs keep rail URLs synchronized'
   );
 
   const fontsDir = 'apps/frontend/src/fonts/figtree';

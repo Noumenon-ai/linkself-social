@@ -89,7 +89,7 @@ export const Plugs = () => {
   }
 
   return (
-    <div className="flex flex-col gap-[20px]">
+    <div className="glass-plugs flex flex-col gap-[20px]">
       <div className="flex flex-col">
         <h3 className="text-[20px]">{t('plugs', 'Plugs')}</h3>
       </div>
@@ -110,7 +110,7 @@ export const Plugs = () => {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-[8px]">
+          <div className="glass-plug-channels flex flex-wrap gap-[8px]">
             {sortedIntegrations.map((integration, index) => (
               <div
                 key={integration.id}

@@ -1,9 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { LogoutComponent } from '@gitroom/frontend/components/layout/logout.component';
-import { FC, ReactNode, useEffect, useRef } from 'react';
-import { useHasOpenModal } from '@gitroom/frontend/components/layout/new-modal';
+import { FC, ReactNode } from 'react';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
@@ -232,34 +230,125 @@ export const TopMenu: FC = () => {
   const user = useUser();
   const { firstMenu, secondMenu } = useMenuItem();
   const { isGeneral, billingEnabled, linkselfUrl } = useVariables();
-  const toolsRef = useRef<HTMLDetailsElement>(null);
-  const hasOpenModal = useHasOpenModal();
-  useEffect(() => {
-    if (hasOpenModal && toolsRef.current) toolsRef.current.open = false;
-  }, [hasOpenModal]);
-  useEffect(() => {
-    if (!linkselfUrl) return;
-    const outside = (event: PointerEvent) => {
-      if (
-        toolsRef.current &&
-        !toolsRef.current.contains(event.target as Node)
-      ) {
-        toolsRef.current.open = false;
-      }
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && toolsRef.current?.open) {
-        toolsRef.current.open = false;
-        toolsRef.current.querySelector('summary')?.focus();
-      }
-    };
-    document.addEventListener('pointerdown', outside);
-    document.addEventListener('keydown', escape);
-    return () => {
-      document.removeEventListener('pointerdown', outside);
-      document.removeEventListener('keydown', escape);
-    };
-  }, [linkselfUrl]);
+  const visible = (item: MenuItemInterface) =>
+    !item.hide &&
+    (!item.requireBilling || (billingEnabled && isGeneral)) &&
+    !(item.name === 'Billing' && user?.isLifetime) &&
+    (!item.role || item.role.includes(user?.role!));
+  if (linkselfUrl) {
+    const canUseCalendar =
+      user?.orgId &&
+      (user.tier?.current !== 'FREE' || !isGeneral || !billingEnabled);
+    const destinations = [
+      ...firstMenu.filter(
+        (item) =>
+          ['/launches', '/analytics', '/media'].includes(item.path) &&
+          canUseCalendar &&
+          visible(item)
+      ),
+      {
+        name: 'Plugs',
+        path: '/plugs',
+        icon: (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          >
+            <path d="M8 3v5m8-5v5M6 8h12v3a6 6 0 0 1-12 0V8Zm6 9v4" />
+          </svg>
+        ),
+      },
+      ...(user?.tier?.current !== 'FREE'
+        ? [
+            {
+              name: 'Sets',
+              path: '/settings?tab=sets',
+              icon: (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+              ),
+            },
+            {
+              name: 'Signatures',
+              path: '/settings?tab=signatures',
+              icon: (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path d="m4 16 1 4 4-1L20 8l-5-5L4 16Zm9-11 5 5M3 22h18" />
+                </svg>
+              ),
+            },
+          ]
+        : []),
+    ];
+    return (
+      <nav className="glass-navigation" aria-label="Studio">
+        <div className="glass-rail-primary">
+          <MenuItem
+            label="My page"
+            path={`${linkselfUrl.replace(/\/$/, '')}/dashboard/links`}
+            icon={
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2m3 6a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2" />
+              </svg>
+            }
+          />
+          {destinations.map((item) => (
+            <MenuItem
+              key={item.path}
+              label={item.name}
+              path={item.path}
+              icon={item.icon}
+            />
+          ))}
+        </div>
+        <div className="glass-rail-bottom">
+          {secondMenu
+            .filter((item) => item.path === '/settings' && visible(item))
+            .map((item) => (
+              <MenuItem
+                key={item.path}
+                label={item.name}
+                path={item.path}
+                icon={item.icon}
+              />
+            ))}
+          <LogoutComponent isIcon />
+          <span className="glass-avatar" aria-label={user?.email || 'Account'}>
+            {(user?.email || 'LS').slice(0, 2).toUpperCase()}
+          </span>
+        </div>
+      </nav>
+    );
+  }
   return (
     <>
       <div className="glass-rail-primary flex flex-1 flex-col minCustom:gap-[20px] custom:gap-[8px] blurMe">
@@ -295,46 +384,6 @@ export const TopMenu: FC = () => {
               ))
         }
       </div>
-      {linkselfUrl && (
-        <details className="glass-tools" ref={toolsRef}>
-          <summary
-            aria-label="All tools"
-            onClick={(event) => {
-              if (hasOpenModal) event.preventDefault();
-            }}
-          >
-            All tools
-          </summary>
-          <nav
-            aria-label="All tools"
-            onClick={(event) => {
-              if (
-                (event.target as Element).closest('a, button') &&
-                toolsRef.current
-              ) {
-                toolsRef.current.open = false;
-              }
-            }}
-          >
-            {[...firstMenu, ...secondMenu]
-              .filter(
-                (item) =>
-                  !item.hide &&
-                  (!item.requireBilling || (billingEnabled && isGeneral)) &&
-                  (!item.role || item.role.includes(user?.role!))
-              )
-              .map((item) => (
-                <Link key={item.path} href={item.path}>
-                  {item.name}
-                </Link>
-              ))}
-            <Link href="/plugs">Plugs</Link>
-            <Link href="/settings?tab=sets">Sets</Link>
-            <Link href="/settings?tab=signatures">Signatures and settings</Link>
-            <LogoutComponent />
-          </nav>
-        </details>
-      )}
       <div className="glass-rail-bottom flex flex-col minCustom:gap-[20px] custom:gap-[8px] blurMe">
         {secondMenu
           .filter((f) => {

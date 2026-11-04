@@ -1,5 +1,6 @@
 'use client';
 
+import { SourceAttribution } from '@gitroom/frontend/components/auth/source-attribution';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Logo } from '@gitroom/frontend/components/new-layout/logo';
 import { jakartaSans } from '@gitroom/frontend/fonts/plus-jakarta-sans/plus.jakarta.sans.font';
@@ -165,17 +166,9 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                           </svg>
                         </button>
                         <div className="glass-heading flex-1 min-w-0">
-                          {linkselfUrl && (
-                            <p className="glass-eyebrow">LinkSelf Social</p>
-                          )}
                           <div className="glass-title text-[24px] mobile:text-[20px] font-[600] flex flex-1 min-w-0">
                             <Title />
                           </div>
-                          {linkselfUrl && pathname.startsWith('/launches') && (
-                            <p className="glass-subtitle">
-                              Plan and publish your social posts.
-                            </p>
-                          )}
                         </div>
                         <div className="flex gap-[20px] mobile:gap-[14px] mobile:items-center text-textItemBlur">
                           <StreakComponent />
@@ -213,6 +206,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                             <a href={`${linkselfUrl.replace(/\/$/, '')}/terms`}>
                               Terms
                             </a>
+                            <SourceAttribution />
                           </nav>
                         </footer>
                       )}
