@@ -729,7 +729,7 @@ const { PostTargets } = component(
   { clsx }
 );
 for (const [count, expected] of [
-  [0, 'Pick a channel'],
+  [0, ''], // the post button itself says Pick a channel
   [1, 'Posts to 1 channel'],
   [5, 'Posts to 5 channels'],
 ]) {

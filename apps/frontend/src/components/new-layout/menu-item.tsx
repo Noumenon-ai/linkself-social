@@ -56,7 +56,10 @@ export const MenuItem: FC<{
       aria-label={label}
       title={label}
       aria-current={isActive ? 'page' : undefined}
-      {...(path.indexOf('http') === 0 && { target: '_blank' })}
+      {...(path.indexOf('http') === 0 &&
+        !(linkselfUrl && path.startsWith(linkselfUrl.replace(/\/$/, ''))) && {
+          target: '_blank',
+        })}
       className={className}
     >
       {inner}

@@ -1135,6 +1135,9 @@ html[data-linkself-theme='glass-frame'] {
   .glass-calendar-panel {
     grid-column: 1;
     grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
     padding: 24px;
     background: var(--inset);
     border: 1px solid var(--line);
@@ -2353,7 +2356,7 @@ html[data-linkself-theme='glass-frame'] {
     padding: 8px;
     gap: 4px;
     justify-content: flex-start;
-    border-radius: 12px;
+    border-radius: 12px !important;
   }
   .glass-provider-tile > div:first-child {
     height: 32px;
@@ -2692,7 +2695,11 @@ html[data-linkself-theme='glass-frame'] {
     width: auto;
     gap: 8px;
     padding: 8px 12px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-pill) !important;
+  }
+  .glass-editor .ProseMirror:focus-visible {
+    border-radius: 12px;
+    outline-offset: 2px;
   }
   .glass-editor #wrapper-settings {
     padding: 0 16px 12px;

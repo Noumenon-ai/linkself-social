@@ -80,9 +80,7 @@ const PostTargets: FC<{ count: number; mobile?: boolean }> = ({
     className={clsx('glass-post-targets', mobile && 'hidden mobile:block')}
     aria-live="polite"
   >
-    {count
-      ? `Posts to ${count} ${count === 1 ? 'channel' : 'channels'}`
-      : 'Pick a channel'}
+    {count ? `Posts to ${count} ${count === 1 ? 'channel' : 'channels'}` : null}
   </span>
 );
 
