@@ -49,6 +49,8 @@ serves users (AGPL-3.0 section 13).
 - 2026-11-05 (a27f53cc, 3ef1bdcf): refined own-key connections, Reddit settings and chat checks, and added upload address rewriting.
 - 2026-11-05 (c1878551): added the studio server migration, backup and restore kit.
 - 2026-11-05 (9644c7f2): updated dependencies within their existing major versions.
+- 2026-11-05 (b5cc1338, cefe7bd3): repaired the server kit after review and a second rehearsal.
+- 2026-11-05: widened the calendar's hour column so the current time fits.
 
 ## Running the staging stack
 ```
