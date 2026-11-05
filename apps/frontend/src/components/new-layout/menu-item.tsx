@@ -1,5 +1,5 @@
 'use client';
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, MouseEvent } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -12,7 +12,9 @@ export const MenuItem: FC<{
   path: string;
   onClick?: () => void;
   active?: boolean;
-}> = ({ label, icon, path, onClick, active }) => {
+  pending?: boolean;
+  onNavigate?: (event: MouseEvent<HTMLAnchorElement>, path: string) => void;
+}> = ({ label, icon, path, onClick, active, pending, onNavigate }) => {
   const currentPath = usePathname();
   const query = useSearchParams();
   const { linkselfUrl, frontEndUrl } = useVariables();
@@ -27,12 +29,12 @@ export const MenuItem: FC<{
         : currentPath === pathname &&
           (search
             ? settingsTab === new URLSearchParams(search).get('tab')
-            : pathname !== '/settings' ||
-              settingsTab === 'global_settings')
+            : pathname !== '/settings' || settingsTab === 'global_settings')
       : currentPath.indexOf(path) === 0);
 
   const className = clsx(
-    'glass-rail-link group w-full minCustom:h-[54px] custom:h-[44px] py-[8px] px-[6px] minCustom:gap-[4px] custom:gap-[2px] flex flex-col font-[600] items-center justify-center rounded-[12px] hover:text-textItemFocused hover:bg-boxFocused transition-colors',
+    'glass-rail-link group w-full minCustom:h-[54px] custom:h-[44px] py-[8px] px-[6px] minCustom:gap-[4px] custom:gap-[2px] flex flex-col font-[600] items-center justify-center rounded-[12px] transition-colors',
+    !linkselfUrl && 'hover:text-textItemFocused hover:bg-boxFocused',
     isActive ? 'text-textItemFocused bg-boxFocused' : 'text-textItemBlur'
   );
 
@@ -61,7 +63,13 @@ export const MenuItem: FC<{
 
   if (linkselfUrl && path.startsWith(linkselfUrl.replace(/\/$/, '') + '/')) {
     return (
-      <a href={linkselfPath(linkselfUrl, path, frontEndUrl)} aria-label={label} className={className}>
+      <a
+        data-navigation-pending={pending || undefined}
+        onClick={(event) => onNavigate?.(event, path)}
+        href={linkselfPath(linkselfUrl, path, frontEndUrl)}
+        aria-label={label}
+        className={className}
+      >
         {inner}
       </a>
     );
@@ -69,6 +77,8 @@ export const MenuItem: FC<{
 
   return (
     <Link
+      data-navigation-pending={pending || undefined}
+      onClick={onNavigate ? (event) => onNavigate(event, path) : undefined}
       prefetch={true}
       href={path}
       aria-label={label}

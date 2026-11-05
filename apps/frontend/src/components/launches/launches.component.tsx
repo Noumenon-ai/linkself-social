@@ -1,5 +1,7 @@
 'use client';
 
+import { StudioPlaceholder } from '@gitroom/frontend/components/layout/studio.placeholder';
+
 import { withBasePath, studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import {
@@ -771,7 +773,7 @@ export const LaunchesComponent = () => {
   const [collapseMenu, setCollapseMenu] = useCookie(studioCookieName('collapseMenu'), '0');
   const [channelsOpen, setChannelsOpen] = useState(false);
   const [mode] = useCookie(studioCookieName('mode'), 'dark');
-  const { isLoading, data: integrations, mutate } = useIntegrationList();
+  const { isLoading, error, data: integrations, mutate } = useIntegrationList();
 
   const totalNonDisabledChannels = useMemo(() => {
     return (
@@ -868,7 +870,10 @@ export const LaunchesComponent = () => {
       window.close();
     }
   }, []);
-  if (isLoading || reload) {
+  const channelsFailed = !!error && !integrations?.length;
+  if (isLoading || reload || (linkselfUrl && channelsFailed)) {
+    if (linkselfUrl)
+      return <StudioPlaceholder calendar failed={channelsFailed} />;
     return (
       <div className="bg-newBgColorInner p-[20px] flex flex-1 flex-col gap-[15px] transition-all items-center justify-center">
         <LoadingComponent />

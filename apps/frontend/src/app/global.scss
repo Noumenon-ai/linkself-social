@@ -3257,3 +3257,162 @@ html[data-linkself-theme='glass-frame'] {
     opacity: 1;
   }
 }
+
+// Shared first-paint frame, aligned with LinkSelf's compact dashboard.
+html[data-linkself-theme='glass-frame'] {
+  background: #10151F;
+  scrollbar-gutter: stable;
+  --calendar-toolbar-height: 41px;
+  --calendar-schedule-height: 238px;
+
+  .glass-rail {
+    position: sticky;
+    top: 36px;
+    align-self: flex-start;
+    height: calc(100dvh - 74px);
+    gap: 0;
+  }
+  #left-menu {
+    min-height: 0;
+    padding: 0;
+  }
+  #left-menu > div {
+    align-items: center;
+    width: 72px;
+    height: 100%;
+    padding: 2px;
+    gap: 12px;
+    overflow: auto;
+    scrollbar-width: none;
+  }
+  #left-menu > div::-webkit-scrollbar { display: none; }
+  #left-menu > div > div:first-child { flex-shrink: 0; height: 36px; }
+  .glass-navigation { display: contents; }
+  .glass-rail-primary, .glass-rail-bottom {
+    flex-shrink: 0;
+    gap: 8px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+  }
+  .glass-rail-bottom { margin-top: auto; }
+  .glass-rail-bottom form { display: flex; margin: 0; }
+  #left-menu .glass-rail-link {
+    border-radius: 14px;
+    background: transparent;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+  #left-menu .glass-rail-link svg { width: 20px; height: 20px; }
+  #left-menu .glass-rail-link:hover { background: var(--tile-hover); }
+  #left-menu [aria-current='page'] { background: var(--accent); color: var(--on-accent); }
+  #left-menu [aria-current='page']:hover { background: var(--button-hover); color: var(--on-accent); }
+  .glass-avatar { min-height: 40px; border: 1px solid var(--line); }
+
+  .glass-topbar { height: 38px; min-height: 38px; flex-shrink: 0; }
+  .glass-studio-header { display: flex; height: auto; align-items: center; justify-content: space-between; }
+  .glass-page-identity { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .glass-studio-header .glass-title h1 { font-size: 24px; font-weight: 600; line-height: 26.88px; letter-spacing: -0.84px; }
+  .glass-handle { font-size: 14px; line-height: 22.4px; color: var(--muted); overflow-wrap: anywhere; }
+  .glass-plan { padding: 4px 12px; border: 1px solid var(--line); border-radius: var(--radius-pill); font-size: 13px; line-height: 21px; background: var(--inset); }
+  .glass-header-actions { display: flex; align-items: center; flex-shrink: 0; gap: 8px; }
+  .glass-header-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 8px;
+    width: fit-content;
+    max-width: 100%;
+    height: 38px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-pill);
+    background: var(--inset);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .glass-header-button:hover { background: var(--tile-hover); color: var(--text); }
+  .glass-notification-target {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .glass-share-page { display: flex; flex-direction: column; gap: 12px; overflow-wrap: anywhere; }
+  .glass-share-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .glass-studio-tabs {
+    width: fit-content;
+    max-width: 100%;
+    padding: 4px;
+    gap: 4px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--inset);
+    overflow-x: auto;
+  }
+  .glass-studio-tabs > :is(a, button) { font-size: 14px; font-weight: 400; height: 38px; min-height: 38px; padding: 8px 12px; }
+  #left-menu .glass-rail-link, #left-menu .glass-rail-link *,
+  .glass-studio-tabs > a { transition: none !important; }
+  #left-menu .glass-navigation[data-navigation-pending] [aria-current='page']:not([data-navigation-pending]),
+  .glass-studio-tabs[data-navigation-pending] [aria-current='page']:not([data-navigation-pending]) { background: transparent; color: var(--muted); }
+  #left-menu .glass-navigation[data-navigation-pending] [aria-current='page']:not([data-navigation-pending]) { color: var(--text); }
+  #left-menu a[data-navigation-pending],
+  .glass-studio-tabs > a[data-navigation-pending],
+  .glass-studio-tabs > a[data-navigation-pending]:hover { background: var(--accent); color: var(--on-accent); }
+  #left-menu a[data-navigation-pending]:hover { background: var(--button-hover); color: var(--on-accent); }
+
+  .glass-footer { min-height: 48px; padding-top: 24px; flex-shrink: 0; align-items: flex-start; }
+  // The placeholder takes the loaded calendar's own classes, so both fill the
+  // same space on any window height. Only the toolbar and the empty Scheduled
+  // tile need a size here, because they have no content yet.
+  .glass-calendar-actions { flex-shrink: 0; }
+  // A drag that misses a post must not select the hour labels.
+  .glass-calendar { user-select: none; }
+  .glass-launches { grid-template-rows: minmax(0, 1fr); }
+  .glass-launches .glass-schedule { grid-row: 1; }
+  .glass-page-placeholder { flex: 1; min-width: 0; min-height: 480px; }
+  // Nothing is drawn inside the panel while loading, so the toolbar and the grid simply appear.
+  .glass-toolbar-placeholder { height: var(--calendar-toolbar-height); flex-shrink: 0; }
+  .glass-placeholder-message { margin: auto; color: var(--muted); font-size: 14px; text-align: center; }
+  .glass-scheduled-placeholder { height: var(--calendar-schedule-height); }
+
+  @media (max-width: 1200px) {
+    --calendar-toolbar-height: 88px;
+  }
+  @media (max-width: 999px) {
+    .glass-launches .glass-schedule { grid-row: 2; }
+  }
+  @media (max-width: 760px) {
+    --calendar-toolbar-height: 173px;
+    --calendar-schedule-height: 230px;
+    .glass-rail { position: static; height: auto; width: 100%; }
+    #left-menu > div { display: grid; grid-template-columns: 1fr auto; width: 100%; height: auto; gap: 8px; overflow: visible; }
+    #left-menu > div > div:first-child { grid-column: 1; grid-row: 1; }
+    .glass-rail-primary { grid-column: 1 / -1; grid-row: 2; gap: 0; border-radius: var(--radius-pill); }
+    .glass-rail-bottom { grid-column: 2; grid-row: 1; padding: 0; border: 0; background: transparent; gap: 8px; margin-top: 0; }
+    #left-menu .glass-rail-bottom .glass-rail-link { padding: 8px; }
+    .glass-rail-bottom .glass-avatar { display: none; }
+    .glass-studio-header { height: auto; min-height: 81px; flex-direction: column; align-items: stretch; gap: 12px; }
+    .glass-page-identity { flex: 0 0 auto; min-height: 31px; }
+    .glass-header-actions { min-height: 38px; }
+    // LinkSelf's View live page and Share keep their place; the bell follows them.
+    .glass-header-actions > :is(.glass-notification-target, .relative) { order: 3; }
+    .glass-share-button { width: 40px; height: 36px; min-height: 36px; padding: 8px; }
+    .glass-share-button span { display: none; }
+
+  }
+}

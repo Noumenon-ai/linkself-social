@@ -4,15 +4,16 @@ import { withBasePath, linkselfPath } from '@gitroom/helpers/utils/base-path';
 
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
+import { Button } from '@gitroom/react/form/button';
 import React, { FC, useCallback } from 'react';
 import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { setCookie } from '@gitroom/frontend/components/layout/layout.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
-export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
+const StandaloneLogout: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
   const fetch = useFetch();
-  const { isGeneral, isSecured, linkselfUrl, frontEndUrl } = useVariables();
+  const { isSecured } = useVariables();
   const t = useT();
 
   const logout = useCallback(async () => {
@@ -25,14 +26,6 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         t('yes_logout', 'Yes logout')
       )
     ) {
-      if (linkselfUrl) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = linkselfPath(linkselfUrl, '/api/auth/logout', frontEndUrl);
-        document.body.appendChild(form);
-        form.submit();
-        return;
-      }
       if (!isSecured) {
         setCookie('auth', '', -10);
         setCookie('showorg', '', -10);
@@ -41,22 +34,16 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
           method: 'POST',
         });
       }
-      window.location.href = linkselfUrl
-        ? linkselfPath(linkselfUrl, '/dashboard/social', frontEndUrl)
-        : withBasePath('/auth/login');
+      window.location.href = withBasePath('/auth/login');
     }
-  }, [fetch, isSecured, linkselfUrl, t]);
+  }, [fetch, isSecured, t]);
   return (
     <>
       <div
-        className={
-          isIcon && linkselfUrl
-            ? 'glass-rail-link cursor-pointer'
-            : 'cursor-pointer'
-        }
+        className="cursor-pointer"
         role="button"
         tabIndex={0}
-        aria-label={linkselfUrl && isIcon ? 'Logout' : t('logout', 'Log out')}
+        aria-label={t('logout', 'Log out')}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -65,23 +52,7 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         }}
         onClick={logout}
       >
-        {isIcon && linkselfUrl ? (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m16 17 5-5-5-5" />
-            <path d="M21 12H9" />
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-          </svg>
-        ) : isIcon ? (
+        {isIcon ? (
           <svg
             width="24"
             height="24"
@@ -105,10 +76,42 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
             {' ' + APP_NAME}
           </span>
         )}
-        {isIcon && linkselfUrl && (
-          <span className="glass-rail-label">Logout</span>
-        )}
       </div>
     </>
+  );
+};
+
+export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
+  const { linkselfUrl, frontEndUrl } = useVariables();
+  if (!linkselfUrl) return <StandaloneLogout isIcon={isIcon} />;
+  return (
+    <form
+      action={linkselfPath(linkselfUrl, '/api/auth/logout', frontEndUrl)}
+      method="POST"
+    >
+      {isIcon ? (
+        <button type="submit" className="glass-rail-link" aria-label="Logout">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m16 17 5-5-5-5" />
+            <path d="M21 12H9" />
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          </svg>
+
+          <span className="glass-rail-label">Logout</span>
+        </button>
+      ) : (
+        <Button type="submit">Log out</Button>
+      )}
+    </form>
   );
 };

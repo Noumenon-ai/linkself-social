@@ -571,10 +571,11 @@ linkselfUrl = 'https://example.test';
 
 // Render the real rail for paid, free and upstream modes.
 let menuUser = { orgId: 'org', role: 'ADMIN', tier: { current: 'PRO' } };
-const { TopMenu } = component(
+const { TopMenu: TopMenuRoot } = component(
   'apps/frontend/src/components/layout/top.menu.tsx',
-  ['TopMenu'],
+  ['TopMenu', 'LinkSelfMenu', 'StandaloneTopMenu'],
   {
+    usePendingNavigation: () => ({ pending: null, onNavigate() {} }),
     useUser: () => menuUser,
     useVariables: () => ({
       linkselfUrl,
@@ -594,6 +595,7 @@ const { TopMenu } = component(
     LogoutComponent: 'logout',
   }
 );
+const TopMenu = (props = {}) => { const root = TopMenuRoot(props); return root.type(root.props); };
 let menu = TopMenu();
 const destinations = nodes(menu)
   .filter((n) => n.type === 'menu-item')
@@ -651,7 +653,7 @@ const { LogoutComponent: LabelledLogout } = component(
   { useVariables: () => ({ linkselfUrl }), useFetch: () => () => {},
     useCallback: (f) => f, useT: () => (_, fallback) => fallback, APP_NAME: 'LinkSelf Social' }
 );
-const logoutButton = nodes(LabelledLogout({ isIcon: true })).find((n) => n.props.role === 'button');
+const logoutButton = nodes(LabelledLogout({ isIcon: true })).find((n) => n.type === 'button');
 check(text(logoutButton).trim() === 'Logout' && logoutButton.props['aria-label'] === 'Logout', 'Logout has the shared visible and accessible label');
 check(JSON.stringify(iconShapes(nodes(logoutButton).find((n) => n.type === 'svg'))) === JSON.stringify(iconShapes(React.createElement(lucide.LogOut))), 'Logout matches the shared lucide LogOut icon');
 linkselfUrl = '';
@@ -844,8 +846,8 @@ const { MenuItem: CategoryItem } = component(
     useVariables: () => ({ linkselfUrl }), URLSearchParams, clsx, Link: 'a' }
 );
 const { StudioTabs } = component(
-  'apps/frontend/src/components/layout/studio.tabs.tsx', ['StudioTabs'],
-  { usePathname: () => studioPath, useVariables: () => ({ linkselfUrl }), Link: 'a', useRef: () => ({ current: null }), useEffect: () => {} }
+  'apps/frontend/src/components/layout/studio.tabs.tsx', ['StudioTabs', 'studioPages', 'isStudioPage'],
+  { usePendingNavigation: () => ({ pending: null, onNavigate() {} }), usePathname: () => studioPath, useVariables: () => ({ linkselfUrl }), Link: 'a', useRef: () => ({ current: null }), useEffect: () => {} }
 );
 for (const base of ['https://example.test', 'https://example.test/']) {
   linkselfUrl = base;

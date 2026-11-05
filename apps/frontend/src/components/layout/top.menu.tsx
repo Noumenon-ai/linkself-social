@@ -1,10 +1,12 @@
 'use client';
 
 import { LogoutComponent } from '@gitroom/frontend/components/layout/logout.component';
+import { StudioIdentity } from '@gitroom/helpers/utils/base-path';
 import { FC, ReactNode } from 'react';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
+import { usePendingNavigation } from '@gitroom/frontend/components/layout/navigation.highlight';
 import { MenuItem } from '@gitroom/frontend/components/new-layout/menu-item';
 
 interface MenuItemInterface {
@@ -226,161 +228,10 @@ export const useMenuItem = () => {
   };
 };
 
-export const TopMenu: FC = () => {
+const StandaloneTopMenu: FC = () => {
   const user = useUser();
   const { firstMenu, secondMenu } = useMenuItem();
-  const { isGeneral, billingEnabled, linkselfUrl } = useVariables();
-  if (linkselfUrl) {
-    const base = linkselfUrl.replace(/\/$/, '');
-    const destinations = [
-      {
-        name: 'Home',
-        path: `${base}/dashboard`,
-        icon: (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect width="7" height="9" x="3" y="3" rx="1" />
-            <rect width="7" height="5" x="14" y="3" rx="1" />
-            <rect width="7" height="9" x="14" y="12" rx="1" />
-            <rect width="7" height="5" x="3" y="16" rx="1" />
-          </svg>
-        ),
-      },
-      {
-        name: 'My page',
-        path: `${base}/dashboard/links`,
-        icon: (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
-        ),
-      },
-      {
-        name: 'Studio',
-        path: '/launches',
-        icon: (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
-            <path d="m21.854 2.147-10.94 10.939" />
-          </svg>
-        ),
-      },
-      {
-        name: 'Sell',
-        path: `${base}/dashboard/products`,
-        icon: (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M16 10a4 4 0 0 1-8 0" />
-            <path d="M3.103 6.034h17.794" />
-            <path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z" />
-          </svg>
-        ),
-      },
-      {
-        name: 'Audience',
-        path: `${base}/dashboard/analytics`,
-        icon: (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M3 3v16a2 2 0 0 0 2 2h16" />
-            <path d="M18 17V9" />
-            <path d="M13 17V5" />
-            <path d="M8 17v-3" />
-          </svg>
-        ),
-      },
-    ];
-    return (
-      <nav className="glass-navigation" aria-label="LinkSelf">
-        <div className="glass-rail-primary">
-          {destinations.map((item) => (
-            <MenuItem
-              key={item.path}
-              label={item.name}
-              path={item.path}
-              active={item.path === '/launches'}
-              icon={item.icon}
-            />
-          ))}
-        </div>
-        <div className="glass-rail-bottom">
-          <MenuItem
-            label="Settings"
-            path={`${base}/dashboard/settings`}
-            icon={
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            }
-          />
-          <LogoutComponent isIcon />
-          <span className="glass-avatar" aria-label={user?.email || 'Account'}>
-            {(user?.email || 'LS').slice(0, 2).toUpperCase()}
-          </span>
-        </div>
-      </nav>
-    );
-  }
+  const { isGeneral, billingEnabled } = useVariables();
   return (
     <>
       <div className="glass-rail-primary flex flex-1 flex-col minCustom:gap-[20px] custom:gap-[8px] blurMe">
@@ -442,18 +293,193 @@ export const TopMenu: FC = () => {
               onClick={item.onClick}
             />
           ))}
-        {linkselfUrl && (
-          <>
-            <LogoutComponent isIcon />
-            <span
-              className="glass-avatar"
-              aria-label={user?.email || 'Account'}
-            >
-              {(user?.email || 'LS').slice(0, 2).toUpperCase()}
-            </span>
-          </>
-        )}
       </div>
     </>
+  );
+};
+
+export const TopMenu: FC<{ identity?: StudioIdentity }> = ({ identity }) => {
+  const { linkselfUrl } = useVariables();
+  return linkselfUrl ? (
+    <LinkSelfMenu identity={identity} linkselfUrl={linkselfUrl} />
+  ) : (
+    <StandaloneTopMenu />
+  );
+};
+
+const LinkSelfMenu = ({
+  identity,
+  linkselfUrl,
+}: {
+  identity?: StudioIdentity;
+  linkselfUrl: string;
+}) => {
+  const user = useUser();
+  const { pending, onNavigate } = usePendingNavigation();
+  const base = linkselfUrl.replace(/\/$/, '');
+  const destinations = [
+    {
+      name: 'Home',
+      path: `${base}/dashboard`,
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <rect width="7" height="9" x="3" y="3" rx="1" />
+          <rect width="7" height="5" x="14" y="3" rx="1" />
+          <rect width="7" height="9" x="14" y="12" rx="1" />
+          <rect width="7" height="5" x="3" y="16" rx="1" />
+        </svg>
+      ),
+    },
+    {
+      name: 'My page',
+      path: `${base}/dashboard/links`,
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+      ),
+    },
+    {
+      name: 'Studio',
+      path: '/launches',
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+          <path d="m21.854 2.147-10.94 10.939" />
+        </svg>
+      ),
+    },
+    {
+      name: 'Sell',
+      path: `${base}/dashboard/products`,
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M16 10a4 4 0 0 1-8 0" />
+          <path d="M3.103 6.034h17.794" />
+          <path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z" />
+        </svg>
+      ),
+    },
+    {
+      name: 'Audience',
+      path: `${base}/dashboard/analytics`,
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+          <path d="M18 17V9" />
+          <path d="M13 17V5" />
+          <path d="M8 17v-3" />
+        </svg>
+      ),
+    },
+  ];
+  return (
+    <nav
+      className="glass-navigation"
+      aria-label="LinkSelf"
+      data-navigation-pending={pending || undefined}
+    >
+      <div className="glass-rail-primary">
+        {destinations.map((item) => (
+          <MenuItem
+            key={item.path}
+            label={item.name}
+            path={item.path}
+            active={item.path === '/launches'}
+            pending={pending === item.path}
+            onNavigate={onNavigate}
+            icon={item.icon}
+          />
+        ))}
+      </div>
+      <div className="glass-rail-bottom">
+        <MenuItem
+          label="Settings"
+          pending={pending === `${base}/dashboard/settings`}
+          onNavigate={onNavigate}
+          path={`${base}/dashboard/settings`}
+          icon={
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          }
+        />
+        <LogoutComponent isIcon />
+        <span
+          className="glass-avatar"
+          aria-label={
+            identity
+              ? `${identity.username}, ${identity.plan} plan`
+              : user?.email || 'Account'
+          }
+        >
+          {(identity?.username || user?.email || 'LS')
+            .slice(0, 2)
+            .toUpperCase()}
+        </span>
+      </div>
+    </nav>
   );
 };

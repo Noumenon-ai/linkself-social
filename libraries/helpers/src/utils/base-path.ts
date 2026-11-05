@@ -30,6 +30,16 @@ export const publicApiUrl = () => studioBasePath()
 export const studioCookieName = (name: string) =>
   studioBasePath() ? `linkself_studio_${name}` : name;
 
+export type StudioIdentity = { username: string; plan: 'Free' | 'Starter' | 'Pro' };
+
+/** Untrusted display metadata only; never use this cookie for authorization. */
+export function parseStudioIdentity(value: unknown): StudioIdentity | undefined {
+  if (typeof value !== 'string') return undefined;
+  const match = /^([a-z0-9_-]{1,64})\.(Free|Starter|Pro)$/.exec(value);
+  if (!match || match[0] !== value) return undefined;
+  return { username: match[1], plan: match[2] as StudioIdentity['plan'] };
+}
+
 export const studioCookiePath = () => studioBasePath() || '/';
 
 /** LinkSelf pages are outside Next's basePath, so render these with plain anchors. */

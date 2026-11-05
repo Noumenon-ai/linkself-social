@@ -1,15 +1,20 @@
 'use client';
 
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useCallback } from 'react';
 import useSWR from 'swr';
 
 export const useIntegrationList = () => {
   const fetch = useFetch();
+  const { linkselfUrl } = useVariables();
 
   const load = useCallback(async (path: string) => {
-    return (await (await fetch(path)).json()).integrations;
-  }, []);
+    const response = await fetch(path);
+    if (linkselfUrl && !response.ok)
+      throw new Error('Could not load the channel list');
+    return (await response.json()).integrations;
+  }, [fetch, linkselfUrl]);
 
   return useSWR('/integrations/list', load, {
     revalidateOnFocus: false,

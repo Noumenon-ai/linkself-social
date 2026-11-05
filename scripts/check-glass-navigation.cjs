@@ -19,15 +19,15 @@ function component(file, name, bindings) {
     true,
     ts.ScriptKind.TSX
   );
-  const declaration = source.statements.find(
+  const declarations = source.statements.filter(
     (statement) =>
       ts.isVariableStatement(statement) &&
       statement.declarationList.declarations.some(
-        (d) => d.name.getText(source) === name
+        (d) => [name, ...(name === 'TopMenu' ? ['LinkSelfMenu', 'StandaloneTopMenu'] : name === 'StudioTabs' ? ['studioPages', 'isStudioPage'] : [])].includes(d.name.getText(source))
       )
   );
   const code = ts.transpileModule(
-    declaration.getText(source).replace(/^export\s+/, ''),
+    declarations.map((declaration) => declaration.getText(source).replace(/^export\s+/, '')).join('\n'),
     {
       compilerOptions: {
         jsx: ts.JsxEmit.React,
@@ -50,6 +50,7 @@ async function main() {
     usePathname: () => '/settings',
     useSearchParams: () => new URLSearchParams('tab=plugs'),
     URLSearchParams,
+    usePendingNavigation: () => ({ pending: null, onNavigate() {} }),
     useRef: () => ({ current: null }), useEffect: () => {},
     linkselfPath: (base, target) => new URL(target, base).toString(),
     clsx: require('clsx'),
@@ -139,7 +140,7 @@ async function main() {
     browser = await chromium.launch({
       executablePath:
         process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
-        chromium.executablePath(),
+        (fs.existsSync(chromium.executablePath()) ? chromium.executablePath() : '/opt/google/chrome/chrome'),
       headless: true,
       env: {
         ...process.env,

@@ -1,4 +1,4 @@
-import { isStudioReturnPath, assertStudioBuildPath, studioPreferenceCookieOptions } from './base-path';
+import { parseStudioIdentity, isStudioReturnPath, assertStudioBuildPath, studioPreferenceCookieOptions } from './base-path';
 import { readFileSync } from 'fs';
 import { customFetch } from './custom.fetch.func';
 import {
@@ -65,8 +65,11 @@ describe.each(['', '/dashboard/studio'])('Studio prefix %s', (base) => {
     const config = renderNginx(template, base);
     expect(config).toContain(`location ${base}/api/ {`);
     expect(config).toContain(`location ${base}/uploads/ {`);
-    expect(config).toContain('proxy_pass http://localhost:3000/;');
-    expect(config).toContain('proxy_pass http://localhost:4200/;');
+    // One address per service: localhost resolves to two, and nginx then keeps
+    // per-worker failure state for each, which turned bursts into 502 responses.
+    expect(config).toContain('proxy_pass http://127.0.0.1:3000/;');
+    expect(config).toContain('proxy_pass http://127.0.0.1:4200/;');
+    expect(config).not.toContain('proxy_pass http://localhost');
     expect(config).toContain('alias /uploads/;');
     expect(config).toContain('proxy_set_header Host $host;');
     expect(config).toContain("script-src 'none'; frame-ancestors 'none'; sandbox");
@@ -125,4 +128,21 @@ it('checks the runtime path during server registration', async () => {
   process.env.LINKSELF_BASE_PATH = '/dashboard/studio';
   delete process.env.NEXT_PUBLIC_SENTRY_DSN;
   await expect(register()).resolves.toBeUndefined();
+});
+
+describe('Studio identity display', () => {
+  it.each(['Free', 'Starter', 'Pro'])('accepts the %s plan', (plan) => {
+    expect(parseStudioIdentity(`creator_42-name.${plan}`)).toEqual({ username: 'creator_42-name', plan });
+  });
+  it.each(['a', '0', '_', '-', 'a'.repeat(64)])('accepts username %s', (username) => {
+    expect(parseStudioIdentity(`${username}.Free`)).toEqual({ username, plan: 'Free' });
+  });
+  it.each([
+    undefined, null, 42, '', 'creator', 'creator.Business', 'creator.free',
+    'Creator.Pro', 'creator.name.Pro', 'creator.Pro.extra', 'creator/name.Pro',
+    '<b>name</b>.Pro', '.Free', `${'a'.repeat(65)}.Pro`, 'creator.Pro\n',
+    ' creator.Pro', 'creator.Pro ',
+  ])('ignores invalid identity %s', (value) => {
+    expect(parseStudioIdentity(value)).toBeUndefined();
+  });
 });
