@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AnalyticsData,
   AuthTokenDetails,
@@ -306,7 +307,7 @@ export class FacebookProvider extends SocialAbstract implements SocialProvider {
         `https://www.facebook.com/${META_GRAPH_API_VERSION}/dialog/oauth` +
         `?client_id=${process.env.FACEBOOK_APP_ID}` +
         `&redirect_uri=${encodeURIComponent(
-          `${process.env.FRONTEND_URL}/integrations/social/facebook`
+          `${frontendUrl()}/integrations/social/facebook`
         )}` +
         `&state=${state}` +
         `&scope=${this.scopes.join(',')}`,
@@ -343,7 +344,7 @@ export class FacebookProvider extends SocialAbstract implements SocialProvider {
         `https://graph.facebook.com/${META_GRAPH_API_VERSION}/oauth/access_token` +
           `?client_id=${process.env.FACEBOOK_APP_ID}` +
           `&redirect_uri=${encodeURIComponent(
-            `${process.env.FRONTEND_URL}/integrations/social/facebook${
+            `${frontendUrl()}/integrations/social/facebook${
               params.refresh ? `?refresh=${params.refresh}` : ''
             }`
           )}` +

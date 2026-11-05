@@ -1,4 +1,5 @@
 'use client';
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@gitroom/react/form/button';
@@ -466,8 +467,8 @@ export const MainBillingComponent: FC<{
   const paymentAction = usePaymentAction();
   const user = useUser();
   const dub = useDubClickId();
-  const [fbc] = useCookie('_fbc', '');
-  const [fbp] = useCookie('_fbp', '');
+  const [fbc] = useCookie(studioCookieName('_fbc'), '');
+  const [fbp] = useCookie(studioCookieName('_fbp'), '');
   const modal = useModals();
   const router = useRouter();
   const utm = useUtmUrl();

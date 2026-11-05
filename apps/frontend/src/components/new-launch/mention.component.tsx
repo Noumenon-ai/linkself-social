@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, { FC, useEffect, useImperativeHandle, useState } from 'react';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { posToDOMRect, ReactRenderer } from '@tiptap/react';
@@ -103,7 +105,7 @@ const MentionList: FC = (props: any) => {
               onClick={() => selectItem(index)}
             >
               <img
-                src={item.image || '/no-picture.jpg'}
+                src={item.image || withBasePath('/no-picture.jpg')}
                 alt={item.label}
                 className="w-[30px] h-[30px] rounded-full object-cover"
               />

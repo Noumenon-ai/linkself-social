@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import useSWR from 'swr';
 import { useCallback, useMemo, useState } from 'react';
 import { capitalize, orderBy } from 'lodash';
@@ -151,7 +153,7 @@ export const Plugs = () => {
                     </div>
                   )}
                   <ImageWithFallback
-                    fallbackSrc={`/icons/platforms/${integration.identifier}.png`}
+                    fallbackSrc={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                     src={integration.picture}
                     className="rounded-[8px]"
                     alt={integration.identifier}
@@ -159,7 +161,7 @@ export const Plugs = () => {
                     height={36}
                   />
                   <SafeImage
-                    src={`/icons/platforms/${integration.identifier}.png`}
+                    src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                     className="rounded-[8px] absolute z-10 bottom-[-5px] -end-[5px] border border-fifth"
                     alt={integration.identifier}
                     width={18.41}

@@ -1,3 +1,4 @@
+import { frontendUrl, publicApiUrl, studioBasePath } from '@gitroom/helpers/utils/base-path';
 import { ForbiddenException } from '@nestjs/common';
 import { OrganizationLimitsService } from '@gitroom/nestjs-libraries/database/prisma/organization-limits/organization.limits.service';
 import { INestApplication } from '@nestjs/common';
@@ -110,7 +111,7 @@ export const startMcp = async (app: INestApplication) => {
     ) as T;
   const claudeTools = withoutClaudeHidden(tools);
 
-  const backendUrl = process.env.NEXT_PUBLIC_OVERRIDE_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+  const backendUrl = process.env.NEXT_PUBLIC_OVERRIDE_BACKEND_URL || publicApiUrl();
   // this runs before the backend listens: a bucket url that doesn't parse only
   // costs the widget its thumbnails, never the boot
   let storageOrigin: string | undefined;
@@ -242,7 +243,7 @@ export const startMcp = async (app: INestApplication) => {
     // RFC 8414: metadata served at /.well-known/oauth-authorization-server/<path>
     // belongs to the path-based issuer <backend>/<path>
     issuer: server.issuer,
-    authorization_endpoint: `${process.env.FRONTEND_URL}/oauth/authorize`,
+    authorization_endpoint: `${frontendUrl()}/oauth/authorize`,
     token_endpoint: `${backendUrl}/oauth/token`,
     ...(server.registration && {
       registration_endpoint: `${backendUrl}/oauth/register`,
@@ -544,7 +545,9 @@ export const startMcp = async (app: INestApplication) => {
     )
       return;
 
-    const url = new URL(req.originalUrl, process.env.NEXT_PUBLIC_BACKEND_URL);
+    // SSE advertises messagePath to clients; both SDK paths must match its public URL.
+    const sseBase = studioBasePath() ? new URL(publicApiUrl()).pathname : '';
+    const url = new URL(sseBase + req.originalUrl, publicApiUrl());
 
     await runWithContext(
       // @ts-ignore
@@ -552,8 +555,8 @@ export const startMcp = async (app: INestApplication) => {
       async () => {
         await new MCPServer(serverConfig).startSSE({
           url,
-          ssePath: `/sse/${req.params.id}`,
-          messagePath: `/message/${req.params.id}`,
+          ssePath: `${sseBase}/sse/${req.params.id}`,
+          messagePath: `${sseBase}/message/${req.params.id}`,
           req,
           res,
         });

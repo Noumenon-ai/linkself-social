@@ -1,3 +1,4 @@
+import { publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { OAuthRepository } from '@gitroom/nestjs-libraries/database/prisma/oauth/oauth.repository';
 import { CreateOAuthAppDto } from '@gitroom/nestjs-libraries/dtos/oauth/create-oauth-app.dto';
@@ -31,7 +32,7 @@ const hubspotAppClientId = () => process.env.HUBSPOT_APP_CLIENT_ID?.trim();
 const hubspotAppClientSecret = () =>
   process.env.HUBSPOT_APP_CLIENT_SECRET?.trim();
 const hubspotInstallRedirectUri = () =>
-  `${process.env.NEXT_PUBLIC_BACKEND_URL}/oauth/hubspot/callback`;
+  `${publicApiUrl()}/oauth/hubspot/callback`;
 
 // The link that installs the HubSpot app in a HubSpot account (listed in
 // Settings > Integrations), undefined when the install can't be completed here

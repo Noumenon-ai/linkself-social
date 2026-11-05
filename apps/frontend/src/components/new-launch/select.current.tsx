@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { FC, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -149,14 +151,14 @@ export const SelectCurrent: FC = () => {
                 }}
               >
                 <img
-                  src={integration.picture || '/no-picture.jpg'}
+                  src={integration.picture || withBasePath('/no-picture.jpg')}
                   alt=""
                   width={28}
                   height={28}
                 />
                 <img
                   className="glass-editor-channel-badge"
-                  src={`/icons/platforms/${integration.identifier}.png`}
+                  src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                   alt={integration.identifier}
                   width={12}
                   height={12}
@@ -244,25 +246,25 @@ export const SelectCurrent: FC = () => {
                 )}
               >
                 <SafeImage
-                  src={integration.picture || '/no-picture.jpg'}
+                  src={integration.picture || withBasePath('/no-picture.jpg')}
                   className="rounded-full min-w-[26px]"
                   alt={integration.identifier}
                   width={26}
                   height={26}
                   onError={(e) => {
-                    e.currentTarget.src = '/no-picture.jpg';
-                    e.currentTarget.srcset = '/no-picture.jpg';
+                    e.currentTarget.src = withBasePath('/no-picture.jpg');
+                    e.currentTarget.srcset = withBasePath('/no-picture.jpg');
                   }}
                 />
                 {integration.identifier === 'youtube' ? (
                   <img
-                    src="/icons/platforms/youtube.svg"
+                    src={withBasePath('/icons/platforms/youtube.svg')}
                     className="absolute z-10 bottom-[2px] end-[2px] min-w-[12px]"
                     width={12}
                   />
                 ) : (
                   <SafeImage
-                    src={`/icons/platforms/${integration.identifier}.png`}
+                    src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                     className="min-w-[12px] min-h-[12px] rounded-[3px] absolute z-10 bottom-[6px] end-[6px]"
                     alt={integration.identifier}
                     width={12}

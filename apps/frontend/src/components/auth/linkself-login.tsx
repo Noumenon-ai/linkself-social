@@ -1,3 +1,4 @@
+import { linkselfPath } from '@gitroom/helpers/utils/base-path';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
 export function LinkSelfLogin() {
@@ -7,7 +8,7 @@ export function LinkSelfLogin() {
     <div className="flex flex-col gap-3">
       <a
         className="bg-forth text-white rounded-[4px] px-4 py-3 text-center font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        href={`${url.replace(/\/$/, '')}/dashboard/social`}
+        href={linkselfPath(url, '/dashboard/social')}
       >
         Continue with LinkSelf
       </a>

@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { createHash, randomBytes } from 'crypto';
 import {
   AuthTokenDetails,
@@ -115,7 +116,7 @@ export class WhopProvider extends SocialAbstract implements SocialProvider {
         `?response_type=code` +
         `&client_id=${process.env.WHOP_CLIENT_ID}` +
         `&redirect_uri=${encodeURIComponent(
-          `${process.env.FRONTEND_URL}/integrations/social/whop`
+          `${frontendUrl()}/integrations/social/whop`
         )}` +
         `&scope=${encodeURIComponent(this.scopes.join(' '))}` +
         `&state=${state}` +
@@ -132,7 +133,7 @@ export class WhopProvider extends SocialAbstract implements SocialProvider {
     codeVerifier: string;
     refresh?: string;
   }) {
-    const redirectUri = `${process.env.FRONTEND_URL}/integrations/social/whop${
+    const redirectUri = `${frontendUrl()}/integrations/social/whop${
       params.refresh ? `?refresh=${params.refresh}` : ''
     }`;
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, { FC, Fragment, useCallback, useMemo } from 'react';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { useShallow } from 'zustand/react/shallow';
@@ -265,7 +267,7 @@ export const InformationComponent: FC<{
                 <Fragment key={p.integration.id}>
                   <div>
                     <SafeImage
-                      src={`/icons/platforms/${p.integration.identifier}.png`}
+                      src={withBasePath(`/icons/platforms/${p.integration.identifier}.png`)}
                       alt={p.integration.name}
                       className="rounded-[4px] w-[16px] h-[16px] min-w-[16px] min-h-[16px]"
                       width={16}

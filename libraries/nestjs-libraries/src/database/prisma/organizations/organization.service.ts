@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 import { CreateOrgUserDto } from '@gitroom/nestjs-libraries/dtos/auth/create.org.user.dto';
 import { HttpException, Injectable } from '@nestjs/common';
@@ -110,7 +111,7 @@ export class OrganizationService {
     const id = makeId(5);
     // only the invite fields, the body can carry undeclared properties
     const url =
-      process.env.FRONTEND_URL +
+      frontendUrl() +
       `/?org=${AuthService.signJWT({
         email: body.email,
         role: body.role,

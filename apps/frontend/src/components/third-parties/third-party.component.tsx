@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import ImageWithFallback from '@gitroom/react/helpers/image.with.fallback';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
@@ -130,8 +132,8 @@ export const ThirdPartyComponent = () => {
                 >
                   <div className="flex items-center gap-[12px] min-w-0">
                     <ImageWithFallback
-                      fallbackSrc={`/icons/third-party/${p.identifier}.png`}
-                      src={`/icons/third-party/${p.identifier}.png`}
+                      fallbackSrc={withBasePath(`/icons/third-party/${p.identifier}.png`)}
+                      src={withBasePath(`/icons/third-party/${p.identifier}.png`)}
                       className="rounded-full"
                       alt={p.title}
                       width={32}

@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AnalyticsData,
   AuthTokenDetails,
@@ -203,7 +204,7 @@ export class PinterestProvider
           grant_type: 'refresh_token',
           refresh_token: refreshToken,
           scope: this.scopes.join(','),
-          redirect_uri: `${process.env.FRONTEND_URL}/integrations/social/pinterest`,
+          redirect_uri: `${frontendUrl()}/integrations/social/pinterest`,
         }),
       })
     ).json();
@@ -234,7 +235,7 @@ export class PinterestProvider
       url: `https://www.pinterest.com/oauth/?client_id=${
         process.env.PINTEREST_CLIENT_ID
       }&redirect_uri=${encodeURIComponent(
-        `${process.env.FRONTEND_URL}/integrations/social/pinterest`
+        `${frontendUrl()}/integrations/social/pinterest`
       )}&response_type=code&scope=${encodeURIComponent(
         'boards:read,boards:write,pins:read,pins:write,user_accounts:read'
       )}&state=${state}`,
@@ -260,7 +261,7 @@ export class PinterestProvider
         body: new URLSearchParams({
           grant_type: 'authorization_code',
           code: params.code,
-          redirect_uri: `${process.env.FRONTEND_URL}/integrations/social/pinterest`,
+          redirect_uri: `${frontendUrl()}/integrations/social/pinterest`,
         }),
       })
     ).json();

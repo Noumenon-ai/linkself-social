@@ -1,3 +1,4 @@
+import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 import React, { FC, SVGProps, useEffect } from 'react';
 import clsx from 'clsx';
 import useCookie from 'react-use-cookie';
@@ -868,11 +869,11 @@ export const VerticalDividerIcon: FC<IconProps> = ({ className, ...props }) => (
 );
 
 export const NoMediaIcon: FC = () => {
-  const [mode, setMode] = useCookie('mode', 'dark');
+  const [mode, setMode] = useCookie(studioCookieName('mode'), 'dark');
 
   useEffect(() => {
     modeEmitter.on('mode', (value) => {
-      setMode(value);
+      setMode(value, { path: studioCookiePath() });
     });
 
     return () => {

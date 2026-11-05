@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthProvider,
   AuthProviderAbstract,
@@ -11,7 +12,7 @@ export class GithubProvider extends AuthProviderAbstract {
     }&scope=user:email&state=${
       query?.state || 'login'
     }&redirect_uri=${encodeURIComponent(
-      `${process.env.FRONTEND_URL}/settings`
+      `${frontendUrl()}/settings`
     )}`;
   }
 
@@ -27,7 +28,7 @@ export class GithubProvider extends AuthProviderAbstract {
           client_id: process.env.GITHUB_CLIENT_ID,
           client_secret: process.env.GITHUB_CLIENT_SECRET,
           code,
-          redirect_uri: `${process.env.FRONTEND_URL}/settings`,
+          redirect_uri: `${frontendUrl()}/settings`,
         }),
       })
     ).json();

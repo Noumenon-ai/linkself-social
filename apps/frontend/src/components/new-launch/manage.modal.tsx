@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import React, {
   FC,
@@ -193,7 +195,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
       <div className="flex items-center gap-[10px]">
         <div className="relative mobile:hidden">
           <img
-            src={`/icons/platforms/${currentIntegration.identifier}.png`}
+            src={withBasePath(`/icons/platforms/${currentIntegration.identifier}.png`)}
             className="w-[20px] h-[20px] rounded-[4px]"
             alt={currentIntegration.identifier}
           />
@@ -1121,7 +1123,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                                     width={24}
                                     height={24}
                                     src={
-                                      integration.picture || '/no-picture.jpg'
+                                      integration.picture || withBasePath('/no-picture.jpg')
                                     }
                                     alt=""
                                   />

@@ -1,0 +1,182 @@
+Optional Studio path prefix implemented for frontend, API/uploads, public URLs, SSO/OAuth and isolated cookies; empty prefix preserves root deployment.
+
+Deployment
+Set LINKSELF_BASE_PATH=/dashboard/studio as both Dockerfile.dev build ARG and runtime environment value. The ARG defaults to empty and is copied into image ENV. Next embeds basePath during build, so changing the prefix requires rebuilding. FRONTEND_URL may be https://linkself.net or https://linkself.net/dashboard/studio. The container renders nginx locations at startup without substituting nginx variables. LinkSelf must proxy the full /dashboard/studio path, retaining the path for this container.
+
+Cookies
+In prefixed mode, Studio-owned cookies use linkself_studio_ names, host-only scope, and Path=/dashboard/studio. Session issuance, reads, logout, OAuth state, organization selection, tracking and UI preferences use the same scheme. Existing root-domain cookies are neither reused nor deleted. Empty prefix retains legacy names and domain behavior.
+
+Path audit exceptions
+- Next Link/router/server redirect and Next configuration routes already apply basePath; Next pathname comparisons deliberately omit it.
+- useFetch routes use the configured public API base; internalFetch routes use the internal backend address. SWR keys are cache identifiers.
+- Menu/tab path data is passed to Next Link. LinkSelf host-page links use plain anchors and become origin-relative only when the configured origins match.
+- Upload filesystem paths and relative local-font imports are not browser URLs; next/font emits assets under Next's basePath.
+- Provider API endpoints, backend route decorators, MIME strings, delimiters and command labels are not Studio browser paths.
+- MCP OAuth discovery retains RFC origin-root semantics. Path deployments use the existing API-key MCP mode or an independently routed MCP_URL for OAuth. SDK HTTP routing sees paths already stripped by nginx. SSE advertised message URLs do retain the public API prefix.
+- TikTok Business retains the existing registered trailing slash on its OAuth callback in both modes.
+- Third-party datafast cookie reads remain read-only and keep their vendor-defined names.
+The executable audit prints its checked exceptions and fails on unhandled frontend path literals, inline script/style paths, or backend public URL construction bypassing the helper.
+
+Final validation
+pnpm exec jest --config apps/backend/jest.enterprise.config.cjs --runInBand
+  20 suites passed; 405 tests passed; 0 failed; 0 snapshots.
+pnpm exec tsc --project apps/frontend/tsconfig.json --noEmit --incremental false
+  Exit 0; 0 diagnostics.
+node scripts/check-glass-css.cjs
+  1055 checks passed; 0 failed; Sass and Tailwind compilation passed.
+node scripts/check-glass-calendar.cjs
+  324 checks passed; 0 failed.
+node scripts/check-base-path.cjs
+  758 files checked; 0 unhandled internal paths.
+git diff --check
+  Exit 0.
+
+No app start, production build, network access, dependency changes, workflow/activity changes, schema/env/secret changes, or git commits/pushes were performed. A read-only second-agent review was completed as required by CLAUDE.md; its identified issues were resolved.
+
+Changed files (146)
+Dockerfile.dev
+apps/backend/jest.enterprise.config.cjs
+apps/backend/src/api/routes/auth.controller.ts
+apps/backend/src/api/routes/billing.controller.ts
+apps/backend/src/api/routes/copilot.controller.ts
+apps/backend/src/api/routes/enterprise.controller.spec.ts
+apps/backend/src/api/routes/enterprise.controller.ts
+apps/backend/src/api/routes/oauth.controller.ts
+apps/backend/src/api/routes/users.controller.ts
+apps/backend/src/main.ts
+apps/backend/src/services/auth/auth.middleware.ts
+apps/backend/src/services/auth/auth.service.ts
+apps/backend/src/services/auth/permissions/subscription.exception.ts
+apps/backend/src/services/auth/providers/apple.provider.ts
+apps/backend/src/services/auth/providers/github.provider.ts
+apps/backend/src/services/auth/providers/google.provider.ts
+apps/backend/src/services/auth/providers/oauth.provider.ts
+apps/backend/src/services/auth/session.path.spec.ts
+apps/backend/src/services/auth/session.ts
+apps/frontend/next.config.js
+apps/frontend/src/app/(app)/(preview)/p/[id]/page.tsx
+apps/frontend/src/app/(app)/auth/return.url.component.tsx
+apps/frontend/src/app/(app)/integrations/social/[provider]/page.tsx
+apps/frontend/src/app/(app)/layout.tsx
+apps/frontend/src/app/(app)/oauth/authorize/page.tsx
+apps/frontend/src/app/(extension)/layout.tsx
+apps/frontend/src/app/(provider)/layout.tsx
+apps/frontend/src/components/agents/agent.tsx
+apps/frontend/src/components/analytics/chart-social.tsx
+apps/frontend/src/components/auth/linkself-login.tsx
+apps/frontend/src/components/auth/providers/farcaster.provider.tsx
+apps/frontend/src/components/auth/providers/oauth.provider.tsx
+apps/frontend/src/components/auth/providers/wallet.provider.tsx
+apps/frontend/src/components/billing/embedded.billing.tsx
+apps/frontend/src/components/billing/first.billing.component.tsx
+apps/frontend/src/components/billing/main.billing.component.tsx
+apps/frontend/src/components/launches/add.provider.component.tsx
+apps/frontend/src/components/launches/bot.picture.tsx
+apps/frontend/src/components/launches/calendar.context.tsx
+apps/frontend/src/components/launches/calendar.tsx
+apps/frontend/src/components/launches/general.preview.component.tsx
+apps/frontend/src/components/launches/helpers/pick.platform.component.tsx
+apps/frontend/src/components/launches/import-debug-post.modal.tsx
+apps/frontend/src/components/launches/information.component.tsx
+apps/frontend/src/components/launches/launches.component.tsx
+apps/frontend/src/components/launches/polonto/polonto.picture.generation.tsx
+apps/frontend/src/components/launches/select.channels.tsx
+apps/frontend/src/components/layout/facebook.component.tsx
+apps/frontend/src/components/layout/gtm.component.tsx
+apps/frontend/src/components/layout/impersonate.tsx
+apps/frontend/src/components/layout/language.component.tsx
+apps/frontend/src/components/layout/layout.context.tsx
+apps/frontend/src/components/layout/logout.component.tsx
+apps/frontend/src/components/layout/mode.component.tsx
+apps/frontend/src/components/layout/pre-condition.component.tsx
+apps/frontend/src/components/layout/studio.tabs.tsx
+apps/frontend/src/components/new-launch/manage.modal.tsx
+apps/frontend/src/components/new-launch/mention.component.tsx
+apps/frontend/src/components/new-launch/picks.socials.component.tsx
+apps/frontend/src/components/new-launch/providers/facebook/facebook.preview.tsx
+apps/frontend/src/components/new-launch/providers/high.order.provider.tsx
+apps/frontend/src/components/new-launch/providers/instagram/instagram.preview.tsx
+apps/frontend/src/components/new-launch/providers/linkedin/linkedin.preview.tsx
+apps/frontend/src/components/new-launch/providers/pinterest/pinterest.preview.tsx
+apps/frontend/src/components/new-launch/providers/reddit/reddit.provider.tsx
+apps/frontend/src/components/new-launch/providers/tiktok/tiktok.preview.tsx
+apps/frontend/src/components/new-launch/providers/youtube/youtube.preview.tsx
+apps/frontend/src/components/new-launch/select.current.tsx
+apps/frontend/src/components/new-layout/layout.component.tsx
+apps/frontend/src/components/new-layout/logo.tsx
+apps/frontend/src/components/new-layout/menu-item.tsx
+apps/frontend/src/components/oauth/authorize.component.tsx
+apps/frontend/src/components/onboarding/onboarding.modal.tsx
+apps/frontend/src/components/platform-analytics/platform.analytics.tsx
+apps/frontend/src/components/plugs/plugs.tsx
+apps/frontend/src/components/post-url-selector/post.url.selector.tsx
+apps/frontend/src/components/public-api/mcp.client.icons.tsx
+apps/frontend/src/components/settings/delete-account.component.tsx
+apps/frontend/src/components/settings/github.component.tsx
+apps/frontend/src/components/settings/global.settings.tsx
+apps/frontend/src/components/third-parties/third-party.component.tsx
+apps/frontend/src/components/third-parties/third-party.list.component.tsx
+apps/frontend/src/components/third-parties/third-party.media-library.tsx
+apps/frontend/src/components/third-parties/third-party.media.tsx
+apps/frontend/src/components/ui/icons/index.tsx
+apps/frontend/src/components/ui/logo-text.component.tsx
+apps/frontend/src/proxy.spec.ts
+apps/frontend/src/proxy.ts
+libraries/helpers/src/subdomain/subdomain.management.ts
+libraries/helpers/src/utils/base-path.spec.ts
+libraries/helpers/src/utils/base-path.ts
+libraries/helpers/src/utils/custom.fetch.func.ts
+libraries/helpers/src/utils/internal.fetch.ts
+libraries/nestjs-libraries/src/chat/mcp.limits.spec.ts
+libraries/nestjs-libraries/src/chat/start.mcp.ts
+libraries/nestjs-libraries/src/chat/tools/integration.schedule.post.ts
+libraries/nestjs-libraries/src/database/prisma/clipping/clipping.service.ts
+libraries/nestjs-libraries/src/database/prisma/integrations/integration.repository.ts
+libraries/nestjs-libraries/src/database/prisma/integrations/integration.service.ts
+libraries/nestjs-libraries/src/database/prisma/media/media.service.ts
+libraries/nestjs-libraries/src/database/prisma/oauth/oauth.service.ts
+libraries/nestjs-libraries/src/database/prisma/organizations/organization.service.ts
+libraries/nestjs-libraries/src/database/prisma/posts/posts.service.ts
+libraries/nestjs-libraries/src/integrations/social.abstract.ts
+libraries/nestjs-libraries/src/integrations/social/discord.provider.ts
+libraries/nestjs-libraries/src/integrations/social/dribbble.provider.ts
+libraries/nestjs-libraries/src/integrations/social/facebook.provider.ts
+libraries/nestjs-libraries/src/integrations/social/fanvue.provider.ts
+libraries/nestjs-libraries/src/integrations/social/gmb.provider.ts
+libraries/nestjs-libraries/src/integrations/social/hashnode.provider.ts
+libraries/nestjs-libraries/src/integrations/social/instagram.provider.ts
+libraries/nestjs-libraries/src/integrations/social/instagram.standalone.provider.ts
+libraries/nestjs-libraries/src/integrations/social/kick.provider.ts
+libraries/nestjs-libraries/src/integrations/social/linkedin.page.provider.ts
+libraries/nestjs-libraries/src/integrations/social/linkedin.provider.ts
+libraries/nestjs-libraries/src/integrations/social/mastodon.custom.provider.ts
+libraries/nestjs-libraries/src/integrations/social/mastodon.provider.ts
+libraries/nestjs-libraries/src/integrations/social/mewe.provider.ts
+libraries/nestjs-libraries/src/integrations/social/oauth.path.spec.ts
+libraries/nestjs-libraries/src/integrations/social/pinterest.provider.ts
+libraries/nestjs-libraries/src/integrations/social/reddit.provider.ts
+libraries/nestjs-libraries/src/integrations/social/slack.provider.ts
+libraries/nestjs-libraries/src/integrations/social/telegram.provider.ts
+libraries/nestjs-libraries/src/integrations/social/threads.provider.ts
+libraries/nestjs-libraries/src/integrations/social/tiktok.business.provider.ts
+libraries/nestjs-libraries/src/integrations/social/tiktok.provider.ts
+libraries/nestjs-libraries/src/integrations/social/tumblr.provider.ts
+libraries/nestjs-libraries/src/integrations/social/twitch.provider.ts
+libraries/nestjs-libraries/src/integrations/social/vk.provider.ts
+libraries/nestjs-libraries/src/integrations/social/whop.provider.ts
+libraries/nestjs-libraries/src/integrations/social/x.provider.ts
+libraries/nestjs-libraries/src/integrations/social/youtube.provider.ts
+libraries/nestjs-libraries/src/services/email.service.ts
+libraries/nestjs-libraries/src/services/stripe.service.ts
+libraries/nestjs-libraries/src/track/track.cookies.ts
+libraries/nestjs-libraries/src/track/track.service.ts
+libraries/nestjs-libraries/src/upload/local.storage.ts
+libraries/nestjs-libraries/src/videos/images-slides/images.slides.ts
+libraries/react-shared-libraries/src/helpers/testomonials.tsx
+libraries/react-shared-libraries/src/translation/i18n.config.ts
+libraries/react-shared-libraries/src/translation/i18next.ts
+scripts/check-base-path.cjs
+scripts/check-glass-calendar.cjs
+var/docker/base-path-report.txt
+var/docker/nginx.conf
+var/docker/render-nginx.cjs

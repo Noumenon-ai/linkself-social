@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { useIntegration } from '@gitroom/frontend/components/launches/helpers/use.integration';
 import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
 import clsx from 'clsx';
@@ -65,8 +66,8 @@ export const GeneralPreviewComponent: FC<{
                 <img
                   src={
                     current === 'global'
-                      ? '/no-picture.jpg'
-                      : integration?.picture || '/no-picture.jpg'
+                      ? withBasePath('/no-picture.jpg')
+                      : integration?.picture || withBasePath('/no-picture.jpg')
                   }
                   alt="x"
                   className="rounded-full relative z-[2]"
@@ -74,7 +75,7 @@ export const GeneralPreviewComponent: FC<{
 
                 {current !== 'global' && (
                   <SafeImage
-                    src={`/icons/platforms/${integration?.identifier}.png`}
+                    src={withBasePath(`/icons/platforms/${integration?.identifier}.png`)}
                     className="min-w-[20px] min-h-[20px] rounded-full absolute z-10 -bottom-[5px] -end-[5px] border border-fifth"
                     alt={integration.identifier}
                     width={20}

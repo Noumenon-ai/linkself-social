@@ -1,3 +1,4 @@
+import { withBasePath, frontendUrl, publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import { SentryComponent } from '@gitroom/frontend/components/layout/sentry.component';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <html data-linkself-theme={isLinkSelf ? 'glass-frame' : undefined}>
       <head>
-        <link rel="icon" href={isLinkSelf ? '/glass-icon.svg' : '/favicon.ico'} sizes="any" />
+        <link rel="icon" href={isLinkSelf ? withBasePath('/glass-icon.svg') : withBasePath('/favicon.ico')} sizes="any" />
 
       </head>
       <ChangeDirClient />
@@ -41,7 +42,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             process.env.STORAGE_PROVIDER! as 'local' | 'cloudflare'
           }
           environment={process.env.NODE_ENV!}
-          backendUrl={process.env.NEXT_PUBLIC_BACKEND_URL!}
+          backendUrl={publicApiUrl()}
           plontoKey={process.env.NEXT_PUBLIC_POLOTNO!}
           stripeClient={process.env.STRIPE_PUBLISHABLE_KEY!}
           isChatBase={!!process.env.CHATBASE_TOKEN}
@@ -50,7 +51,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           billingEnabled={!!process.env.STRIPE_PUBLISHABLE_KEY}
           discordUrl={process.env.NEXT_PUBLIC_DISCORD_SUPPORT!}
           linkselfUrl={process.env.LINKSELF_URL || process.env.NEXT_PUBLIC_LINKSELF_URL || ''}
-          frontEndUrl={process.env.FRONTEND_URL!}
+          frontEndUrl={frontendUrl()}
           isGeneral={!!process.env.IS_GENERAL}
           genericOauth={!!process.env.POSTIZ_GENERIC_OAUTH}
           oauthLogoUrl={process.env.NEXT_PUBLIC_POSTIZ_OAUTH_LOGO_URL!}

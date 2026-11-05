@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
 import { FC, useCallback, useEffect, useState } from 'react';
@@ -106,9 +108,9 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
 
   // Sign in (or sign up) and land back on this same request
   const signIn = useCallback(() => {
-    window.location.href = `/auth/login?returnUrl=${encodeURIComponent(
+    window.location.href = withBasePath(`/auth/login?returnUrl=${encodeURIComponent(
       window.location.href
-    )}`;
+    )}`);
   }, []);
 
   if (loading) {

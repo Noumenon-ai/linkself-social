@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AnalyticsData,
   AuthTokenDetails,
@@ -400,10 +401,10 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
         `?client_key=${process.env.TIKTOK_CLIENT_ID}` +
         `&redirect_uri=${encodeURIComponent(
           `${
-            process?.env?.FRONTEND_URL?.indexOf('https') === -1
+            frontendUrl()?.indexOf('https') === -1
               ? 'https://redirectmeto.com/'
               : ''
-          }${process?.env?.FRONTEND_URL}/integrations/social/tiktok`
+          }${frontendUrl()}/integrations/social/tiktok`
         )}` +
         `&state=${state}` +
         `&response_type=code` +
@@ -425,10 +426,10 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
       grant_type: 'authorization_code',
       code_verifier: params.codeVerifier,
       redirect_uri: `${
-        process?.env?.FRONTEND_URL?.indexOf('https') === -1
+        frontendUrl()?.indexOf('https') === -1
           ? 'https://redirectmeto.com/'
           : ''
-      }${process?.env?.FRONTEND_URL}/integrations/social/tiktok`,
+      }${frontendUrl()}/integrations/social/tiktok`,
     };
 
     const { access_token, refresh_token, scope } = await (

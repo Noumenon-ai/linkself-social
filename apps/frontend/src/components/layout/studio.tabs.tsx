@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { linkselfPath } from '@gitroom/helpers/utils/base-path';
 import { usePathname } from 'next/navigation';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 export const StudioTabs = () => {
-  const { linkselfUrl } = useVariables();
+  const { linkselfUrl, frontEndUrl } = useVariables();
   const pathname = usePathname();
   if (!linkselfUrl) return null;
 
@@ -24,7 +25,11 @@ export const StudioTabs = () => {
       className="glass-studio-tabs glass-settings-tabs flex"
       aria-label="Studio"
     >
-      {tabs.map(({ label, path }) => (
+      {tabs.map(({ label, path }) => path.startsWith(base + '/') ? (
+        <a key={path} href={linkselfPath(linkselfUrl, path, frontEndUrl)} className="hover:bg-boxHover">
+          {label}
+        </a>
+      ) : (
         <Link
           key={path}
           href={path}

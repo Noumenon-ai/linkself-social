@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   ClientInformation,
   PostDetails,
@@ -20,10 +21,10 @@ export class MastodonCustomProvider extends MastodonProvider {
     form.append('client_name', 'Postiz');
     form.append(
       'redirect_uris',
-      `${process.env.FRONTEND_URL}/integrations/social/mastodon`
+      `${frontendUrl()}/integrations/social/mastodon`
     );
     form.append('scopes', this.scopes.join(' '));
-    form.append('website', process.env.FRONTEND_URL!);
+    form.append('website', frontendUrl());
     const { client_id, client_secret, ...all } = await (
       await fetch(url + '/api/v1/apps', {
         method: 'POST',
@@ -47,7 +48,7 @@ export class MastodonCustomProvider extends MastodonProvider {
       external?.instanceUrl!,
       state,
       external?.client_id!,
-      process.env.FRONTEND_URL!,
+      frontendUrl(),
       refresh
     );
 

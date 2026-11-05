@@ -1,6 +1,7 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 export const testimonials1 = [
   {
-    picture: '/auth/avatars/vincent.jpg',
+    picture: withBasePath('/auth/avatars/vincent.jpg'),
     name: 'Vincent L.',
     description: 'Marketing Coordinator',
     content: (
@@ -12,7 +13,7 @@ export const testimonials1 = [
     ),
   },
   {
-    picture: '/auth/avatars/dilini.jpeg',
+    picture: withBasePath('/auth/avatars/dilini.jpeg'),
     name: 'Dilini R.',
     description: 'AI & Tech Consultant',
     content: (
@@ -37,7 +38,7 @@ export const testimonials1 = [
     ),
   },
   {
-    picture: '/auth/avatars/johna.jpg',
+    picture: withBasePath('/auth/avatars/johna.jpg'),
     name: 'Johannes D.',
     description: 'CEO',
     content: (
@@ -50,7 +51,7 @@ export const testimonials1 = [
     ),
   },
   {
-    picture: '/auth/avatars/george.jpg',
+    picture: withBasePath('/auth/avatars/george.jpg'),
     name: 'George B.',
     description: 'Marketing Assistant',
     content: (
@@ -61,7 +62,7 @@ export const testimonials1 = [
     ),
   },
   {
-    picture: '/auth/avatars/maria.jpg',
+    picture: withBasePath('/auth/avatars/maria.jpg'),
     name: 'Maria Camila A.',
     description: 'Data Analyst',
     content: (
@@ -75,7 +76,7 @@ export const testimonials1 = [
     ),
   },
   {
-    picture: '/auth/avatars/bart.jpg',
+    picture: withBasePath('/auth/avatars/bart.jpg'),
     name: 'Bartolomeo H.',
     description: 'CEO',
     content: (
@@ -89,7 +90,7 @@ export const testimonials1 = [
     ),
   },
   {
-    picture: '/auth/avatars/henry.jpg',
+    picture: withBasePath('/auth/avatars/henry.jpg'),
     name: 'Henry H.',
     description: 'Social Media Coordinator',
     content: (
@@ -101,7 +102,7 @@ export const testimonials1 = [
     ),
   },
   {
-    picture: '/auth/avatars/andy.jpeg',
+    picture: withBasePath('/auth/avatars/andy.jpeg'),
     name: 'Andy C.',
     description: 'AI Specialist',
     content: (
@@ -119,7 +120,7 @@ export const testimonials1 = [
 
 export const testimonials2 = [
   {
-    picture: '/auth/avatars/michael.jpeg',
+    picture: withBasePath('/auth/avatars/michael.jpeg'),
     name: 'Michael H.',
     description: 'Senior frontend developer',
     content: (
@@ -143,7 +144,7 @@ export const testimonials2 = [
     ),
   },
   {
-    picture: '/auth/avatars/kiley.jpeg',
+    picture: withBasePath('/auth/avatars/kiley.jpeg'),
     name: 'Kiley H.',
     description: 'Content Creator',
     content: (
@@ -155,7 +156,7 @@ export const testimonials2 = [
     ),
   },
   {
-    picture: '/auth/avatars/iorn.jpg',
+    picture: withBasePath('/auth/avatars/iorn.jpg'),
     name: 'Iornienge S.',
     description: 'Social Media Manager',
     content: (
@@ -168,7 +169,7 @@ export const testimonials2 = [
     ),
   },
   {
-    picture: '/auth/avatars/david.jpg',
+    picture: withBasePath('/auth/avatars/david.jpg'),
     name: 'David C.',
     description: 'Digital Marketing Manager',
     content: (
@@ -179,7 +180,7 @@ export const testimonials2 = [
     ),
   },
   {
-    picture: '/auth/avatars/serge.jpeg',
+    picture: withBasePath('/auth/avatars/serge.jpeg'),
     name: 'Serge A.',
     description: 'CEO',
     content: (
@@ -192,7 +193,7 @@ export const testimonials2 = [
     ),
   },
   {
-    picture: '/auth/avatars/anica.jpg',
+    picture: withBasePath('/auth/avatars/anica.jpg'),
     name: 'Anica R.',
     description: 'University Applications Specialist',
     content: (
@@ -203,7 +204,7 @@ export const testimonials2 = [
     ),
   },
   {
-    picture: '/auth/avatars/josh.jpg',
+    picture: withBasePath('/auth/avatars/josh.jpg'),
     name: 'Josh W.',
     description: 'Content Manager',
     content: (
@@ -214,7 +215,7 @@ export const testimonials2 = [
     ),
   },
   {
-    picture: '/auth/avatars/vince.jpeg',
+    picture: withBasePath('/auth/avatars/vince.jpeg'),
     name: 'Vince C.',
     description: 'Developer Relations Engineer',
     content: (

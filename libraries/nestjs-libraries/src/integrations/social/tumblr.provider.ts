@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthTokenDetails,
   PostDetails,
@@ -406,7 +407,7 @@ export class TumblrProvider extends SocialAbstract implements SocialProvider {
   }
 
   private redirectUri() {
-    return `${process.env.FRONTEND_URL}/integrations/social/tumblr`;
+    return `${frontendUrl()}/integrations/social/tumblr`;
   }
 
   private getAvatarUrl(blogName: string) {
@@ -425,7 +426,7 @@ export class TumblrProvider extends SocialAbstract implements SocialProvider {
 
   private getMediaUrl(path: string) {
     return path?.indexOf('http') === -1
-      ? `${process.env.FRONTEND_URL}/${path}`
+      ? `${frontendUrl()}/${path}`
       : path;
   }
 

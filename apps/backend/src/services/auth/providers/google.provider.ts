@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { google } from 'googleapis';
 import { HttpException } from '@nestjs/common';
 import {
@@ -6,7 +7,7 @@ import {
 } from '@gitroom/backend/services/auth/providers.interface';
 
 const defaultRedirect = () =>
-  `${process.env.FRONTEND_URL}/integrations/social/youtube`;
+  `${frontendUrl()}/integrations/social/youtube`;
 
 const makeClient = (redirectUri: string) =>
   new google.auth.OAuth2({

@@ -1,3 +1,4 @@
+import { withBasePath, frontendUrl, publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import { MantineWrapper } from '@gitroom/react/helpers/mantine.wrapper';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +18,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <html data-linkself-theme={isLinkSelf ? 'glass-frame' : undefined}>
       <head>
-        <link rel="icon" href={isLinkSelf ? '/glass-icon.svg' : '/favicon.ico'} sizes="any" />
+        <link rel="icon" href={isLinkSelf ? withBasePath('/glass-icon.svg') : withBasePath('/favicon.ico')} sizes="any" />
       </head>
       <body
         className={clsx(jakartaSans.className, 'dark text-primary !bg-primary', isLinkSelf && figtree.variable)}
@@ -29,14 +30,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           }
           stripeClient=""
           environment={process.env.NODE_ENV!}
-          backendUrl={process.env.NEXT_PUBLIC_BACKEND_URL!}
+          backendUrl={publicApiUrl()}
           plontoKey={process.env.NEXT_PUBLIC_POLOTNO!}
           aiEnabled={!!process.env.OPENAI_API_KEY}
           emailEnabled={!!process.env.EMAIL_PROVIDER}
           linkselfUrl={process.env.LINKSELF_URL || process.env.NEXT_PUBLIC_LINKSELF_URL || ''}
           billingEnabled={!!process.env.STRIPE_PUBLISHABLE_KEY}
           discordUrl={process.env.NEXT_PUBLIC_DISCORD_SUPPORT!}
-          frontEndUrl={process.env.FRONTEND_URL!}
+          frontEndUrl={frontendUrl()}
           isGeneral={!!process.env.IS_GENERAL}
           genericOauth={!!process.env.POSTIZ_GENERIC_OAUTH}
           oauthLogoUrl={process.env.NEXT_PUBLIC_POSTIZ_OAUTH_LOGO_URL!}

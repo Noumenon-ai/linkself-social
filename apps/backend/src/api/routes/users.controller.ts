@@ -1,3 +1,4 @@
+import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 import {
   Body,
   Controller,
@@ -90,7 +91,7 @@ export class UsersController {
       throw new HttpForbiddenException();
     }
 
-    const impersonate = req.cookies.impersonate || req.headers.impersonate;
+    const impersonate = req.cookies[studioCookieName('impersonate')] || req.headers.impersonate;
     // @ts-ignore
     return {
       ...user,
@@ -151,8 +152,9 @@ export class UsersController {
       throw new HttpException('Unauthorized', 400);
     }
 
-    response.cookie('impersonate', id, {
+    response.cookie(studioCookieName('impersonate'), id, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
@@ -205,7 +207,7 @@ export class UsersController {
 
   private getRequestUserId(req: Request): string | null {
     try {
-      const auth = (req.headers.auth as string) || req.cookies?.auth;
+      const auth = (req.headers.auth as string) || req.cookies?.[studioCookieName('auth')];
       const payload = AuthChecker.verifyJWT(auth) as { id?: string } | null;
       return payload?.id || null;
     } catch {
@@ -305,8 +307,9 @@ export class UsersController {
     @Body('id') id: string,
     @Res({ passthrough: true }) response: Response
   ) {
-    response.cookie('showorg', id, {
+    response.cookie(studioCookieName('showorg'), id, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
@@ -335,7 +338,7 @@ export class UsersController {
     @Req() req: Request,
     @Res({ passthrough: true }) response: Response
   ) {
-    const impersonate = req.cookies.impersonate || req.headers.impersonate;
+    const impersonate = req.cookies[studioCookieName('impersonate')] || req.headers.impersonate;
     if (impersonate) {
       throw new HttpException(
         'Account cannot be deleted while impersonating',
@@ -369,8 +372,9 @@ export class UsersController {
   @Post('/logout')
   logout(@Res({ passthrough: true }) response: Response) {
     response.header('logout', 'true');
-    response.cookie('auth', '', {
+    response.cookie(studioCookieName('auth'), '', {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
@@ -382,8 +386,9 @@ export class UsersController {
       expires: new Date(0),
     });
 
-    response.cookie('showorg', '', {
+    response.cookie(studioCookieName('showorg'), '', {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
@@ -395,8 +400,9 @@ export class UsersController {
       expires: new Date(0),
     });
 
-    response.cookie('impersonate', '', {
+    response.cookie(studioCookieName('impersonate'), '', {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,

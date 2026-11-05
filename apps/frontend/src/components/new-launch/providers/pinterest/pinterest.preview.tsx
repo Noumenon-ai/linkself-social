@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { FC } from 'react';
 import { useIntegration } from '@gitroom/frontend/components/launches/helpers/use.integration';
 import { stripHtmlValidation } from '@gitroom/helpers/utils/strip.html.validation';
@@ -138,7 +139,7 @@ export const PinterestPreview: FC<{
         </div>
       </div>
       <div
-        style={{ background: 'url(/no-video-youtube.png)' }}
+        style={{ background: `url(${withBasePath('/no-video-youtube.png')})` }}
         className="!bg-cover w-full aspect-[calc(16/9)] rounded-[20px] overflow-hidden"
       >
         {!!renderContent?.[0]?.images?.[0]?.path && (

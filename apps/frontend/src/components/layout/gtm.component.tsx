@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import Script from 'next/script';
 import { FC, useEffect } from 'react';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
@@ -42,7 +44,7 @@ export const GoogleTagManagerComponent: FC<{ gtmId?: string }> = ({
   }
   return (
     <>
-      <Script src="/g.js" strategy="afterInteractive" />
+      <Script src={withBasePath('/g.js')} strategy="afterInteractive" />
 
       <Script id="google-ads-gtag" strategy="afterInteractive">
         {`

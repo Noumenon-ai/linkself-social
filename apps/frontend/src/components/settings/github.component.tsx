@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import SafeImage from '@gitroom/react/helpers/safe.image';
 import { Button } from '@gitroom/react/form/button';
 import { FC, Fragment, useCallback, useEffect, useState } from 'react';
@@ -35,7 +37,7 @@ const ConnectedComponent: FC<{
     <div className="my-[16px] mt-[16px] h-[90px] bg-sixth border-fifth border rounded-[4px] p-[24px]">
       <div className={`flex items-center gap-[8px]`}>
         <div>
-          <SafeImage src="/icons/github.svg" alt="GitHub" width={40} height={40} />
+          <SafeImage src={withBasePath('/icons/github.svg')} alt="GitHub" width={40} height={40} />
         </div>
         <div className="flex-1">
           <strong>{t('connected', 'Connected:')}</strong> {login}
@@ -90,7 +92,7 @@ const ConnectComponent: FC<{
     <div className="my-[16px] mt-[16px] h-[100px] bg-sixth border-fifth border rounded-[4px] px-[24px] flex">
       <div className={`flex items-center gap-[8px] flex-1`}>
         <div>
-          <SafeImage src="/icons/github.svg" alt="GitHub" width={40} height={40} />
+          <SafeImage src={withBasePath('/icons/github.svg')} alt="GitHub" width={40} height={40} />
         </div>
         <div className="flex-1">
           {t('connect_your_repository', 'Connect your repository')}
@@ -198,7 +200,7 @@ export const GithubComponent: FC<{
           <div className={`flex items-center gap-[8px]`}>
             <div>
               <SafeImage
-                src="/icons/github.svg"
+                src={withBasePath('/icons/github.svg')}
                 alt="GitHub"
                 width={40}
                 height={40}

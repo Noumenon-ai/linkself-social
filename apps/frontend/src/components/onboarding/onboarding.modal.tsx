@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
 import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
@@ -199,7 +201,7 @@ const OnboardingStep1: FC<{ onNext: () => void; onSkip: () => void }> = ({
                     height={28}
                   />
                   <SafeImage
-                    src={`/icons/platforms/${integration.identifier}.png`}
+                    src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                     className="rounded-full absolute -bottom-[3px] -end-[3px] border border-fifth"
                     alt={integration.identifier}
                     width={14}

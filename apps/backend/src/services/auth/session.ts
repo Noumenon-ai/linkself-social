@@ -1,3 +1,4 @@
+import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 import { Response } from 'express';
 import { User } from '@prisma/client';
 import { AuthService } from '@gitroom/helpers/auth/auth.service';
@@ -16,15 +17,16 @@ export function setSessionCookies(
 ) {
   const options = {
     domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
     ...(!process.env.NOT_SECURED
       ? { secure: true, httpOnly: true, sameSite: 'none' as const }
       : {}),
     expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
   };
-  response.cookie('auth', jwt, options);
+  response.cookie(studioCookieName('auth'), jwt, options);
   if (process.env.NOT_SECURED) response.header('auth', jwt);
   if (organizationId) {
-    response.cookie('showorg', organizationId, options);
+    response.cookie(studioCookieName('showorg'), organizationId, options);
     if (process.env.NOT_SECURED) response.header('showorg', organizationId);
   }
 }

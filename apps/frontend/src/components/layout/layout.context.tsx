@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, linkselfPath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+
 import { ReactNode, useCallback } from 'react';
 import { FetchWrapperComponent } from '@gitroom/helpers/utils/custom.fetch';
 import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
@@ -19,17 +21,17 @@ export function setCookie(cname: string, cvalue: string, exdays: number) {
   const d = new Date();
   d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
   const expires = 'expires=' + d.toUTCString();
-  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
+  document.cookie = studioCookieName(cname) + '=' + cvalue + ';' + expires + ';path=' + studioCookiePath();
 }
 function LayoutContextInner(params: { children: ReactNode }) {
   const returnUrl = useReturnUrl();
-  const { backendUrl, isGeneral, isSecured, linkselfUrl } = useVariables();
+  const { backendUrl, isGeneral, isSecured, linkselfUrl, frontEndUrl } = useVariables();
   const afterRequest = useCallback(
     async (url: string, options: RequestInit, response: Response) => {
       if (
         typeof window !== 'undefined' &&
         (window.location.href.includes('/p/') ||
-          window.location.pathname.startsWith('/provider/'))
+          window.location.pathname.startsWith(withBasePath('/provider/')))
       ) {
         return true;
       }
@@ -55,7 +57,7 @@ function LayoutContextInner(params: { children: ReactNode }) {
         setCookie('auth', '', -10);
         setCookie('showorg', '', -10);
         setCookie('impersonate', '', -10);
-        window.location.href = logout && linkselfUrl ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social` : '/auth/login';
+        window.location.href = logout && linkselfUrl ? linkselfPath(linkselfUrl, '/dashboard/social', frontEndUrl) : withBasePath('/auth/login');
         return true;
       }
       const reloadOrOnboarding =
@@ -70,8 +72,8 @@ function LayoutContextInner(params: { children: ReactNode }) {
       }
       if (response?.headers?.get('onboarding')) {
         window.location.href = isGeneral
-          ? '/launches?onboarding=true'
-          : '/analytics?onboarding=true';
+          ? withBasePath('/launches?onboarding=true')
+          : withBasePath('/analytics?onboarding=true');
         return true;
       }
 
@@ -86,7 +88,7 @@ function LayoutContextInner(params: { children: ReactNode }) {
           setCookie('showorg', '', -10);
           setCookie('impersonate', '', -10);
         }
-        window.location.href = logout && linkselfUrl ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social` : '/auth/login';
+        window.location.href = logout && linkselfUrl ? linkselfPath(linkselfUrl, '/dashboard/social', frontEndUrl) : withBasePath('/auth/login');
       }
       if (response.status === 406) {
         if (
@@ -97,7 +99,7 @@ function LayoutContextInner(params: { children: ReactNode }) {
 
           )
         ) {
-          window.open('/billing?finishTrial=true', '_blank');
+          window.open(withBasePath('/billing?finishTrial=true'), '_blank');
           return false;
         }
         return false;
@@ -116,7 +118,7 @@ function LayoutContextInner(params: { children: ReactNode }) {
             'Payment Required'
           )
         ) {
-          window.open('/billing', '_blank');
+          window.open(withBasePath('/billing'), '_blank');
           return false;
         }
         return true;

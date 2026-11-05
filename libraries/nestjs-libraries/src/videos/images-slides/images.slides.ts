@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { OpenaiService } from '@gitroom/nestjs-libraries/openai/openai.service';
 import {
   ExposeVideoFunction,
@@ -145,7 +146,7 @@ export class ImagesSlides extends VideoAbstract<ImagesSlidesParams> {
               len: await getAudioDuration(buffer),
               url:
                 path.indexOf('http') === -1
-                  ? process.env.FRONTEND_URL +
+                  ? frontendUrl() +
                     '/' +
                     process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY +
                     path

@@ -1,3 +1,4 @@
+import { publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import { decode, sign, verify } from 'jsonwebtoken';
 import { createPublicKey } from 'crypto';
 import {
@@ -28,10 +29,10 @@ const getConfig = () => {
 
 const defaultRedirect = () =>
   `${
-    process?.env?.NEXT_PUBLIC_BACKEND_URL?.indexOf('https') === -1
+    publicApiUrl()?.indexOf('https') === -1
       ? 'https://redirectmeto.com/'
       : ''
-  }${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/oauth/apple/redirect`;
+  }${publicApiUrl()}/auth/oauth/apple/redirect`;
 
 const clientSecret = () => {
   const { clientId, teamId, keyId, privateKey } = getConfig();

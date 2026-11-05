@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   ArgumentsHost,
   Catch,
@@ -20,7 +21,7 @@ export class SubscriptionExceptionFilter implements ExceptionFilter {
     response.status(status).json({
       statusCode: status,
       message,
-      url: process.env.FRONTEND_URL + '/billing',
+      url: frontendUrl() + '/billing',
     });
   }
 }

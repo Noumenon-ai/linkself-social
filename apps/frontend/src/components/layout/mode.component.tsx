@@ -1,4 +1,5 @@
 'use client';
+import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 
 import { useCallback, useEffect, useState } from 'react';
 import useCookie from 'react-use-cookie';
@@ -9,11 +10,11 @@ export const modeEmitter = new EventEmitter();
 
 const ModeComponent = () => {
   const { linkselfUrl } = useVariables();
-  const [mode, setMode] = useCookie('mode', 'dark');
+  const [mode, setMode] = useCookie(studioCookieName('mode'), 'dark');
 
   const changeMode = useCallback(() => {
     modeEmitter.emit('mode', mode === 'dark' ? 'light' : 'dark');
-    setMode(mode === 'dark' ? 'light' : 'dark');
+    setMode(mode === 'dark' ? 'light' : 'dark', { path: studioCookiePath() });
   }, [mode]);
 
   useEffect(() => {

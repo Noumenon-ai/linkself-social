@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { FC } from 'react';
 import { useIntegration } from '@gitroom/frontend/components/launches/helpers/use.integration';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
@@ -49,7 +50,7 @@ export const YoutubePreview: FC<{
   return (
     <div className="absolute left-0 top-0 gap-[12px] w-full h-full flex flex-col p-[16px] bg-bgYoutube">
       <div
-        style={{ background: 'url(/no-video-youtube.png)' }}
+        style={{ background: `url(${withBasePath('/no-video-youtube.png')})` }}
         className="!bg-cover w-full aspect-[calc(16/9)] rounded-[4px] overflow-hidden"
       >
         {!!renderContent?.[0]?.images?.[0]?.path && (
@@ -65,7 +66,7 @@ export const YoutubePreview: FC<{
         <div className="flex flex-1 gap-[17px] items-center">
           <div>
             <img
-              src={integration?.picture || '/no-picture.jpg'}
+              src={integration?.picture || withBasePath('/no-picture.jpg')}
               alt="social"
               className="rounded-full z-[2] w-[40px] h-[40px]"
             />

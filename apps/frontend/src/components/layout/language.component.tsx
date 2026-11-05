@@ -1,4 +1,5 @@
 'use client';
+import { studioCookiePath } from '@gitroom/helpers/utils/base-path';
 
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import {
@@ -69,7 +70,7 @@ export const ChangeLanguageComponent = () => {
   const t = useT();
 
   const handleLanguageChange = (language: string) => {
-    setCookie(language);
+    setCookie(language, { path: studioCookiePath() });
     i18next.changeLanguage(language);
     modals.closeCurrent();
     const rtlLanguages = ['he', 'ar'];

@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, { FC, useCallback, useState } from 'react';
 import useSWR from 'swr';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
@@ -94,7 +96,7 @@ const DeleteAccountComponent: FC<{ isLink?: boolean }> = ({ isLink }) => {
       if (!isSecured) {
         setCookie('auth', '', -10);
       }
-      window.location.href = '/';
+      window.location.href = withBasePath('/');
     } finally {
       setLoading(false);
     }

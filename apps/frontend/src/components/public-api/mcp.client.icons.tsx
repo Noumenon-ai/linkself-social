@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { FC } from 'react';
 
 // Logos for the MCP clients shown in Settings > Agents and in onboarding.
@@ -426,7 +428,7 @@ const icons: Record<string, FC<{ size: number }>> = {
   // Raster mark, served from /public like the other third-party icons
   NanoClaw: ({ size }) => (
     <img
-      src="/icons/third-party/nanoclaw.png"
+      src={withBasePath('/icons/third-party/nanoclaw.png')}
       width={size}
       height={size}
       alt="NanoClaw"

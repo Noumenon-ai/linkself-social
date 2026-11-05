@@ -1,4 +1,5 @@
 'use client';
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
 
 import { FC, useEffect, useMemo, useRef } from 'react';
 import DrawChart from 'chart.js/auto';
@@ -21,7 +22,7 @@ export const ChartSocial: FC<{
   color?: 'purple' | 'green' | 'blue';
 }> = (props) => {
   const { data, color = 'purple' } = props;
-  const [mode] = useCookie('mode', 'dark');
+  const [mode] = useCookie(studioCookieName('mode'), 'dark');
 
   const list = useMemo(() => {
     const merged = data.length < 7 ? data : mergeDataPoints(data, 7);

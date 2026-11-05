@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, linkselfPath } from '@gitroom/helpers/utils/base-path';
+
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import React from 'react';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
@@ -17,7 +19,7 @@ const MetricComponent = dynamic(
 );
 
 export const GlobalSettings = () => {
-  const { emailEnabled, dub, linkselfUrl } = useVariables();
+  const { emailEnabled, dub, linkselfUrl, frontEndUrl } = useVariables();
   const t = useT();
   return (
     <div className="glass-global-settings flex flex-col">
@@ -30,7 +32,7 @@ export const GlobalSettings = () => {
         <p>
           Your account is managed and deleted in{' '}
           <a
-            href={`${linkselfUrl.replace(/\/$/, '')}/dashboard/settings`}
+            href={linkselfPath(linkselfUrl, '/dashboard/settings', frontEndUrl)}
             className="underline"
           >
             LinkSelf

@@ -3,6 +3,7 @@ import { FC, ReactNode } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import clsx from 'clsx';
 import Link from 'next/link';
+import { linkselfPath } from '@gitroom/helpers/utils/base-path';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 export const MenuItem: FC<{
@@ -14,7 +15,7 @@ export const MenuItem: FC<{
 }> = ({ label, icon, path, onClick, active }) => {
   const currentPath = usePathname();
   const query = useSearchParams();
-  const { linkselfUrl } = useVariables();
+  const { linkselfUrl, frontEndUrl } = useVariables();
   const [pathname, search] = path.split('?');
   const settingsTab = query.get('tab') || 'global_settings';
   const isActive =
@@ -55,6 +56,14 @@ export const MenuItem: FC<{
       >
         {inner}
       </button>
+    );
+  }
+
+  if (linkselfUrl && path.startsWith(linkselfUrl.replace(/\/$/, '') + '/')) {
+    return (
+      <a href={linkselfPath(linkselfUrl, path, frontEndUrl)} aria-label={label} className={className}>
+        {inner}
+      </a>
     );
   }
 

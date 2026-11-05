@@ -1,3 +1,4 @@
+import { withBasePath, frontendUrl, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getCookieUrlFromDomain } from '@gitroom/helpers/subdomain/subdomain.management';
@@ -14,7 +15,7 @@ acceptLanguage.languages(languages);
 export async function proxy(request: NextRequest) {
   const nextUrl = request.nextUrl;
   const authCookie =
-    request.cookies.get('auth') ||
+    request.cookies.get(studioCookieName('auth')) ||
     request.headers.get('auth') ||
     nextUrl.searchParams.get('loggedAuth');
   const lng = request.cookies.has(cookieName)
@@ -40,7 +41,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (nextUrl.pathname.startsWith('/modal/') && !authCookie) {
-    return NextResponse.redirect(new URL(`/auth/login-required`, nextUrl.href));
+    return NextResponse.redirect(new URL(withBasePath(`/auth/login-required`), nextUrl.href));
   }
 
   if (
@@ -65,10 +66,11 @@ export async function proxy(request: NextRequest) {
   // If the URL is logout, delete the cookie and redirect to login
   if (nextUrl.href.indexOf('/auth/logout') > -1) {
     const response = NextResponse.redirect(
-      new URL('/auth/login', nextUrl.href)
+      new URL(withBasePath('/auth/login'), nextUrl.href)
     );
-    response.cookies.set('auth', '', {
-      path: '/',
+    response.cookies.set(studioCookieName('auth'), '', {
+      path: studioCookiePath(),
+
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
@@ -77,7 +79,7 @@ export async function proxy(request: NextRequest) {
           }
         : {}),
       maxAge: -1,
-      domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+      domain: getCookieUrlFromDomain(frontendUrl()),
     });
     return response;
   }
@@ -86,7 +88,7 @@ export async function proxy(request: NextRequest) {
     nextUrl.pathname.startsWith('/auth/register') &&
     process.env.DISABLE_REGISTRATION === 'true'
   ) {
-    return NextResponse.redirect(new URL('/auth/login', nextUrl.href));
+    return NextResponse.redirect(new URL(withBasePath('/auth/login'), nextUrl.href));
   }
 
   const org = nextUrl.searchParams.get('org');
@@ -104,25 +106,26 @@ export async function proxy(request: NextRequest) {
           : findIndex
         ).toUpperCase()}`;
     return NextResponse.redirect(
-      new URL(`/auth${url}${additional}`, nextUrl.href)
+      new URL(withBasePath(`/auth${url}${additional}`), nextUrl.href)
     );
   }
 
   // If the url is /auth and the cookie exists, redirect to /
   if (nextUrl.pathname.startsWith('/auth') && authCookie) {
-    return NextResponse.redirect(new URL(`/${url}`, nextUrl.href));
+    return NextResponse.redirect(new URL(withBasePath(`/${url}`), nextUrl.href));
   }
   if (nextUrl.pathname.startsWith('/auth') && !authCookie) {
     if (org) {
-      const redirect = NextResponse.redirect(new URL(`/`, nextUrl.href));
-      redirect.cookies.set('org', org, {
+      const redirect = NextResponse.redirect(new URL(withBasePath(`/`), nextUrl.href));
+      redirect.cookies.set(studioCookieName('org'), org, {
+        path: studioCookiePath(),
         ...(!process.env.NOT_SECURED
           ? {
-              path: '/',
+
               secure: true,
               httpOnly: true,
               sameSite: false,
-              domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+              domain: getCookieUrlFromDomain(frontendUrl()),
             }
           : {}),
         expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
@@ -142,17 +145,18 @@ export async function proxy(request: NextRequest) {
         })
       ).json();
       const redirect = NextResponse.redirect(
-        new URL(`/?added=true`, nextUrl.href)
+        new URL(withBasePath(`/?added=true`), nextUrl.href)
       );
       if (id) {
-        redirect.cookies.set('showorg', id, {
+        redirect.cookies.set(studioCookieName('showorg'), id, {
+          path: studioCookiePath(),
           ...(!process.env.NOT_SECURED
             ? {
-                path: '/',
+
                 secure: true,
                 httpOnly: true,
                 sameSite: false,
-                domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+                domain: getCookieUrlFromDomain(frontendUrl()),
               }
             : {}),
           expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
@@ -163,7 +167,7 @@ export async function proxy(request: NextRequest) {
     if (nextUrl.pathname === '/') {
       return NextResponse.redirect(
         new URL(
-          !!process.env.IS_GENERAL ? '/launches' : `/analytics`,
+          withBasePath(!!process.env.IS_GENERAL ? '/launches' : `/analytics`),
           nextUrl.href
         )
       );
@@ -172,7 +176,7 @@ export async function proxy(request: NextRequest) {
     return topResponse;
   } catch (err) {
     console.log('err', err);
-    return NextResponse.redirect(new URL('/auth/logout', nextUrl.href));
+    return NextResponse.redirect(new URL(withBasePath('/auth/logout'), nextUrl.href));
   }
 }
 

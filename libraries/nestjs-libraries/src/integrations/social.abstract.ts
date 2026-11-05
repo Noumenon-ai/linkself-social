@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { timer } from '@gitroom/helpers/utils/timer';
 import { Integration } from '@prisma/client';
 import {
@@ -263,7 +264,7 @@ export abstract class SocialAbstract {
     // fetchable URL the same way posts.service.updateMedia does.
     const url =
       path?.indexOf('http') === -1
-        ? `${process.env.FRONTEND_URL}/${path}`
+        ? `${frontendUrl()}/${path}`
         : path;
     setHeartbeatDetails(`read media ${stripQuery(url)}`);
     const { width = 0, height = 0 } = await sharp(

@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { EventEmitter } from 'events';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { TopTitle } from '@gitroom/frontend/components/launches/helpers/top.title.component';
@@ -181,7 +183,7 @@ export const PostSelector: FC<{
                             <img
                               className="w-[20px] h-[20px] rounded-full absolute z-10 -bottom-[5px] -end-[5px] border border-fifth"
                               src={
-                                `/icons/platforms/` +
+                                withBasePath(`/icons/platforms/`) +
                                 p?.integration?.providerIdentifier +
                                 '.png'
                               }

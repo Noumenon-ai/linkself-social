@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+
 import useSWR from 'swr';
 import { useCallback, useMemo, useState } from 'react';
 import { capitalize, orderBy } from 'lodash';
@@ -39,7 +41,7 @@ export const PlatformAnalytics = () => {
   const [current, setCurrent] = useState(0);
   const [key, setKey] = useState(7);
   const [refresh, setRefresh] = useState(false);
-  const [collapseMenu, setCollapseMenu] = useCookie('collapseMenu', '0');
+  const [collapseMenu, setCollapseMenu] = useCookie(studioCookieName('collapseMenu'), '0');
   const toaster = useToaster();
   const load = useCallback(async () => {
     const int = (
@@ -150,7 +152,7 @@ export const PlatformAnalytics = () => {
     return (
       <div className="bg-newBgColorInner p-[20px] flex flex-col gap-[15px] transition-all flex-1 justify-center items-center text-center">
         <div>
-          <img src="/peoplemarketplace.svg" />
+          <img src={withBasePath('/peoplemarketplace.svg')} />
         </div>
         <div className="text-[48px]">
           {t('can_t_show_analytics_yet', "Can't show analytics yet")}
@@ -183,7 +185,7 @@ export const PlatformAnalytics = () => {
               {t('channels')}
             </h2>
             <div
-              onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1')}
+              onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1', { path: studioCookiePath() })}
               className="group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
             >
               <svg
@@ -246,7 +248,7 @@ export const PlatformAnalytics = () => {
                     <SVGLine />
                   </div>
                   <ImageWithFallback
-                    fallbackSrc={`/icons/platforms/${integration.identifier}.png`}
+                    fallbackSrc={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                     src={integration.picture}
                     className="rounded-[8px]"
                     alt={integration.identifier}
@@ -254,7 +256,7 @@ export const PlatformAnalytics = () => {
                     height={36}
                   />
                   <SafeImage
-                    src={`/icons/platforms/${integration.identifier}.png`}
+                    src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                     className="rounded-[8px] absolute z-10 bottom-[5px] -end-[5px] border border-fifth"
                     alt={integration.identifier}
                     width={18.41}

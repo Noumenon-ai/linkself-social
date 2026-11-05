@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { createHash, randomBytes } from 'crypto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -58,7 +59,7 @@ export class FanvueProvider extends SocialAbstract implements SocialProvider {
     if (!process.env.FRONTEND_URL) {
       throw new Error('Fanvue requires FRONTEND_URL');
     }
-    return `${process.env.FRONTEND_URL}/integrations/social/fanvue`;
+    return `${frontendUrl()}/integrations/social/fanvue`;
   }
 
   async generateAuthUrl() {

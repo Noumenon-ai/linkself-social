@@ -1,4 +1,5 @@
 'use client';
+import { studioBasePath } from '@gitroom/helpers/utils/base-path';
 
 import { useSearchParams } from 'next/navigation';
 import { FC, useCallback, useEffect } from 'react';
@@ -12,7 +13,8 @@ const sameOriginUrl = (url: string | null) => {
   try {
     const parsed = new URL(url);
     return parsed.origin === window.location.origin &&
-      parsed.protocol === window.location.protocol
+      parsed.protocol === window.location.protocol &&
+      (!studioBasePath() || parsed.pathname === studioBasePath() || parsed.pathname.startsWith(studioBasePath() + '/'))
       ? parsed.toString()
       : null;
   } catch {

@@ -116,6 +116,7 @@ describe('Enterprise browser login', () => {
     });
     const options = {
       domain: '.linkself.net',
+      path: '/',
       secure: true,
       httpOnly: true,
       sameSite: 'none',
@@ -133,11 +134,22 @@ describe('Enterprise browser login', () => {
     );
   });
 
+  it.each(['/settings', '/dashboard/studio/settings'])('keeps SSO redirect %s under Studio exactly once', async (redirect) => {
+    process.env.LINKSELF_BASE_PATH = '/dashboard/studio';
+    process.env.FRONTEND_URL = 'https://linkself.net/dashboard/studio/';
+    await controller.login(token({ ...claims(), redirect }), response);
+    expect(response.redirect).toHaveBeenCalledWith(302, 'https://linkself.net/dashboard/studio/settings');
+    expect(response.cookie).toHaveBeenCalledWith('linkself_studio_auth', expect.any(String), expect.objectContaining({
+      domain: undefined, path: '/dashboard/studio', secure: true, httpOnly: true,
+    }));
+  });
+
   it('preserves NOT_SECURED cookie and response header behavior', async () => {
     process.env.NOT_SECURED = 'true';
     await controller.login(token(claims()), response);
     expect(response.cookie).toHaveBeenCalledWith('showorg', 'org', {
       domain: '.linkself.net',
+      path: '/',
       expires: expect.any(Date),
     });
     expect(response.header).toHaveBeenCalledWith('auth', expect.any(String));

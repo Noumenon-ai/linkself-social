@@ -1,3 +1,4 @@
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
 import {
   Body,
   Controller,
@@ -107,7 +108,7 @@ export class BillingController {
       return { blocked: true };
     }
 
-    const uniqueId = req?.cookies?.track;
+    const uniqueId = req?.cookies?.[studioCookieName('track')];
     return (await this.provider(org)).embedded(
       uniqueId,
       org.id,
@@ -128,7 +129,7 @@ export class BillingController {
       return { blocked: true };
     }
 
-    const uniqueId = req?.cookies?.track;
+    const uniqueId = req?.cookies?.[studioCookieName('track')];
     return (await this.provider(org)).subscribe(
       uniqueId,
       org.id,

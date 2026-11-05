@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { FC, useCallback } from 'react';
 import {
   PostComment,
@@ -130,7 +132,7 @@ const RedditPreview: FC = (props) => {
                       <SafeImage
                         width={24}
                         height={24}
-                        src={`/icons/platforms/${integration?.identifier!}.png`}
+                        src={withBasePath(`/icons/platforms/${integration?.identifier!}.png`)}
                         alt="x"
                         className="rounded-full absolute -end-[5px] -bottom-[5px] z-[2]"
                       />

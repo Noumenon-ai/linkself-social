@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AnalyticsData,
   AuthTokenDetails,
@@ -118,9 +119,9 @@ export class ThreadsProvider extends SocialAbstract implements SocialProvider {
         `?client_id=${process.env.THREADS_APP_ID}` +
         `&redirect_uri=${encodeURIComponent(
           `${
-            process?.env.FRONTEND_URL?.indexOf('https') == -1
-              ? `https://redirectmeto.com/${process?.env.FRONTEND_URL}`
-              : `${process?.env.FRONTEND_URL}`
+            frontendUrl()?.indexOf('https') == -1
+              ? `https://redirectmeto.com/${frontendUrl()}`
+              : `${frontendUrl()}`
           }/integrations/social/threads`
         )}` +
         `&state=${state}` +
@@ -141,9 +142,9 @@ export class ThreadsProvider extends SocialAbstract implements SocialProvider {
           `?client_id=${process.env.THREADS_APP_ID}` +
           `&redirect_uri=${encodeURIComponent(
             `${
-              process?.env.FRONTEND_URL?.indexOf('https') == -1
-                ? `https://redirectmeto.com/${process?.env.FRONTEND_URL}`
-                : `${process?.env.FRONTEND_URL}`
+              frontendUrl()?.indexOf('https') == -1
+                ? `https://redirectmeto.com/${frontendUrl()}`
+                : `${frontendUrl()}`
             }/integrations/social/threads`
           )}` +
           `&grant_type=authorization_code` +

@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AnalyticsData,
   AuthTokenDetails,
@@ -31,7 +32,7 @@ const clientAndYoutube = () => {
   const client = new google.auth.OAuth2({
     clientId: process.env.YOUTUBE_CLIENT_ID,
     clientSecret: process.env.YOUTUBE_CLIENT_SECRET,
-    redirectUri: `${process.env.FRONTEND_URL}/integrations/social/youtube`,
+    redirectUri: `${frontendUrl()}/integrations/social/youtube`,
   });
 
   const youtube = (newClient: OAuth2Client) =>
@@ -313,7 +314,7 @@ export class YoutubeProvider extends SocialAbstract implements SocialProvider {
         access_type: 'offline',
         prompt: 'consent',
         state,
-        redirect_uri: `${process.env.FRONTEND_URL}/integrations/social/youtube`,
+        redirect_uri: `${frontendUrl()}/integrations/social/youtube`,
         scope: this.scopes.slice(0),
       }),
       codeVerifier: makeSecureId(11),

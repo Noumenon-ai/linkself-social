@@ -4,6 +4,13 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');
 const React = require('react');
+// Load the production path helper, just as the extracted components do.
+const pathHelper = { exports: {}, process, URL };
+vm.runInNewContext(ts.transpileModule(
+  fs.readFileSync('libraries/helpers/src/utils/base-path.ts', 'utf8'),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }
+).outputText, pathHelper);
+
 const RealDate = Date;
 const fixedNow = RealDate.parse('2026-11-04T19:00:00Z');
 global.Date = class extends RealDate {
@@ -49,7 +56,7 @@ function component(file, names, bindings) {
       target: ts.ScriptTarget.ES2020,
     },
   });
-  const sandbox = { exports: {}, React, Date: global.Date, ...bindings };
+  const sandbox = { exports: {}, React, Date: global.Date, ...pathHelper.exports, ...bindings };
   vm.runInNewContext(
     result.outputText + `\nObject.assign(exports, {${names.join(',')}});`,
     sandbox,

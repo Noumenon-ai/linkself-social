@@ -1,3 +1,4 @@
+import { publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthTokenDetails,
   PostDetails,
@@ -187,7 +188,7 @@ export class HashnodeProvider extends SocialAbstract implements SocialProvider {
                   ? {
                       coverImage: `${
                         settings?.main_image?.path?.indexOf('http') === -1
-                          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/${process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY}`
+                          ? `${publicApiUrl()}/${process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY}`
                           : ``
                       }${settings?.main_image?.path}`,
                     }

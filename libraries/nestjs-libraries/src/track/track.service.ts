@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { TrackEnum } from '@gitroom/nestjs-libraries/user/track.enum';
 import { User } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
@@ -60,7 +61,7 @@ export class TrackService {
                 event_name: TrackEnum[tt],
                 event_time: Math.floor(Date.now() / 1000),
                 event_id: uniqueId || user?.id,
-                event_source_url: process.env.FRONTEND_URL,
+                event_source_url: frontendUrl(),
                 action_source: 'website',
                 user_data: {
                   client_user_agent: userAgent,

@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { FC } from 'react';
 import clsx from 'clsx';
 import SafeImage from '@gitroom/react/helpers/safe.image';
@@ -13,13 +15,13 @@ import { Integrations } from '@gitroom/frontend/components/launches/calendar.con
 const PlatformBadge: FC<{ integration: Integrations }> = ({ integration }) => {
   return integration.identifier === 'youtube' ? (
     <img
-      src="/icons/platforms/youtube.svg"
+      src={withBasePath('/icons/platforms/youtube.svg')}
       className="absolute z-10 bottom-0 -end-[5px] min-w-[16px]"
       width={16}
     />
   ) : (
     <SafeImage
-      src={`/icons/platforms/${integration.identifier}.png`}
+      src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
       className="rounded-[4px] absolute z-10 bottom-0 -end-[5px] min-w-[16px] min-h-[16px]"
       alt={integration.identifier}
       width={16}
@@ -41,8 +43,8 @@ export const IntegrationListRow: FC<{
     >
       <div className="relative">
         <ImageWithFallback
-          fallbackSrc="/no-picture.jpg"
-          src={integration.picture || '/no-picture.jpg'}
+          fallbackSrc={withBasePath('/no-picture.jpg')}
+          src={integration.picture || withBasePath('/no-picture.jpg')}
           className="rounded-[8px] min-w-[40px] min-h-[40px]"
           alt={integration.identifier}
           width={40}
@@ -143,8 +145,8 @@ export const PicksSocialsComponent: FC<{
                   )}
                 >
                   <ImageWithFallback
-                    fallbackSrc="/no-picture.jpg"
-                    src={integration.picture || '/no-picture.jpg'}
+                    fallbackSrc={withBasePath('/no-picture.jpg')}
+                    src={integration.picture || withBasePath('/no-picture.jpg')}
                     className={clsx(
                       'rounded-full transition-all min-w-[42px] border-[1.5px] min-h-[42px]',
                       selectedIntegrations.findIndex(

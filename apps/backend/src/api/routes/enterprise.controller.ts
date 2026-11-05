@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { OrganizationLimitsService } from '@gitroom/nestjs-libraries/database/prisma/organization-limits/organization.limits.service';
 import {
   EnterpriseLimitsRequestDto,
@@ -126,12 +127,12 @@ export class EnterpriseController {
         !/[\\\x00-\x1f\x7f]/.test(path)
           ? path
           : '/launches';
-      return response.redirect(302, `${process.env.FRONTEND_URL}${redirect}`);
+      return response.redirect(302, frontendUrl(undefined, redirect));
     } catch {
       this.logger.warn(`Enterprise SSO rejected: ${reason}`);
       return response.redirect(
         302,
-        `${process.env.FRONTEND_URL}/auth/login?error=sso`
+        `${frontendUrl()}/auth/login?error=sso`
       );
     }
   }

@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+
 import {
   AddProviderButton,
   CustomVariables,
@@ -409,17 +411,17 @@ export const MenuComponent: FC<
           }}
         >
           <ImageWithFallback
-            fallbackSrc="/no-picture.jpg"
-            src={integration.picture || '/no-picture.jpg'}
+            fallbackSrc={withBasePath('/no-picture.jpg')}
+            src={integration.picture || withBasePath('/no-picture.jpg')}
             className="glass-channel-image"
             alt=""
             width={48}
             height={48}
           />
           <SafeImage
-            src={`/icons/platforms/${integration.identifier}.${
+            src={withBasePath(`/icons/platforms/${integration.identifier}.${
               integration.identifier === 'youtube' ? 'svg' : 'png'
-            }`}
+            }`)}
             className="glass-channel-badge"
             alt={integration.identifier}
             width={20}
@@ -519,8 +521,8 @@ export const MenuComponent: FC<
           </div>
         )}
         <ImageWithFallback
-          fallbackSrc={'/no-picture.jpg'}
-          src={integration.picture || '/no-picture.jpg'}
+          fallbackSrc={withBasePath('/no-picture.jpg')}
+          src={integration.picture || withBasePath('/no-picture.jpg')}
           className="rounded-[8px] min-w-[36px] min-h-[36px]"
           alt={integration.identifier}
           width={36}
@@ -528,13 +530,13 @@ export const MenuComponent: FC<
         />
         {integration.identifier === 'youtube' ? (
           <img
-            src="/icons/platforms/youtube.svg"
+            src={withBasePath('/icons/platforms/youtube.svg')}
             className="absolute z-10 bottom-[5px] -end-[5px]"
             width={20}
           />
         ) : (
           <SafeImage
-            src={`/icons/platforms/${integration.identifier}.png`}
+            src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
             className="rounded-[8px] absolute z-10 bottom-[5px] -end-[5px] border border-fifth"
             alt={integration.identifier}
             width={18.41}
@@ -735,8 +737,8 @@ const ChannelsButton: FC<
             {channels.slice(0, 5).map((integration) => (
               <ImageWithFallback
                 key={integration.id}
-                fallbackSrc="/no-picture.jpg"
-                src={integration.picture || '/no-picture.jpg'}
+                fallbackSrc={withBasePath('/no-picture.jpg')}
+                src={integration.picture || withBasePath('/no-picture.jpg')}
                 alt=""
                 width={24}
                 height={24}
@@ -766,9 +768,9 @@ export const LaunchesComponent = () => {
   const t = useT();
   const modal = useModals();
   const [reload, setReload] = useState(false);
-  const [collapseMenu, setCollapseMenu] = useCookie('collapseMenu', '0');
+  const [collapseMenu, setCollapseMenu] = useCookie(studioCookieName('collapseMenu'), '0');
   const [channelsOpen, setChannelsOpen] = useState(false);
-  const [mode] = useCookie('mode', 'dark');
+  const [mode] = useCookie(studioCookieName('mode'), 'dark');
   const { isLoading, data: integrations, mutate } = useIntegrationList();
 
   const totalNonDisabledChannels = useMemo(() => {
@@ -933,7 +935,7 @@ export const LaunchesComponent = () => {
                   </div>
                   <div
                     onClick={() =>
-                      setCollapseMenu(collapseMenu === '1' ? '0' : '1')
+                      setCollapseMenu(collapseMenu === '1' ? '0' : '1', { path: studioCookiePath() })
                     }
                     className="group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto mobile:hidden text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
                   >
@@ -971,8 +973,8 @@ export const LaunchesComponent = () => {
                           <img
                             src={
                               mode === 'dark'
-                                ? '/no-channels.svg'
-                                : '/no-channels-colors.svg'
+                                ? withBasePath('/no-channels.svg')
+                                : withBasePath('/no-channels-colors.svg')
                             }
                             alt="No channels"
                             className="glass-empty-art mx-auto min-w-[100%]"
@@ -1042,7 +1044,7 @@ export const LaunchesComponent = () => {
                     {sortedIntegrations.slice(0, 3).map((integration: any) => (
                       <ImageWithFallback
                         key={integration.id}
-                        fallbackSrc={`/icons/platforms/${integration.identifier}.png`}
+                        fallbackSrc={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                         src={integration.picture}
                         className="rounded-full border-2 border-btnSimple"
                         alt={integration.identifier}

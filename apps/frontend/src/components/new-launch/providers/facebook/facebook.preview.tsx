@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { useIntegration } from '@gitroom/frontend/components/launches/helpers/use.integration';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
@@ -125,7 +126,7 @@ export const FacebookPreview: FC<{
       <div className="flex gap-[8px]">
         <div className="w-[36px] h-[36px]">
           <img
-            src={integration?.picture || '/no-picture.jpg'}
+            src={integration?.picture || withBasePath('/no-picture.jpg')}
             alt="social"
             className="rounded-full relative z-[2] w-[36px] h-[36px]"
           />
@@ -280,7 +281,7 @@ export const FacebookPreview: FC<{
               <div className="flex gap-[6px] leading-[17px]">
                 <div className="h-[34px]">
                   <img
-                    src={integration?.picture || '/no-picture.jpg'}
+                    src={integration?.picture || withBasePath('/no-picture.jpg')}
                     alt="social"
                     className="rounded-full relative z-[2] h-[34px] w-[34px]"
                   />

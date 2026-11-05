@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, studioCookieName } from '@gitroom/helpers/utils/base-path';
+
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -63,8 +65,8 @@ export const FirstBillingComponent = () => {
   const t = useT();
   const [datafast_visitor_id] = useCookie('datafast_visitor_id', '');
   const [datafast_session_id] = useCookie('datafast_session_id', '');
-  const [fbc] = useCookie('_fbc', '');
-  const [fbp] = useCookie('_fbp', '');
+  const [fbc] = useCookie(studioCookieName('_fbc'), '');
+  const [fbp] = useCookie(studioCookieName('_fbp'), '');
 
   useEffect(() => {
     const stripePromise = loadStripe(stripeClient);
@@ -148,7 +150,7 @@ export const FirstBillingComponent = () => {
             <div>
               <SafeImage
                 className="text-[12px]"
-                src="/icons/platforms/youtube.svg"
+                src={withBasePath('/icons/platforms/youtube.svg')}
                 width={22.5}
                 height={16}
                 alt="YouTube"

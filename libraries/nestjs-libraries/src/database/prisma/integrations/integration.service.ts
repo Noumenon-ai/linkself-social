@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { OrganizationLimitsService } from '../organization-limits/organization.limits.service';
 import {
   forwardRef,
@@ -351,7 +352,7 @@ export class IntegrationService {
     await this._notificationService.inAppNotification(
       orgId,
       `Could not refresh your ${integration.providerIdentifier} channel`,
-      `Could not refresh your ${integration.providerIdentifier} channel ${err}. Please go back to the system and connect it again ${process.env.FRONTEND_URL}/launches`,
+      `Could not refresh your ${integration.providerIdentifier} channel ${err}. Please go back to the system and connect it again ${frontendUrl()}/launches`,
       true,
       false,
       'info'

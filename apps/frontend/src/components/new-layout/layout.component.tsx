@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, linkselfPath } from '@gitroom/helpers/utils/base-path';
+
 import { SourceAttribution } from '@gitroom/frontend/components/auth/source-attribution';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Logo } from '@gitroom/frontend/components/new-layout/logo';
@@ -51,7 +53,7 @@ import { setUserTimezone } from '@gitroom/frontend/components/layout/set.timezon
 export const LayoutComponent = ({ children }: { children: ReactNode }) => {
   const fetch = useFetch();
 
-  const { backendUrl, billingEnabled, isGeneral, linkselfUrl } = useVariables();
+  const { backendUrl, billingEnabled, isGeneral, linkselfUrl, frontEndUrl } = useVariables();
 
   // Feedback icon component attaches Sentry feedback to a top-bar icon when DSN is present
   const searchParams = useSearchParams();
@@ -201,11 +203,11 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                           <span>LinkSelf Social</span>
                           <nav aria-label="Footer">
                             <a
-                              href={`${linkselfUrl.replace(/\/$/, '')}/privacy`}
+                              href={linkselfPath(linkselfUrl, '/privacy', frontEndUrl)}
                             >
                               Privacy
                             </a>
-                            <a href={`${linkselfUrl.replace(/\/$/, '')}/terms`}>
+                            <a href={linkselfPath(linkselfUrl, '/terms', frontEndUrl)}>
                               Terms
                             </a>
                             <SourceAttribution />

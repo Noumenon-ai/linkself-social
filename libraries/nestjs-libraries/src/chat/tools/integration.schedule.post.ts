@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { AgentToolInterface } from '@gitroom/nestjs-libraries/chat/agent.tool.interface';
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
@@ -287,7 +288,7 @@ If validation fails, the result contains output.errors describing what to fix; t
           finalOutput.push(
             ...output.map((p) => ({
               ...p,
-              previewUrl: `${process.env.FRONTEND_URL}/p/${p.postId}?share=true`,
+              previewUrl: `${frontendUrl()}/p/${p.postId}?share=true`,
             }))
           );
         }

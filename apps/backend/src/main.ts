@@ -43,7 +43,7 @@ async function start() {
         ...(process.env.NOT_SECURED ? ['auth', 'showorg', 'impersonate'] : []),
       ],
       origin: [
-        process.env.FRONTEND_URL,
+        process.env.FRONTEND_URL ? new URL(process.env.FRONTEND_URL).origin : undefined,
         'http://localhost:6274',
         ...(process.env.MAIN_URL ? [process.env.MAIN_URL] : []),
         // Optional: the Canva app calls the public API from its iframe origin

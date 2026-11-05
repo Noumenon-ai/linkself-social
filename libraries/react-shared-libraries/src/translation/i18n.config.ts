@@ -1,3 +1,4 @@
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
 export const fallbackLng = 'en';
 export const languages = [
   fallbackLng,
@@ -17,5 +18,5 @@ export const languages = [
 ];
 
 export const defaultNS = 'translation';
-export const cookieName = 'i18next';
+export const cookieName = studioCookieName('i18next');
 export const headerName = 'x-i18next-current-language';

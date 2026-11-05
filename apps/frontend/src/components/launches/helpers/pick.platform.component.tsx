@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Integrations } from '@gitroom/frontend/components/launches/calendar.context';
 import { useMoveToIntegrationListener } from '@gitroom/frontend/components/launches/helpers/use.move.to.integration';
@@ -245,7 +246,7 @@ export const PickPlatforms: FC<{
                         )}
                       >
                         <SafeImage
-                          src={integration.picture || '/no-picture.jpg'}
+                          src={integration.picture || withBasePath('/no-picture.jpg')}
                           className="rounded-full"
                           alt={integration.identifier}
                           width={32}
@@ -253,13 +254,13 @@ export const PickPlatforms: FC<{
                         />
                         {integration.identifier === 'youtube' ? (
                           <img
-                            src="/icons/platforms/youtube.svg"
+                            src={withBasePath('/icons/platforms/youtube.svg')}
                             className="absolute z-10 bottom-0 -end-[5px]"
                             width={20}
                           />
                         ) : (
                           <SafeImage
-                            src={`/icons/platforms/${integration.identifier}.png`}
+                            src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                             className="rounded-full absolute z-10 -bottom-[5px] -end-[5px] border border-fifth"
                             alt={integration.identifier}
                             width={20}
@@ -284,14 +285,14 @@ export const PickPlatforms: FC<{
                         <div className="flex items-center justify-center gap-[10px]">
                           <div className="relative">
                             <img
-                              src={integration.picture || '/no-picture.jpg'}
+                              src={integration.picture || withBasePath('/no-picture.jpg')}
                               className="rounded-full"
                               alt={integration.identifier}
                               width={24}
                               height={24}
                             />
                             <SafeImage
-                              src={`/icons/platforms/${integration.identifier}.png`}
+                              src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                               className="rounded-full absolute z-10 -bottom-[5px] -end-[5px] border border-fifth"
                               alt={integration.identifier}
                               width={15}

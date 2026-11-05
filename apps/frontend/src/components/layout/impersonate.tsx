@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { Input } from '@gitroom/react/form/input';
 import { ChangeEventHandler, FC, useCallback, useMemo, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
@@ -802,7 +803,7 @@ const AddTeamMember = () => {
 const ViewErrors = () => {
   const t = useT();
   const handleClick = useCallback(() => {
-    window.location.href = '/admin/errors';
+    window.location.href = withBasePath('/admin/errors');
   }, []);
   return (
     <div
@@ -817,7 +818,7 @@ const ViewErrors = () => {
 const ViewStats = () => {
   const t = useT();
   const handleClick = useCallback(() => {
-    window.location.href = '/admin/stats';
+    window.location.href = withBasePath('/admin/stats');
   }, []);
   return (
     <div

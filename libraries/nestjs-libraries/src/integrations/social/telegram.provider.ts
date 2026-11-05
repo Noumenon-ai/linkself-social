@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthTokenDetails,
   PostDetails,
@@ -18,7 +19,7 @@ import striptags from 'striptags';
 
 const telegramBot = new TelegramBot(process.env.TELEGRAM_TOKEN!);
 // Added to support local storage posting
-const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5000';
+const frontendURL = frontendUrl(process.env.FRONTEND_URL || 'http://localhost:5000');
 const mediaStorage = process.env.STORAGE_PROVIDER || 'local';
 
 export class TelegramProvider extends SocialAbstract implements SocialProvider {

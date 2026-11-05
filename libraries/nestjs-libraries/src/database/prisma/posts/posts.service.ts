@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { OrganizationLimitsService } from '../organization-limits/organization.limits.service';
 import {
   BadRequestException,
@@ -539,7 +540,7 @@ export class PostsService {
               ...m,
               url:
                 m.path.indexOf('http') === -1
-                  ? process.env.FRONTEND_URL +
+                  ? frontendUrl() +
                     '/' +
                     process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY +
                     m.path
@@ -589,7 +590,7 @@ export class PostsService {
                 name: originalname,
                 url:
                   path.indexOf('http') === -1
-                    ? process.env.FRONTEND_URL +
+                    ? frontendUrl() +
                       '/' +
                       process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY +
                       path

@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 import { internalFetch } from '@gitroom/helpers/utils/internal.fetch';
 import { sanitizePostContent } from '@gitroom/helpers/utils/sanitize.post.content';
@@ -61,7 +62,7 @@ export default async function Auth(
             className="flex items-center gap-[10px] text-textColor"
           >
             <div className="glass-upstream-brand w-[44px]">
-              <SafeImage src={'/logo.svg'} width={44} height={44} alt={APP_NAME} />
+              <SafeImage src={withBasePath('/logo.svg')} width={44} height={44} alt={APP_NAME} />
             </div>
             <div>
               <LogoTextComponent />
@@ -105,7 +106,7 @@ export default async function Auth(
                         <img
                           className="w-full h-full bg-newBgColor aspect-square rounded-full"
                           alt={post[0].integration.providerIdentifier}
-                          src={`/icons/platforms/${post[0].integration.providerIdentifier}.png`}
+                          src={withBasePath(`/icons/platforms/${post[0].integration.providerIdentifier}.png`)}
                         />
                       </div>
                     </div>

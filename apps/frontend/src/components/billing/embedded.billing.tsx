@@ -1,4 +1,5 @@
 'use client';
+import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { Stripe } from '@stripe/stripe-js';
@@ -26,11 +27,11 @@ export const EmbeddedBilling: FC<{
   const { linkselfUrl } = useVariables();
   const [saveSecret, setSaveSecret] = useState(secret);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useCookie('mode', 'dark');
+  const [mode, setMode] = useCookie(studioCookieName('mode'), 'dark');
 
   useEffect(() => {
     modeEmitter.on('mode', (value) => {
-      setMode(value);
+      setMode(value, { path: studioCookiePath() });
       setLoading(true);
     });
 

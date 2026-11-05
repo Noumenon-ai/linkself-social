@@ -1,4 +1,5 @@
 'use client';
+import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 
 import 'reflect-metadata';
 import {
@@ -189,7 +190,7 @@ export const CalendarWeekProvider: FC<{
   const searchParams = useSearchParams();
   // A 7-column week doesn't fit a phone, so default small screens (tailwind `mobile`) to the day view
   const [displaySaved, setDisplaySaved] = useCookie(
-    'calendar-display',
+    studioCookieName('calendar-display'),
     typeof window !== 'undefined' &&
       window.matchMedia('(max-width: 1025px)').matches
       ? 'day'
@@ -345,7 +346,7 @@ export const CalendarWeekProvider: FC<{
           selectedDayForRange(newFilters.startDate, newFilters.endDate)
         );
       }
-      setDisplaySaved(newFilters.display);
+      setDisplaySaved(newFilters.display, { path: studioCookiePath() });
       setFilters(newFilters);
       setInternalData([]);
 
@@ -360,7 +361,7 @@ export const CalendarWeekProvider: FC<{
         `display=${newFilters.display}`,
         newFilters.customer ? `customer=${newFilters.customer}` : ``,
       ].filter((f) => f);
-      window.history.replaceState(null, '', `/launches?${path.join('&')}`);
+      window.history.replaceState(null, '', withBasePath(`/launches?${path.join('&')}`));
     },
     [filters.startDate, filters.endDate, filters.display, setDisplaySaved]
   );

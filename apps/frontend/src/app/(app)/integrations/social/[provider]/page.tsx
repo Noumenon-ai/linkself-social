@@ -1,3 +1,4 @@
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
 import { ContinueIntegration } from '@gitroom/frontend/components/launches/continue.integration';
 import { cookies } from 'next/headers';
 
@@ -18,6 +19,6 @@ export default async function Page(
     provider
   } = params;
 
-  const get = (await cookies()).get('auth');
+  const get = (await cookies()).get(studioCookieName('auth'));
   return <ContinueIntegration searchParams={searchParams} provider={provider} logged={!!get?.name} />;
 }

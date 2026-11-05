@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { Injectable } from '@nestjs/common';
 import { EmailInterface } from '@gitroom/nestjs-libraries/emails/email.interface';
 import { ResendProvider } from '@gitroom/nestjs-libraries/emails/resend.provider';
@@ -118,7 +119,7 @@ export class EmailService {
                         margin: 0;
                     ">${process.env.EMAIL_FROM_NAME}</h2>
                     <div style="font-size: 12px">
-                      You can change your notification preferences in your <a href="${process.env.FRONTEND_URL}/settings">account settings.</a>
+                      You can change your notification preferences in your <a href="${frontendUrl()}/settings">account settings.</a>
                      </div>
                 </div>
             </div>

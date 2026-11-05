@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthTokenDetails,
   PostDetails,
@@ -72,7 +73,7 @@ export class KickProvider extends SocialAbstract implements SocialProvider {
     const state = makeSecureId(32);
     const { codeVerifier, codeChallenge } = this.generatePKCE();
 
-    const redirectUri = `${process.env.FRONTEND_URL}/integrations/social/kick`;
+    const redirectUri = `${frontendUrl()}/integrations/social/kick`;
 
     const url =
       `https://id.kick.com/oauth/authorize` +
@@ -96,7 +97,7 @@ export class KickProvider extends SocialAbstract implements SocialProvider {
     codeVerifier: string;
     refresh?: string;
   }) {
-    const redirectUri = `${process.env.FRONTEND_URL}/integrations/social/kick${
+    const redirectUri = `${frontendUrl()}/integrations/social/kick${
       params.refresh ? `?refresh=${params.refresh}` : ''
     }`;
 

@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthTokenDetails,
   PostDetails,
@@ -86,7 +87,7 @@ export class MeweProvider extends SocialAbstract implements SocialProvider {
         `${this.meweHost}/login` +
         `?client_id=${process.env.MEWE_APP_ID}` +
         `&redirect_uri=${encodeURIComponent(
-          `${process.env.FRONTEND_URL}/integrations/social/mewe`
+          `${frontendUrl()}/integrations/social/mewe`
         )}` +
         `&state=${state}`,
       codeVerifier: makeSecureId(10),

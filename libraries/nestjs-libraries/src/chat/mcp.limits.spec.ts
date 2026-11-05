@@ -65,9 +65,11 @@ describe('MCP organization limits on every transport', () => {
       '/mcp-oauth-claude',
       '/mcp-oauth-dynamic',
     ].flatMap((path) =>
-      [false, true].map((allowed) => [path, allowed] as const)
+      [false, true].flatMap((allowed) => ['', '/dashboard/studio'].map((base) => [path, allowed, base] as const))
     )
-  )('%s permits MCP only when mcp is true (%s)', async (path, allowed) => {
+  )('%s permits MCP only when mcp is true (%s)', async (path, allowed, base) => {
+    process.env.LINKSELF_BASE_PATH = base;
+    process.env.FRONTEND_URL = 'https://studio.test';
     const startHTTP = jest.fn();
     const startSSE = jest.fn();
     (MCPServer as jest.Mock).mockImplementation(() => ({
@@ -128,6 +130,13 @@ describe('MCP organization limits on every transport', () => {
     if (allowed) {
       expect(startHTTP.mock.calls.length + startSSE.mock.calls.length).toBe(1);
       expect(res.status).not.toHaveBeenCalledWith(403);
+      if (startSSE.mock.calls.length) {
+        const args = startSSE.mock.calls[0][0];
+        const prefix = base ? base + '/api' : '';
+        expect(args.url.href).toBe('https://studio.test' + prefix + req.originalUrl);
+        expect(args.ssePath).toBe(prefix + '/sse/api-key');
+        expect(args.messagePath).toBe(prefix + '/message/api-key');
+      }
     } else {
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({

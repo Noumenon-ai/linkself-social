@@ -1,3 +1,4 @@
+import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 import { Request, Response } from 'express';
 import { randomInt } from 'crypto';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
@@ -7,6 +8,7 @@ const DAY = 1000 * 60 * 60 * 24;
 
 const cookieOptions = (expiresInDays: number, httpOnly: boolean) => ({
   domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
   ...(!process.env.NOT_SECURED
     ? {
         secure: true,
@@ -30,25 +32,25 @@ export const applyTrackCookies = (
   res: Response,
   fbclid?: string
 ) => {
-  const uniqueId = req?.cookies?.track || makeId(10);
-  if (!req?.cookies?.track) {
-    res.cookie('track', uniqueId, cookieOptions(365, true));
+  const uniqueId = req?.cookies?.[studioCookieName('track')] || makeId(10);
+  if (!req?.cookies?.[studioCookieName('track')]) {
+    res.cookie(studioCookieName('track'), uniqueId, cookieOptions(365, true));
   }
 
   // a new ad click replaces the old one, the same click keeps its creation time
-  const currentFbc = req?.cookies?._fbc;
+  const currentFbc = req?.cookies?.[studioCookieName('_fbc')];
   const isNewClick = !!fbclid && !currentFbc?.endsWith(`.${fbclid}`);
   const fbc = isNewClick
     ? `fb.1.${Date.now()}.${fbclid}`
     : // the fbclid cookie was set by older versions of this endpoint
       currentFbc || req?.cookies?.fbclid;
   if (isNewClick) {
-    res.cookie('_fbc', fbc, cookieOptions(90, false));
+    res.cookie(studioCookieName('_fbc'), fbc, cookieOptions(90, false));
   }
 
-  const fbp = req?.cookies?._fbp || `fb.1.${Date.now()}.${randomInt(2 ** 31)}`;
-  if (!req?.cookies?._fbp) {
-    res.cookie('_fbp', fbp, cookieOptions(90, false));
+  const fbp = req?.cookies?.[studioCookieName('_fbp')] || `fb.1.${Date.now()}.${randomInt(2 ** 31)}`;
+  if (!req?.cookies?.[studioCookieName('_fbp')]) {
+    res.cookie(studioCookieName('_fbp'), fbp, cookieOptions(90, false));
   }
 
   return { uniqueId, fbc, fbp };

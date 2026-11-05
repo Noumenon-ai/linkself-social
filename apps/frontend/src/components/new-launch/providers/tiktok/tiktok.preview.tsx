@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { useIntegration } from '@gitroom/frontend/components/launches/helpers/use.integration';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
@@ -81,7 +82,7 @@ export const TiktokPreview: FC<{
       <div className="flex flex-col justify-end gap-[10px] ml-[18px]">
         <div className="relative">
           <img
-            src={integration?.picture || '/no-picture.jpg'}
+            src={integration?.picture || withBasePath('/no-picture.jpg')}
             alt="social"
             className="rounded-full z-[2] w-[29px] h-[29px]"
           />
@@ -167,7 +168,7 @@ export const TiktokPreview: FC<{
         />
         <div>
           <img
-            src={integration?.picture || '/no-picture.jpg'}
+            src={integration?.picture || withBasePath('/no-picture.jpg')}
             alt="social"
             className="rounded-full relative z-[2] w-[29px] h-[29px]"
           />

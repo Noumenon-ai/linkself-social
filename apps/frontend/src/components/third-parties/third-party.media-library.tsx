@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, { FC, useCallback, useState } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
@@ -214,7 +216,7 @@ const ThirdPartyMediaLibraryPicker: FC<{
           <div>
             <img
               className="w-[32px] h-[32px] rounded-full"
-              src={`/icons/third-party/${p.identifier}.png`}
+              src={withBasePath(`/icons/third-party/${p.identifier}.png`)}
             />
           </div>
           <div className="whitespace-pre-wrap text-left text-lg">

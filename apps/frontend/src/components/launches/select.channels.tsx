@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { uniqBy } from 'lodash';
@@ -133,7 +135,7 @@ export const SelectChannels: FC<{
               />
               <img
                 className="w-[24px] h-[24px] rounded-full"
-                src={p.picture || '/no-picture.jpg'}
+                src={p.picture || withBasePath('/no-picture.jpg')}
                 alt=""
               />
               <div className="truncate">{p.name}</div>

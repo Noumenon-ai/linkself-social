@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { Button } from '@gitroom/react/form/button';
 import clsx from 'clsx';
@@ -108,7 +110,7 @@ export const ThirdPartyPopup: FC<{
               <div>
                 <img
                   className="w-[32px] h-[32px]"
-                  src={`/icons/third-party/${p.identifier}.png`}
+                  src={withBasePath(`/icons/third-party/${p.identifier}.png`)}
                 />
               </div>
               <div className="whitespace-pre-wrap text-left text-lg">

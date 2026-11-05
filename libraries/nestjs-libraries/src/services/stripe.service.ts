@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import Stripe from 'stripe';
 import { BadRequestException } from '@nestjs/common';
 import { Organization, User } from '@prisma/client';
@@ -572,7 +573,7 @@ export class StripeService extends PaymentProviderAbstract {
   async createBillingPortalLink(customer: string) {
     return stripe.billingPortal.sessions.create({
       customer,
-      return_url: process.env['FRONTEND_URL'] + '/billing',
+      return_url: frontendUrl() + '/billing',
     });
   }
 
@@ -667,7 +668,7 @@ export class StripeService extends PaymentProviderAbstract {
       ui_mode: 'custom',
       customer,
       return_url:
-        process.env['FRONTEND_URL'] +
+        frontendUrl() +
         `/launches?onboarding=true&trialStart=true&check=${uniqueId}${isUtm}`,
       mode: 'subscription',
       subscription_data: {
@@ -726,9 +727,9 @@ export class StripeService extends PaymentProviderAbstract {
 
     const { url } = await stripe.checkout.sessions.create({
       customer,
-      cancel_url: process.env['FRONTEND_URL'] + `/billing?cancel=true${isUtm}`,
+      cancel_url: frontendUrl() + `/billing?cancel=true${isUtm}`,
       success_url:
-        process.env['FRONTEND_URL'] +
+        frontendUrl() +
         `/launches?onboarding=true&trialStart=true&check=${uniqueId}${isUtm}`,
       mode: 'subscription',
       subscription_data: {

@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ConnectionProvider,
@@ -45,7 +47,7 @@ import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { WalletUiProvider } from '@gitroom/frontend/components/auth/providers/placeholder/wallet.ui.provider';
 const WalletProvider = () => {
   const gotoLogin = useCallback(async (code: string) => {
-    window.location.href = `/auth?provider=FARCASTER&code=${code}`;
+    window.location.href = withBasePath(`/auth?provider=FARCASTER&code=${code}`);
   }, []);
   return <ButtonCaster login={gotoLogin} />;
 };
@@ -148,7 +150,7 @@ const InnerWallet = () => {
           publicKey: wallet?.publicKey?.toString(),
         })
       ).toString('base64');
-      window.location.href = `/auth?provider=WALLET&code=${info}`;
+      window.location.href = withBasePath(`/auth?provider=WALLET&code=${info}`);
     } catch (err) {
       walletModal.setVisible(false);
       wallet.select(null);

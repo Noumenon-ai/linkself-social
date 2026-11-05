@@ -1,8 +1,16 @@
 // @ts-check
 import { withSentryConfig } from '@sentry/nextjs';
 
+// Next embeds basePath in its bundles; build and runtime must use the same value.
+const basePath = (process.env.LINKSELF_BASE_PATH || '').replace(/\/+$/, '');
+if (basePath && !/^\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*$/.test(basePath)) {
+  throw new Error('LINKSELF_BASE_PATH must be an absolute path without a trailing slash');
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath,
+  env: { LINKSELF_BASE_PATH: basePath },
   experimental: {
     proxyTimeout: 90_000,
   },

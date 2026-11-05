@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { IUploadProvider, UploadedStream } from './upload.interface';
 import { createWriteStream, mkdirSync, unlink, writeFileSync } from 'fs';
 import { resolve, sep } from 'path';
@@ -46,7 +47,7 @@ export class LocalStorage implements IUploadProvider {
     return {
       filename,
       filePath: `${dir}/${filename}`,
-      path: process.env.FRONTEND_URL + '/uploads' + `${innerPath}/${filename}`,
+      path: frontendUrl() + '/uploads' + `${innerPath}/${filename}`,
     };
   }
 
@@ -142,7 +143,7 @@ export class LocalStorage implements IUploadProvider {
   // stored media name or path, so only a file inside the upload directory is
   // ever deleted: resolve() collapses any `..` segments before the comparison
   async removeFile(filePath: string): Promise<void> {
-    const publicPrefix = process.env.FRONTEND_URL + '/uploads';
+    const publicPrefix = frontendUrl() + '/uploads';
     const base = resolve(String(this.uploadDirectory));
     const localPath = resolve(
       filePath.startsWith(publicPrefix)

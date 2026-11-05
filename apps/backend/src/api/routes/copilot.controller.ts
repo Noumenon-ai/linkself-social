@@ -32,7 +32,7 @@ export type ChannelsContext = {
 // the copilot runtime writes its own CORS headers on the response, keep them aligned with main.ts
 const copilotCors = () => ({
   origin: [
-    process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL ? new URL(process.env.FRONTEND_URL).origin : undefined,
     'http://localhost:6274',
     ...(process.env.MAIN_URL ? [process.env.MAIN_URL] : []),
   ],

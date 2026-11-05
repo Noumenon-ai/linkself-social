@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, linkselfPath } from '@gitroom/helpers/utils/base-path';
+
 import { useOrganizationLimits } from '@gitroom/frontend/components/settings/use.organization.limits';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
@@ -422,7 +424,7 @@ export const AddProviderComponent: FC<{
   isMobile?: boolean;
 }> = (props) => {
   const { update, social, article, onboarding, isMobile } = props;
-  const { isGeneral, extensionId, linkselfUrl } = useVariables();
+  const { isGeneral, extensionId, linkselfUrl, frontEndUrl } = useVariables();
   const { data: limits } = useOrganizationLimits();
   const toaster = useToaster();
   const router = useRouter();
@@ -479,9 +481,9 @@ export const AddProviderComponent: FC<{
               >
                 <Web3Providers
                   onComplete={(code, newState) => {
-                    window.location.href = `/integrations/social/${identifier}?code=${encodeURIComponent(code)}&state=${newState}${
+                    window.location.href = withBasePath(`/integrations/social/${identifier}?code=${encodeURIComponent(code)}&state=${newState}${
                       onboarding ? '&onboarding=true' : ''
-                    }`;
+                    }`);
                   }}
                   nonce={url}
                 />
@@ -655,9 +657,9 @@ export const AddProviderComponent: FC<{
               return;
             }
             modal.closeAll();
-            window.location.href = `/integrations/social/${identifier}?state=${url}&code=${Buffer.from(
+            window.location.href = withBasePath(`/integrations/social/${identifier}?state=${url}&code=${Buffer.from(
               JSON.stringify(cookieResponse.cookies)
-            ).toString('base64')}${onboarding ? '&onboarding=true' : ''}`;
+            ).toString('base64')}${onboarding ? '&onboarding=true' : ''}`);
           } catch {
             toaster.show(
               t(
@@ -721,7 +723,7 @@ export const AddProviderComponent: FC<{
           {linkselfUrl && (
             <a
               className="underline focus-visible:ring-2"
-              href={`${linkselfUrl.replace(/\/$/, '')}/pricing`}
+              href={linkselfPath(linkselfUrl, '/pricing', frontEndUrl)}
             >
               Upgrade
             </a>
@@ -789,7 +791,7 @@ export const AddProviderComponent: FC<{
               >
                 <div>
                   {item.identifier === 'youtube' ? (
-                    <img src={`/icons/platforms/youtube.svg`} />
+                    <img src={withBasePath(`/icons/platforms/youtube.svg`)} />
                   ) : (
                     <img
                       className={clsx(
@@ -797,7 +799,7 @@ export const AddProviderComponent: FC<{
                         item.identifier !== 'google_my_business' &&
                           'rounded-full'
                       )}
-                      src={`/icons/platforms/${item.identifier}.png`}
+                      src={withBasePath(`/icons/platforms/${item.identifier}.png`)}
                     />
                   )}
                 </div>

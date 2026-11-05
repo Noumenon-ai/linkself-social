@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   Body,
   Controller,
@@ -190,7 +191,7 @@ export class OAuthController {
 
     // The calendar explains what just happened (HubspotInstalled); returnUrl
     // brings someone who has to sign in first back to it
-    const installed = `${process.env.FRONTEND_URL}/launches?hubspot=installed`;
+    const installed = `${frontendUrl()}/launches?hubspot=installed`;
     return response.redirect(
       302,
       `${installed}&returnUrl=${encodeURIComponent(installed)}`

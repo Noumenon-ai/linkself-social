@@ -1,3 +1,4 @@
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
 export interface Params {
   baseUrl: string;
   beforeRequest?: (url: string, options: RequestInit) => Promise<RequestInit>;
@@ -24,7 +25,7 @@ export const customFetch = (
         ? null
         : document.cookie
             .split(';')
-            .find((p) => p.includes('auth='))
+            .find((p) => p.trim().startsWith(studioCookieName('auth') + '='))
             ?.split('=')[1];
 
     const authNonSecuredOrg =
@@ -32,7 +33,7 @@ export const customFetch = (
         ? null
         : document.cookie
             .split(';')
-            .find((p) => p.includes('showorg='))
+            .find((p) => p.trim().startsWith(studioCookieName('showorg') + '='))
             ?.split('=')[1];
 
     const authNonSecuredImpersonate =
@@ -40,7 +41,7 @@ export const customFetch = (
         ? null
         : document.cookie
             .split(';')
-            .find((p) => p.includes('impersonate='))
+            .find((p) => p.trim().startsWith(studioCookieName('impersonate') + '='))
             ?.split('=')[1];
 
     const fetchRequest = await fetch(params.baseUrl + url, {

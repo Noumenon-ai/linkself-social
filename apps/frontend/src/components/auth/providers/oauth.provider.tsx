@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { useCallback } from 'react';
 import SafeImage from '@gitroom/react/helpers/safe.image';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
@@ -30,7 +32,7 @@ export const OauthProvider = () => {
     >
       <div>
         <SafeImage
-          src={oauthLogoUrl || '/icons/generic-oauth.svg'}
+          src={oauthLogoUrl || withBasePath('/icons/generic-oauth.svg')}
           alt="genericOauth"
           width={40}
           height={40}

@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { FC, useCallback, useMemo, useState } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { useToaster } from '@gitroom/react/toaster/toaster';
@@ -222,7 +224,7 @@ export const ImportDebugPostModal: FC<{ close: () => void }> = ({ close }) => {
                     onClick={() => setSelectedIntegrationId(integration.id)}
                   >
                     <img
-                      src={integration.picture || '/no-picture.jpg'}
+                      src={integration.picture || withBasePath('/no-picture.jpg')}
                       className="w-[24px] h-[24px] rounded-[6px]"
                       alt={integration.name}
                     />
@@ -230,7 +232,7 @@ export const ImportDebugPostModal: FC<{ close: () => void }> = ({ close }) => {
                       {integration.name}
                     </div>
                     <img
-                      src={`/icons/platforms/${integration.identifier}.png`}
+                      src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                       className="w-[14px] h-[14px] rounded-[4px] ml-auto"
                       alt={integration.identifier}
                     />

@@ -1,3 +1,4 @@
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { APP_NAME } from '@gitroom/helpers/app-name';
 import React, { FC, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -20,7 +21,7 @@ export const PreConditionComponentModal: FC = () => {
       </div>
       <div className="flex gap-[2px] justify-center">
         <Button
-          onClick={() => (window.location.href = '/billing?finishTrial=true')}
+          onClick={() => (window.location.href = withBasePath('/billing?finishTrial=true'))}
         >
           End trial and pay now
         </Button>

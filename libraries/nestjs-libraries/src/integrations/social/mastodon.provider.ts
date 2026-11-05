@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthTokenDetails,
   PendingCheckResponse,
@@ -102,7 +103,7 @@ export class MastodonProvider extends SocialAbstract implements SocialProvider {
       process.env.MASTODON_URL || 'https://mastodon.social',
       state,
       process.env.MASTODON_CLIENT_ID!,
-      process.env.FRONTEND_URL!
+      frontendUrl()
     );
     return {
       url,
@@ -124,7 +125,7 @@ export class MastodonProvider extends SocialAbstract implements SocialProvider {
     form.append('grant_type', 'authorization_code');
     form.append(
       'redirect_uri',
-      `${process.env.FRONTEND_URL}/integrations/social/mastodon`
+      `${frontendUrl()}/integrations/social/mastodon`
     );
     form.append('scope', this.scopes.join(' '));
 

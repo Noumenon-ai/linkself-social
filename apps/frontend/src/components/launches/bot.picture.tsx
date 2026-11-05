@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import { TopTitle } from '@gitroom/frontend/components/launches/helpers/top.title.component';
 import React, { FC, FormEventHandler, useCallback, useState } from 'react';
 import { Integrations } from '@gitroom/frontend/components/launches/calendar.context';
@@ -23,7 +25,7 @@ export const BotPicture: FC<{
     props.integration.originalName || props.integration.name
   );
   const [picture, setPicture] = useState(
-    props.integration.picture || '/no-picture.jpg'
+    props.integration.picture || withBasePath('/no-picture.jpg')
   );
   const fetch = useFetch();
   const submitForm: FormEventHandler<HTMLFormElement> = useCallback(

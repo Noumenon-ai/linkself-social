@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+
 import React, {
   createContext,
   FC,
@@ -71,7 +73,7 @@ export const AgentList: FC<{ onChange: (arr: any[]) => void }> = ({
     return (await (await fetch('/integrations/list')).json()).integrations;
   }, []);
 
-  const [collapseMenu, setCollapseMenu] = useCookie('collapseMenu', '0');
+  const [collapseMenu, setCollapseMenu] = useCookie(studioCookieName('collapseMenu'), '0');
 
   const { data } = useSWR('integrations', load, {
     revalidateOnFocus: false,
@@ -117,7 +119,7 @@ export const AgentList: FC<{ onChange: (arr: any[]) => void }> = ({
             {t('select_channels', 'Select Channels')}
           </h2>
           <div
-            onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1')}
+            onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1', { path: studioCookiePath() })}
             className="-mt-3 group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
           >
             <svg
@@ -169,7 +171,7 @@ export const AgentList: FC<{ onChange: (arr: any[]) => void }> = ({
                   <SVGLine />
                 </div>
                 <ImageWithFallback
-                  fallbackSrc={`/icons/platforms/${integration.identifier}.png`}
+                  fallbackSrc={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                   src={integration.picture}
                   className="rounded-[8px]"
                   alt={integration.identifier}
@@ -177,7 +179,7 @@ export const AgentList: FC<{ onChange: (arr: any[]) => void }> = ({
                   height={36}
                 />
                 <SafeImage
-                  src={`/icons/platforms/${integration.identifier}.png`}
+                  src={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
                   className="rounded-[8px] absolute z-10 bottom-[5px] -end-[5px] border border-fifth"
                   alt={integration.identifier}
                   width={18.41}

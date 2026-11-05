@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { MediaRepository } from '@gitroom/nestjs-libraries/database/prisma/media/media.repository';
 import { OpenaiService } from '@gitroom/nestjs-libraries/openai/openai.service';
@@ -511,7 +512,7 @@ export class MediaService {
 
     if (!video.trial && org.isTrailing) {
       throw new HttpException(
-        `This video is not available in trial mode. To use it now, open ${process.env.FRONTEND_URL}/billing and click "Finish trial" (this charges the plan immediately)`,
+        `This video is not available in trial mode. To use it now, open ${frontendUrl()}/billing and click "Finish trial" (this charges the plan immediately)`,
         406
       );
     }
@@ -539,7 +540,7 @@ export class MediaService {
 
     if (!video.trial && org.isTrailing) {
       throw new HttpException(
-        `This video is not available in trial mode. To use it now, open ${process.env.FRONTEND_URL}/billing and click "Finish trial" (this charges the plan immediately)`,
+        `This video is not available in trial mode. To use it now, open ${frontendUrl()}/billing and click "Finish trial" (this charges the plan immediately)`,
         406
       );
     }

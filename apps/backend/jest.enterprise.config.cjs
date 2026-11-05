@@ -5,6 +5,10 @@ module.exports = {
   rootDir: '../..',
   testEnvironment: 'node',
   testMatch: [
+    '<rootDir>/libraries/helpers/src/utils/base-path.spec.ts',
+    '<rootDir>/apps/backend/src/services/auth/session.path.spec.ts',
+    '<rootDir>/apps/frontend/src/proxy.spec.ts',
+    '<rootDir>/libraries/nestjs-libraries/src/integrations/social/oauth.path.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/chat/mcp.limits.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/database/prisma/organization-limits/organization.limits.spec.ts',
     '<rootDir>/apps/backend/src/api/routes/enterprise.limits.spec.ts',

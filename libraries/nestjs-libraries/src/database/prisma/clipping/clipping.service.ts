@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { HttpException, Injectable } from '@nestjs/common';
 import { Organization } from '@prisma/client';
 import { ApplicationFailure, TypedSearchAttributes } from '@temporalio/common';
@@ -192,7 +193,7 @@ export class ClippingService {
 
     if (org.isTrailing) {
       throw new HttpException(
-        `Clipping is not available in trial mode. To use it now, open ${process.env.FRONTEND_URL}/billing and click "Finish trial" (this charges the plan immediately)`,
+        `Clipping is not available in trial mode. To use it now, open ${frontendUrl()}/billing and click "Finish trial" (this charges the plan immediately)`,
         406
       );
     }

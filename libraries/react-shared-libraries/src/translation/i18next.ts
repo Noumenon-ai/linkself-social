@@ -3,7 +3,7 @@ import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import resourcesToBackend from 'i18next-resources-to-backend';
 import { initReactI18next } from 'react-i18next/initReactI18next';
-import { fallbackLng, languages, defaultNS } from './i18n.config';
+import { fallbackLng, languages, defaultNS, cookieName } from './i18n.config';
 const runsOnServerSide = typeof window === 'undefined';
 
 i18next
@@ -23,6 +23,7 @@ i18next
     defaultNS,
     detection: {
       order: ['cookie', 'header'],
+      lookupCookie: cookieName,
     },
     preload: runsOnServerSide ? languages : [],
   });

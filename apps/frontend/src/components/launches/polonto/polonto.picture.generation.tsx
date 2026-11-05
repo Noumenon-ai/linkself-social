@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { InputGroup } from '@blueprintjs/core';
@@ -37,7 +39,7 @@ const GenerateTab = observer(({ store }: any) => {
 
   const handleGenerate = async () => {
     if (data?.credits <= 0) {
-      window.open('/billing', '_blank');
+      window.open(withBasePath('/billing'), '_blank');
       return;
     }
     if (!inputRef.current.value) {

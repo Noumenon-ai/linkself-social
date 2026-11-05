@@ -1,3 +1,4 @@
+import { frontendUrl, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
 import { setSessionCookies } from '@gitroom/backend/services/auth/session';
 import {
   Body,
@@ -60,7 +61,7 @@ export class AuthController {
   ) {
     try {
       const getOrgFromCookie = this._authService.getOrgFromCookie(
-        req?.cookies?.org
+        req?.cookies?.[studioCookieName('org')]
       );
 
       const { jwt, addedOrg } = await this._authService.routeAuth(
@@ -108,7 +109,7 @@ export class AuthController {
   ) {
     try {
       const getOrgFromCookie = this._authService.getOrgFromCookie(
-        req?.cookies?.org
+        req?.cookies?.[studioCookieName('org')]
       );
 
       const { jwt, addedOrg } = await this._authService.routeAuth(
@@ -176,8 +177,9 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response
   ) {
     const state = `login-${makeSecureId(16)}`;
-    response.cookie('oauth_state', state, {
+    response.cookie(studioCookieName('oauth_state'), state, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
@@ -205,8 +207,9 @@ export class AuthController {
       return response.status(200).json({ can: false });
     }
 
-    response.cookie('auth', activate, {
+    response.cookie(studioCookieName('auth'), activate, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
@@ -273,7 +276,7 @@ export class AuthController {
     @Res({ passthrough: false }) response: Response
   ) {
     if (!code) {
-      return response.redirect(303, `${process.env.FRONTEND_URL}/auth/login`);
+      return response.redirect(303, `${frontendUrl()}/auth/login`);
     }
 
     const params = new URLSearchParams();
@@ -282,7 +285,7 @@ export class AuthController {
     params.set('provider', provider.toUpperCase());
     return response.redirect(
       303,
-      `${process.env.FRONTEND_URL}/auth?${params.toString()}`
+      `${frontendUrl()}/auth?${params.toString()}`
     );
   }
 
@@ -305,15 +308,16 @@ export class AuthController {
       code,
       redirect_uri,
       state,
-      req?.cookies?.oauth_state
+      req?.cookies?.[studioCookieName('oauth_state')]
     );
 
     if (token) {
       return response.json({ token });
     }
 
-    response.cookie('auth', jwt, {
+    response.cookie(studioCookieName('auth'), jwt, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+    path: studioCookiePath(),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,

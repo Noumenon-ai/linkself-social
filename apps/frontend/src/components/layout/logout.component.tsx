@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath, linkselfPath } from '@gitroom/helpers/utils/base-path';
+
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
 import React, { FC, useCallback } from 'react';
@@ -10,7 +12,7 @@ import { setCookie } from '@gitroom/frontend/components/layout/layout.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
   const fetch = useFetch();
-  const { isGeneral, isSecured, linkselfUrl } = useVariables();
+  const { isGeneral, isSecured, linkselfUrl, frontEndUrl } = useVariables();
   const t = useT();
 
   const logout = useCallback(async () => {
@@ -32,8 +34,8 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         });
       }
       window.location.href = linkselfUrl
-        ? `${linkselfUrl.replace(/\/$/, '')}/dashboard/social`
-        : '/auth/login';
+        ? linkselfPath(linkselfUrl, '/dashboard/social', frontEndUrl)
+        : withBasePath('/auth/login');
     }
   }, [fetch, isSecured, linkselfUrl, t]);
   return (

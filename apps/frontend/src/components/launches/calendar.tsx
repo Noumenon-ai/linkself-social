@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
+
 import React, {
   FC,
   Fragment,
@@ -752,7 +754,7 @@ const useLoadedPostDetails = () => {
                 secondary
                 onClick={() =>
                   window.open(
-                    `/p/${post.id}?share=true`,
+                    withBasePath(`/p/${post.id}?share=true`),
                     '_blank',
                     'noopener,noreferrer'
                   )
@@ -1594,7 +1596,7 @@ export const CalendarColumn: FC<{
                       >
                         <SafeImage
                           src={
-                            selectedIntegrations.picture || '/no-picture.jpg'
+                            selectedIntegrations.picture || withBasePath('/no-picture.jpg')
                           }
                           className="rounded-[8px]"
                           alt={selectedIntegrations.identifier}
@@ -1603,13 +1605,13 @@ export const CalendarColumn: FC<{
                         />
                         {selectedIntegrations.identifier === 'youtube' ? (
                           <img
-                            src="/icons/platforms/youtube.svg"
+                            src={withBasePath('/icons/platforms/youtube.svg')}
                             className="absolute z-10 -bottom-[5px] -end-[5px]"
                             width={20}
                           />
                         ) : (
                           <SafeImage
-                            src={`/icons/platforms/${selectedIntegrations.identifier}.png`}
+                            src={withBasePath(`/icons/platforms/${selectedIntegrations.identifier}.png`)}
                             className="rounded-[8px] absolute z-10 -bottom-[5px] -end-[5px] border border-fifth"
                             alt={selectedIntegrations.identifier}
                             width={20}
@@ -1677,7 +1679,7 @@ const CalendarItem: FC<{
     post.creationMethod &&
     post.creationMethod !== 'UNKNOWN';
   const preview = useCallback(() => {
-    window.open(`/p/` + post.id + '?share=true', '_blank');
+    window.open(withBasePath(`/p/`) + post.id + '?share=true', '_blank');
   }, [post]);
   const [{ opacity }, dragRef] = useDrag(
     () => ({
@@ -1907,11 +1909,11 @@ const CalendarItem: FC<{
         <div className={clsx('relative min-w-[20px]')}>
           <img
             className="w-[20px] h-[20px] rounded-[8px]"
-            src={post.integration.picture! || '/no-picture.jpg'}
+            src={post.integration.picture! || withBasePath('/no-picture.jpg')}
           />
           <img
             className="w-[12px] h-[12px] rounded-[8px] absolute z-10 top-[10px] end-0 border border-fifth"
-            src={`/icons/platforms/${post.integration?.providerIdentifier}.png`}
+            src={withBasePath(`/icons/platforms/${post.integration?.providerIdentifier}.png`)}
           />
         </div>
         <div

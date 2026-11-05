@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthProvider,
   AuthProviderAbstract,
@@ -32,7 +33,7 @@ export class OauthProvider extends AuthProviderAbstract {
       clientSecret: POSTIZ_OAUTH_CLIENT_SECRET,
       tokenUrl: POSTIZ_OAUTH_TOKEN_URL,
       userInfoUrl: POSTIZ_OAUTH_USERINFO_URL,
-      frontendUrl: FRONTEND_URL,
+      frontendUrl: frontendUrl(FRONTEND_URL),
     };
   }
 

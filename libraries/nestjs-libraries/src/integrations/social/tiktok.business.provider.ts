@@ -1,3 +1,4 @@
+import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AnalyticsData,
   AuthTokenDetails,
@@ -63,10 +64,10 @@ export class TiktokBusinessProvider
   // redirect_uri sent on the token exchange must match the registered one.
   private redirectUri() {
     return `${
-      process?.env?.FRONTEND_URL?.indexOf('https') === -1
+      frontendUrl()?.indexOf('https') === -1
         ? 'https://redirectmeto.com/'
         : ''
-    }${process?.env?.FRONTEND_URL}/integrations/social/tiktok-business/`;
+    }${frontendUrl()}/integrations/social/tiktok-business/`;
   }
 
   override async checkValidity(
