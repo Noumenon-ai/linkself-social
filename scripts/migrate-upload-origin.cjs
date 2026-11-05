@@ -24,29 +24,44 @@ function validateOrigin(value) {
   return url.origin;
 }
 
+function validateTarget(value) {
+  const message = '--from and --to must be an HTTP or HTTPS origin with optional plain path segments; no dot segments, credentials, query or fragment.';
+  const match = typeof value === 'string' && /^(https?:\/\/[^/?#]+)(\/[^?#]*)?$/.exec(value);
+  if (!match) throw new Error(message);
+  let origin;
+  try { origin = validateOrigin(match[1]); } catch { throw new Error(message); }
+  const path = (match[2] || '').replace(/\/$/, '');
+  if (path && path.slice(1).split('/').some(segment =>
+    !segment || /[^A-Za-z0-9._~-]/.test(segment) || segment === '.' || segment === '..'
+  )) throw new Error(message);
+  return origin + path;
+}
+
 function parseArguments(args) {
   const values = {};
   for (const arg of args) {
-    const match = /^(--from|--to)=(.+)$/.exec(arg);
+    const match = /^(--from|--to)=([\s\S]+)$/.exec(arg);
     const key = match ? match[1].slice(2) : arg === '--apply' ? 'apply' : '';
-    if (!key || Object.hasOwn(values, key)) throw new Error('Use --from=<origin> --to=<origin> [--apply].');
+    if (!key || Object.hasOwn(values, key)) throw new Error('Use --from=<origin[/path]> --to=<origin[/path]> [--apply].');
     values[key] = match ? match[2] : true;
   }
-  return { from: validateOrigin(values.from), to: validateOrigin(values.to), apply: values.apply === true };
+  return { from: validateTarget(values.from), to: validateTarget(values.to), apply: values.apply === true };
 }
 
 function replaceUploadOrigin(text, from, to) {
   if (typeof text !== 'string') return text;
-  const prefix = validateOrigin(from) + '/uploads/';
-  const replacement = validateOrigin(to) + '/uploads/';
+  const prefix = validateTarget(from) + '/uploads/';
+  const replacement = validateTarget(to) + '/uploads/';
   // A boundary avoids rewriting a URL embedded in another host or URL path.
   const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(new RegExp('(^|[\\s"\'`(=<>\\[])' + escaped, 'g'), (_, boundary) => boundary + replacement);
+  return text.replace(new RegExp('(^|[\\s"\'`(=<>\\[])' + escaped, 'g'), (match, boundary, offset) =>
+    text.startsWith(replacement, offset + boundary.length) ? match : boundary + replacement
+  );
 }
 
 async function migrateUploadOrigin(prisma, { from, to, apply = false }, log = console.log) {
-  from = validateOrigin(from);
-  to = validateOrigin(to);
+  from = validateTarget(from);
+  to = validateTarget(to);
   const counts = {};
   for (const [model, columns] of Object.entries(UPLOAD_COLUMNS)) {
     for (const column of columns) {
@@ -85,7 +100,13 @@ async function migrateUploadOrigin(prisma, { from, to, apply = false }, log = co
 }
 
 async function main() {
-  const options = parseArguments(process.argv.slice(2));
+  let options;
+  try { options = parseArguments(process.argv.slice(2)); }
+  catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
+    return;
+  }
   const { PrismaClient } = require('@prisma/client');
   const prisma = new PrismaClient({ log: [] });
   try { await migrateUploadOrigin(prisma, options); }
@@ -99,4 +120,4 @@ if (require.main === module) {
     process.exitCode = 1;
   });
 }
-module.exports = { UPLOAD_COLUMNS, validateOrigin, parseArguments, replaceUploadOrigin, migrateUploadOrigin };
+module.exports = { UPLOAD_COLUMNS, validateOrigin, validateTarget, parseArguments, replaceUploadOrigin, migrateUploadOrigin };

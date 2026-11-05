@@ -1,0 +1,66 @@
+# Requires Docker Compose 2.24.4 or newer for list reset support.
+# Update the Caddy pin here, then stage that image on the laptop before moving.
+services:
+  postiz:
+    image: ${STUDIO_IMAGE:?set STUDIO_IMAGE to the staged studio image}
+    pull_policy: never
+    ports: !reset []
+    restart: unless-stopped
+    mem_limit: 2560m
+  postiz-postgres:
+    pull_policy: never
+    ports: !reset []
+    restart: unless-stopped
+    mem_limit: 768m
+  postiz-redis:
+    pull_policy: never
+    ports: !reset []
+    restart: unless-stopped
+    mem_limit: 256m
+  temporal-elasticsearch:
+    pull_policy: never
+    ports: !reset []
+    restart: unless-stopped
+    mem_limit: 768m
+    environment:
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
+  temporal-postgresql:
+    pull_policy: never
+    ports: !reset []
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      POSTGRES_PASSWORD: ${TEMPORAL_POSTGRES_PASSWORD:?set TEMPORAL_POSTGRES_PASSWORD}
+  temporal:
+    pull_policy: never
+    ports: !reset []
+    restart: unless-stopped
+    mem_limit: 768m
+    environment:
+      POSTGRES_PWD: ${TEMPORAL_POSTGRES_PASSWORD:?set TEMPORAL_POSTGRES_PASSWORD}
+  temporal-ui:
+    pull_policy: never
+    ports: !reset []
+    restart: unless-stopped
+    mem_limit: 128m
+  caddy:
+    image: caddy:2.11.8-alpine
+    pull_policy: never
+    restart: unless-stopped
+    mem_limit: 128m
+    environment:
+      STUDIO_ORIGIN_HOST: ${STUDIO_ORIGIN_HOST:?set STUDIO_ORIGIN_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./var/docker/server/Caddyfile:/etc/caddy/Caddyfile:ro
+      - linkself-caddy-data:/data
+      - linkself-caddy-config:/config
+    networks:
+      - linkself-social-network
+    depends_on:
+      - postiz
+volumes:
+  linkself-caddy-data:
+  linkself-caddy-config:

@@ -8,6 +8,7 @@ module.exports = {
     '<rootDir>/libraries/nestjs-libraries/src/integrations/social/own-key.spec.ts',
     '<rootDir>/libraries/nestjs-libraries/src/integrations/social/reddit.spec.ts',
     '<rootDir>/scripts/migrate-upload-origin.spec.ts',
+    '<rootDir>/scripts/server-kit.spec.ts',
     '<rootDir>/apps/backend/src/api/routes/studio.responses.spec.ts',
     '<rootDir>/libraries/helpers/src/utils/base-path.spec.ts',
     '<rootDir>/apps/backend/src/services/auth/session.path.spec.ts',

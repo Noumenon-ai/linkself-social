@@ -1,6 +1,7 @@
 const {
   UPLOAD_COLUMNS,
   validateOrigin,
+  validateTarget,
   parseArguments,
   replaceUploadOrigin,
   migrateUploadOrigin,
@@ -49,6 +50,49 @@ describe('Upload address migration', () => {
     undefined,
   ])('rejects invalid origin %s', (value) => {
     expect(() => validateOrigin(value)).toThrow();
+  });
+  it.each([
+    'https://linkself.net/dashboard/studio',
+    'https://linkself.net/dashboard/studio/',
+    from + '/dashboard/studio',
+    from + '/dashboard/studio/',
+    from + '/uploads/archive',
+  ])('replaces uploads with the path target %s and remains unchanged on a second run', (target) => {
+    const normalized = target.replace(/\/$/, '');
+    expect(parseArguments([`--from=${from}`, `--to=${target}`]).to).toBe(normalized);
+    const content = JSON.stringify({ path: from + '/uploads/a.png', html: `<img src="${from}/uploads/b.png">` });
+    const result = replaceUploadOrigin(content, from, target);
+    expect(JSON.parse(result)).toEqual({ path: normalized + '/uploads/a.png', html: `<img src="${normalized}/uploads/b.png">` });
+    expect(replaceUploadOrigin(result, from, target)).toBe(result);
+  });
+  it('accepts plain segments and can undo a path rewrite', () => {
+    expect(validateTarget(to + '/A-z_9.~')).toBe(to + '/A-z_9.~');
+    const content = JSON.stringify({ path: from + '/uploads/a.png', other: to + '/studio/a.png' });
+    const moved = replaceUploadOrigin(content, from, to + '/studio');
+    expect(parseArguments([`--from=${to}/studio`, `--to=${from}`]).from).toBe(to + '/studio');
+    expect(replaceUploadOrigin(moved, to + '/studio', from)).toBe(content);
+  });
+  it.each([
+    to + '/dashboard/../studio',
+    to + '/dashboard/./studio',
+    to + '/dashboard/%2e%2e/studio',
+    to + '/dashboard/studio?query=1',
+    to + '/dashboard/studio?',
+    to + '/dashboard/studio#fragment',
+    to + '/dashboard/studio#',
+    'https://user:pass@example.com/studio',
+    'https://user@example.com/studio',
+    'ftp://example.com/studio',
+    to + '/dashboard//studio',
+    to + '/dashboard/studio//',
+    to + '/dashboard/a b',
+    to + '/dashboard/with%20space',
+    to + '/dashboard/with:colon',
+    to + '/dashboard/with\\slash',
+    to + '/studio\n',
+  ])('refuses unsupported target %s', (target) => {
+    expect(() => parseArguments([`--from=${from}`, `--to=${target}`])).toThrow('--from and --to must be');
+    expect(() => parseArguments([`--from=${target}`, `--to=${from}`])).toThrow('--from and --to must be');
   });
   it('defaults to dry run and requires explicit origins', () => {
     expect(parseArguments([`--from=${from}`, `--to=${to}/`])).toEqual({
@@ -116,7 +160,7 @@ describe('Upload address migration', () => {
       expect(JSON.stringify(log.mock.calls)).not.toContain('example.com');
     }
   );
-  it('does not skip rows as applied batches stop matching and a second run changes nothing', async () => {
+  it.each([to, to + '/dashboard/studio', from + '/dashboard/studio', from + '/uploads/archive'])('processes all batches and changes nothing on a second run to %s', async (to) => {
     const rows = Array.from({ length: 405 }, (_, index) => ({
       id: String(index).padStart(4, '0'),
       path: from + `/uploads/${index}.png`,
