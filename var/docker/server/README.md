@@ -1,14 +1,14 @@
 # Studio server kit
 
 This kit moves the existing studio to Ubuntu 24.04 LTS. It does not change
-LinkSelf, DNS, provider settings, or the laptop tunnel. Run commands yourself
-at cutover. Keep the laptop and its data until a restore drill and a scheduled
+LinkSelf, DNS, provider settings, or the source machine tunnel. Run commands yourself
+at cutover. Keep the source machine and its data until a restore drill and a scheduled
 test post have succeeded. Never run both studio workers together.
 
 ## 1. Reserve the server and origin
 
 Use 4 vCPU, 8 GB RAM, and at least 75 GB disk, on the same CPU architecture as
-the laptop's Docker engine. No production build runs on the server. Container
+the source machine's Docker engine. No production build runs on the server. Container
 memory limits total 5.75 GiB: studio 2560 MiB, application Postgres 768 MiB,
 Redis 256 MiB, Elasticsearch 768 MiB, Temporal Postgres 512 MiB, Temporal
 768 MiB, UI 128 MiB, and Caddy 128 MiB. Elasticsearch keeps its existing
@@ -18,14 +18,14 @@ Monitor Redis memory and studio OOM events as traffic grows.
 
 Disk must fit images, live data, fourteen compressed backups, a migration
 snapshot, and free working space. A 75 GB disk is only a starting size. Keep
-at least 20 percent free, estimate backup size from the laptop, and enlarge
+at least 20 percent free, estimate backup size from the source machine, and enlarge
 the disk before migrating if it cannot hold this budget. Allow for overlap
 while the fifteenth backup is written. Copy backups to private off-server
 storage separately; backups on the same disk do not survive server loss.
 
-Choose a separate origin hostname under linkself.net. In Porkbun, add an A
+Choose a separate origin hostname under linkself.net. At the DNS provider for linkself.net, add an A
 record for that hostname pointing to the rented server's public IPv4 address.
-Porkbun remains the authoritative DNS provider for linkself.net; do not move
+Keep the DNS provider for linkself.net; do not move
 nameservers or change the main site's record. Use a short TTL during cutover.
 Do not publish an AAAA record unless IPv6 also reaches this server. Provider
 firewalls must permit TCP 22, 80, and 443. Caddy obtains and renews TLS using
@@ -70,29 +70,31 @@ container and applies to newly created containers. Existing swap is retained.
 Compose 2.24.4 or newer is required; the override uses `ports: !reset []` to
 remove the base file's loopback bindings. Caddy is pinned to 2.11.8-alpine in
 docker-compose.server.yaml. Before a cutover, check Caddy's releases, update
-that pin if a newer image exists, and run `docker pull` for it on the laptop.
+that pin if a newer image exists, and run `docker pull` for it on the source machine.
 This is a known version, not a claim that it is the latest.
 
-## 3. Prepare the laptop and private env
+## 3. Prepare the source machine and private env
 
 Use Bash 4+, GNU coreutils/find, flock, Python 3, curl, OpenSSH, tar, Docker,
-and Compose. These scripts target a Linux laptop; use its existing Linux
+and Compose. These scripts target a Linux source machine; use its existing Linux
 Docker environment if the desktop OS differs. Trust the server host key for
 both the SSH target and origin hostname after verifying it independently.
 The dry run uses strict host-key checking and will not enroll a new key.
 
 Build the studio image once, before the cutover, with
 `--build-arg LINKSELF_BASE_PATH=/dashboard/studio`; the script refuses an image
-without it. It differs from the image running on the laptop, which serves the
+without it. It differs from the image running on the source machine, which serves the
 old address; the database schema must be the same in both. Do not rebuild during
 cutover. Stage every dependency image listed by the merged Compose
 configuration, including Caddy. The move streams `docker save` into
 `docker load` for all of them. Every server service has `pull_policy: never`;
-startup and restoration also pass `--pull never`. No registry access is needed
-on the destination during migration.
+startup and restoration also pass `--pull never`. Container images need no
+registry access during migration. Every studio start runs `pnpm dlx prisma@6.5.0`
+through `pm2-run` and `prisma-db-push`; outbound npm registry access is required
+once its cache is older than a day. Keep that registry access available.
 
 Prepare a separate private server env file outside this repository; do not
-edit the laptop's active env file. Preserve all existing application secrets,
+edit the source machine's active env file. Preserve all existing application secrets,
 especially JWT_SECRET and encryption keys, provider credentials, and the
 application database password. Supply the application's existing settings
 plus these deployment settings, with real values only in that private file:
@@ -118,7 +120,10 @@ plus these deployment settings, with real values only in that private file:
 Keep all other working LinkSelf SSO and application settings. Use dotenv
 syntax, not shell commands. Never source this file or print `compose config`
 with real values. Scripts use `--env-file` and silent validation. Do not set
-LINKSELF_SOCIAL_ENV in the file; scripts supply its absolute path.
+LINKSELF_SOCIAL_ENV in the file; scripts supply its absolute path. If a value
+contains `$`, single-quote the entire value so Compose preserves it literally.
+The scripts refuse other values containing `$` and report only the variable
+name. Comments and blank lines are ignored.
 
 The dry run checks the existing containers and image identities, the merged
 configuration, SSH, DNS reaching the same Docker engine, CPU architecture,
@@ -128,13 +133,13 @@ restoration. Review disk capacity on both machines before applying.
 
 ```sh
 chmod 600 "$SERVER_ENV"
-bash var/docker/server/move-from-laptop.sh --dry-run --image "$IMAGE_TAG" "$SERVER" "$ORIGIN_HOST" "$SERVER_ENV"
+bash var/docker/server/move-to-server.sh --dry-run --image "$IMAGE_TAG" "$SERVER" "$ORIGIN_HOST" "$SERVER_ENV"
 ```
 
 SERVER is admin@<server-host>; ORIGIN_HOST is the separate hostname. Set these
 shell variables privately. No server hostname, address, or token is checked
 into this kit. The script requires an unused destination project and private
-env path. Existing deployment data is never silently overwritten.
+directory. Existing deployment data is never silently overwritten.
 
 ## 4. Cut over
 
@@ -144,15 +149,16 @@ Reserve enough time for the image transfer and database/volume sizes; an hour
 is a rollback target, not a guarantee for an arbitrarily large dataset.
 
 ```sh
-bash var/docker/server/move-from-laptop.sh --apply --image "$IMAGE_TAG" "$SERVER" "$ORIGIN_HOST" "$SERVER_ENV"
+bash var/docker/server/move-to-server.sh --apply --image "$IMAGE_TAG" "$SERVER" "$ORIGIN_HOST" "$SERVER_ENV"
 ```
 
 Images, Compose files, dynamicconfig, and this kit transfer first. The env is
 copied over SSH to /srv/linkself-social-private/studio.env with mode 600.
-The origin and image arguments are appended there. The script then stops the
-entire laptop postiz container, including the API and publishing orchestrator,
+Existing STUDIO_ORIGIN_HOST and STUDIO_IMAGE lines are removed before the
+arguments are appended, so each appears once. The script stops PM2 workers
+first, then stops the source machine postiz container with a 15-second timeout,
 followed by Temporal, its UI, Elasticsearch, and Redis. Both databases remain
-running for dumps. Nothing on the laptop is deleted, including old backups.
+running for dumps. Nothing on the source machine is deleted, including old backups.
 Set MIGRATION_BACKUP_ROOT to a private directory outside the repository; local
 snapshots go there, with modes 700 and 600.
 
@@ -162,7 +168,7 @@ history, task queues, timers, and SQL visibility (if present) survive. Roles
 are supplied by Compose; this stack uses only postiz-user and temporal.
 Elasticsearch is the enabled visibility store in the base Compose file.
 Its stopped data volume is copied with ownership intact and restored only
-with the identical image ID. Visibility is **not** discarded or rebuilt.
+with the same image reference as the snapshot. Visibility is **not** discarded or rebuilt.
 Redis is also copied while stopped. Uploads and config are copied while no
 studio writer is running. Existing dynamicconfig is transferred unchanged.
 
@@ -170,55 +176,58 @@ Checksums must pass before restore. The destination restores volumes and
 databases, waits for Temporal cluster health, then starts the studio and
 Caddy. Jobs whose times passed during downtime can fire immediately on
 startup. The script polls the exact origin HTTPS can-register route with
-certificate validation enabled. No failure automatically restarts the laptop.
+certificate validation enabled. No failure automatically restarts the source machine.
 Keep both machines from rebooting during cutover: unless-stopped services
 that were explicitly stopped remain stopped, but never rely only on that
 policy when confirming that there is one publisher.
 
-An interrupted attempt leaves a private migration-started marker. Do not
+The private migration-started marker is written immediately before stopping
+the source stack, after image/file transfer and validation. A failure before
+that stage stops nothing and can be retried. An interruption from that stage
+on leaves the marker. Do not
 blindly rerun or remove it: inspect service state and the completed snapshot,
 then finish the restore/start sequence manually or follow rollback below.
 The marker intentionally prevents a second cutover overwriting evidence.
 
 ## 5. Manual steps after origin health
 
-On the server, open an admin Bash session and define the Compose helper:
+Set SOCIAL_ORIGIN_URL=https://<origin-host> in LinkSelf's production env and
+redeploy its Vercel rewrite. Check https://linkself.net/dashboard/studio and
+its uploads route before rewriting stored addresses.
+
+On the server, open an admin Bash session. Set OLD_UPLOAD_ORIGIN to the
+previous upload origin. Inspect the dry-run counts before applying:
 
 ```sh
 cd /srv/linkself-social
-source var/docker/server/common.sh
-init_stack /srv/linkself-social-private/studio.env
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio </dev/null
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio --apply </dev/null
 ```
 
-Set OLD_UPLOAD_ORIGIN to the previous upload origin. Run these commands
-manually, inspecting dry-run counts before applying:
-
-```sh
-dc exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio
-dc exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio --apply
-```
-
-See scripts/migrate-upload-origin.md in the laptop repository for the column
+The `dc.sh ENV_FILE <compose arguments>` wrapper runs Compose for this stack.
+It defaults to KIT_MODE=server; KIT_MODE=source uses the source machine's
+original project and two base Compose files.
+See scripts/migrate-upload-origin.md in the source repository for the column
 inventory and conflict handling. Stored upload addresses move to
 https://linkself.net/dashboard/studio/uploads/, the same place new uploads use.
-Do this only after the LinkSelf rewrite serves that path.
 
-Set SOCIAL_ORIGIN_URL=https://<origin-host> in LinkSelf's production env and
-redeploy its Vercel rewrite. Update provider redirect URIs to the exact
-browser-facing https://linkself.net/dashboard/studio callback URLs shown by
-each integration's setup screen; keep provider-specific callback suffixes.
-Verify SSO login, media, OAuth, and a scheduled test post through LinkSelf.
-Only then stop the old tunnel. None of these steps is automated by the kit.
+Update provider redirect URIs to the exact browser-facing
+https://linkself.net/dashboard/studio callback URLs shown by each integration's
+setup screen; keep provider-specific callback suffixes. Verify SSO login,
+media, OAuth, and a scheduled test post through LinkSelf. Only then stop the
+old tunnel. None of these steps is automated by the kit.
 
 ## 6. Nightly backup and restore drill
 
 Install this in the admin user's crontab, using the private paths as written:
 
 ```cron
-15 3 * * * /bin/bash /srv/linkself-social/var/docker/server/backup.sh /srv/linkself-social-private/studio.env /srv/linkself-social-private/backups >> /srv/linkself-social-private/backup-cron.log 2>&1
+7 3 * * * /bin/bash /srv/linkself-social/var/docker/server/backup.sh /srv/linkself-social-private/studio.env /srv/linkself-social-private/backups >> /srv/linkself-social-private/backup-cron.log 2>&1
 ```
 
-Create backup-cron.log with mode 600 first. Rotate that log separately. The
+Minute 7 avoids quarter hours, when posts are usually scheduled. A publish
+running at the exact moment of a stop can be interrupted; Temporal then retries
+it. Create backup-cron.log with mode 600 first. Rotate that log separately. The
 backup pauses studio publishing and Temporal while taking a coherent snapshot;
 schedule this short maintenance window for low usage. Services that were
 running are restarted on exit, including after backup failure. Failures exit
@@ -231,8 +240,13 @@ backups. Copy the private env and images to encrypted off-server storage too;
 snapshots intentionally do not contain the env file or role passwords.
 
 Test a restore on a separate disposable machine with the same architecture,
-staged image IDs, and private env. Block outbound provider access there before
-ever starting a studio worker. Copy this kit and a complete snapshot, then:
+staged images with the same references, and private env. Block outbound
+provider access there before ever starting a studio worker; keep npm registry
+access available for startup. Copy docker-compose.linkself.yaml,
+docker-compose.linkself.local.yaml, the entire dynamicconfig directory, and
+the entire var/docker/server directory, preserving their relative paths under
+the deployment directory. Copy a complete snapshot and the mode-600 private
+env outside that directory, then:
 
 ```sh
 bash var/docker/server/restore.sh --apply "$RESTORE_ENV" "$SNAPSHOT"
@@ -253,57 +267,72 @@ Keep the snapshot and private restore.log on failure; publishers remain stopped.
 
 ## 7. Roll back within the same hour
 
-Keep users frozen. First stop postiz on the server and verify it is stopped.
-Do this even if HTTPS failed: the worker can publish before TLS is healthy.
+Keep users frozen. First stop workers and postiz on the server and verify it
+is stopped. Do this even if HTTPS failed: workers can publish before TLS is
+healthy. If postiz is already stopped, skip the PM2 command:
 
-If server postiz never started, the laptop snapshot is still authoritative.
+```sh
+cd /srv/linkself-social
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env exec -T postiz sh -c 'cd /app && pnpm exec pm2 stop all' </dev/null
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env stop -t 15 postiz
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env ps --all postiz
+```
+
+If server postiz never started, the source snapshot is still authoritative.
 Stop the whole destination stack. Restore the old LinkSelf origin setting,
 redeploy, restore provider redirects, and restart the old tunnel. On the
-laptop, use the original env and project (not the server env), start Redis,
-Elasticsearch, and Temporal, wait for Temporal health, then start postiz and
-the UI. Check HTTPS and a scheduled test job before unfreezing users.
+source machine, use the original env and project, start Redis, Elasticsearch,
+and Temporal, wait for Temporal health, then start postiz and the UI. Check
+HTTPS and a scheduled test job before unfreezing users.
 
 If server postiz started at all, use its latest state to avoid replaying jobs
-already published. On the server use the helper from step 5:
+already published. If upload URLs were rewritten, reverse them on the server
+before taking the rollback snapshot. The old image may not contain the tool.
+Set OLD_UPLOAD_ORIGIN to the previous upload origin; these one-off containers
+start no workers. Inspect the dry-run counts before applying:
 
 ```sh
-dc stop -t 120 postiz
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env run --rm --no-deps -T postiz sh -c 'cd /app && pnpm uploads:rewrite-origin --from=https://linkself.net/dashboard/studio --to="$1"' sh "$OLD_UPLOAD_ORIGIN" </dev/null
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env run --rm --no-deps -T postiz sh -c 'cd /app && pnpm uploads:rewrite-origin --from=https://linkself.net/dashboard/studio --to="$1" --apply' sh "$OLD_UPLOAD_ORIGIN" </dev/null
 bash var/docker/server/backup.sh /srv/linkself-social-private/studio.env /srv/linkself-social-private/rollback --leave-stopped
-dc stop -t 120
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env stop -t 120
 ```
 
-Transfer that COMPLETE snapshot over SSH to a private laptop directory. Keep
-the original laptop cutover snapshot. With the server fully stopped, on the
-laptop run these commands using its original env file and the returned snapshot:
+Transfer that COMPLETE snapshot over SSH to a private source machine directory.
+Keep the original cutover snapshot. With the server fully stopped, on the
+source machine use its original env file and the returned snapshot:
 
 ```sh
-export KIT_MODE=laptop
-source var/docker/server/common.sh
-init_stack "$LAPTOP_ENV"
-dc stop -t 120
-bash var/docker/server/restore.sh --apply "$LAPTOP_ENV" "$RETURNED_SNAPSHOT" --replace
-dc up -d --pull never postiz-redis temporal-elasticsearch temporal
-dc exec -T temporal temporal operator cluster health --address temporal:7233
+export KIT_MODE=source
+bash var/docker/server/dc.sh "$SOURCE_ENV" stop -t 120
+bash var/docker/server/restore.sh --apply "$SOURCE_ENV" "$RETURNED_SNAPSHOT" --replace
+bash var/docker/server/dc.sh "$SOURCE_ENV" up -d --pull never postiz-redis temporal-elasticsearch temporal
+bash var/docker/server/dc.sh "$SOURCE_ENV" exec -T temporal temporal operator cluster health --address temporal:7233 </dev/null
 ```
 
-Repeat the health command until it succeeds, then `dc up -d --pull never postiz
-temporal-ui`. Restore the old LinkSelf origin, provider redirects, and tunnel.
-If upload URLs were rewritten, run the tool on the laptop with the two addresses
-swapped: dry run, inspect counts, then --apply.
-Verify media paths for any new uploads created on the server too. Keep the
-server stopped throughout. Do not resume stale laptop state after server
-publishing; extend maintenance if reverse transfer cannot finish within the
-hour. Provider-side actions already in flight must be reconciled against
-provider delivery records; no infrastructure snapshot can undo a published post.
+Repeat the health command until it succeeds, then run:
+
+```sh
+bash var/docker/server/dc.sh "$SOURCE_ENV" up -d --pull never postiz temporal-ui
+```
+
+Restore the old LinkSelf origin, provider redirects, and tunnel. Verify media
+paths for any new uploads created on the server too. Keep the server stopped
+throughout. Do not resume stale source state after server publishing; extend
+maintenance if reverse transfer cannot finish within the hour. Provider-side
+actions already in flight must be reconciled against provider delivery records;
+no infrastructure snapshot can undo a published post.
 
 ## 8. Health, disk pressure, and later image updates
 
-In a server shell initialized as in step 5:
+In an admin server shell, set ORIGIN_HOST to the chosen origin hostname:
 
 ```sh
-dc ps
-dc logs --tail=100 caddy postiz temporal
-dc exec -T temporal temporal operator cluster health --address temporal:7233
+cd /srv/linkself-social
+ORIGIN_HOST='<origin-host>'
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env ps
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env logs --tail=100 caddy postiz temporal
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env exec -T temporal temporal operator cluster health --address temporal:7233 </dev/null
 curl --fail --silent --show-error "https://$ORIGIN_HOST/dashboard/studio/api/auth/can-register"
 docker stats --no-stream
 df -h /srv /var/lib/docker
@@ -312,7 +341,7 @@ docker system df
 
 Treat logs as private: application/provider logs may contain personal data.
 Never paste env contents or expanded Compose config into an issue. Postgres
-and Redis readiness are available in `dc ps`; Temporal and origin HTTPS need
+and Redis readiness are available through `dc.sh ENV_FILE ps`; Temporal and origin HTTPS need
 the explicit checks above. The internal Temporal UI has no public host port.
 
 If disk space runs low, stop postiz to halt writes, inspect image usage and
@@ -325,12 +354,12 @@ ES flood-stage write block through its internal API before restarting writers.
 The low existing ES disk watermarks are a last guard; monitor capacity well
 before they are reached. Re-test both health routes after recovery.
 
-To update later, build and test a new version on the laptop separately. Keep
+To update later, build and test a new version on the source machine separately. Keep
 the previous image loaded on the server. Transfer the new tag using
 `docker save "$NEW_IMAGE_TAG" | ssh "$SERVER" docker load`. Take a full backup
 and freeze edits, then stop postiz. Update STUDIO_IMAGE only in the server's
-private env file and retain mode 600. In a fresh helper shell run
-`dc up -d --no-deps --pull never postiz`, then check origin health and a test
+private env file and retain mode 600. Run
+`bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env up -d --no-deps --pull never postiz`, then check origin health and a test
 post. The image startup performs database schema synchronization, so an image
 rollback may also require restoring the pre-update backup. Do not downgrade
 over a changed schema without checking compatibility. Update dependency pins

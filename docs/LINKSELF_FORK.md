@@ -29,16 +29,30 @@ serves users (AGPL-3.0 section 13).
 - 2026-10-27: removed .github/workflows/staging-conflicts.yml. Upstream runs it every 10 minutes against a staging branch
   this fork does not have, so it failed on every run and emailed the owner. Also disabled on GitHub for the published branch.
 - 2026-10-30: POST /auth/login and /auth/register allow 10 attempts per 15 minutes per client (ThrottlerSignInGuard, keyed
-  by cf-connecting-ip, else the last forwarded hop; IPv6 counted per /64), and the two forms show "Too many attempts" on
-  429. The guard assumes the backend is reachable only through Cloudflare. The reset and activation routes stay as
+  by the address the nearest proxy reports; IPv6 counted per /64), and the two forms show "Too many attempts" on
+  429. The reset and activation routes stay as
   upstream. The LinkedIn personal provider requests only openid, profile and w_member_social, so it connects with
   LinkedIn's self-serve products, and no longer calls /v2/me (it needs r_basicprofile), so personal channels have an empty
   username. Company lookups and mentions in personal posts need the organization scopes and fail with a message until
   LinkedIn grants them. LinkedIn Page keeps the organization scopes.
 
+- 2026-11-01 (ca09e81d, 2e87e7dd): added Pinterest sandbox support and updated TikTok post settings.
+- 2026-11-02 (caf5fc74, 8a228fac, 5efa2e17): refined provider availability, branding, reconnects, disconnection and deployment behaviour.
+- 2026-11-02 (c91b2cd1): added per-organization plan limits managed by LinkSelf.
+- 2026-11-02 (db397e8d, b4e69c05, ae4206d8): introduced the approved Blueprint interface and refined controls and the top bar.
+- 2026-11-03 (77aacfaa): added the Fanvue channel and its media and post settings.
+- 2026-11-04 (4aa58aef, 374ea1a8, 241b0df4): introduced the approved Glass frame and refined calendar scheduling and checks.
+- 2026-11-04 (dab0a95d, aea6181d, afbda401): refined the channel popup, navigation, editor, settings and branding.
+- 2026-11-04 (80812cd7, 9e501a99, eb22adb6, 1f48589b): aligned the rail, phone layout and My page navigation with LinkSelf.
+- 2026-11-04 (2340e1c2, 4a145764, 2df3d11c, b5f6cef3): added optional base paths and refined request handling, controls and the server-rendered frame.
+- 2026-11-05 (edb17a18, ebf5fca6, 2326d5d9): refined calendar chips, actions, list view and text rendering.
+- 2026-11-05 (a27f53cc, 3ef1bdcf): refined own-key connections, Reddit settings and chat checks, and added upload address rewriting.
+- 2026-11-05 (c1878551): added the studio server migration, backup and restore kit.
+- 2026-11-05 (9644c7f2): updated dependencies within their existing major versions.
+
 ## Running the staging stack
 ```
-export LINKSELF_SOCIAL_ENV=~/.claude/secrets/linkself-social.env   # chmod 600, never committed
+export LINKSELF_SOCIAL_ENV=/path/outside/repository/linkself-social.env   # chmod 600, never committed
 set -a; . $LINKSELF_SOCIAL_ENV; set +a                              # compose needs POSTGRES_PASSWORD on the host side
 docker compose -f docker-compose.linkself.yaml up -d
 ```

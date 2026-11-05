@@ -307,7 +307,7 @@ export const CustomVariables: FC<{
           ))}
           {error && <div role="alert" className="text-red-400 text-[13px] w-0 min-w-full">{error}</div>}
           <div>
-            <Button type="submit" loading={methods.formState.isSubmitting} disabled={methods.formState.isSubmitting}>
+            <Button type="submit" loading={!!linkselfUrl && methods.formState.isSubmitting} disabled={!!linkselfUrl && methods.formState.isSubmitting}>
               {t('connect', 'Connect')}
             </Button>
           </div>

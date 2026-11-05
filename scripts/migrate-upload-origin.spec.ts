@@ -65,6 +65,14 @@ describe('Upload address migration', () => {
     expect(JSON.parse(result)).toEqual({ path: normalized + '/uploads/a.png', html: `<img src="${normalized}/uploads/b.png">` });
     expect(replaceUploadOrigin(result, from, target)).toBe(result);
   });
+  it('can undo an upload archive rewrite and repeat the forward run', () => {
+    const target = from + '/uploads/archive';
+    const content = JSON.stringify({ path: from + '/uploads/a.png', html: `<img src="${from}/uploads/b.png">` });
+    const moved = replaceUploadOrigin(content, from, target);
+    expect(JSON.parse(moved).path).toBe(target + '/uploads/a.png');
+    expect(replaceUploadOrigin(moved, from, target)).toBe(moved);
+    expect(replaceUploadOrigin(moved, target, from)).toBe(content);
+  });
   it('accepts plain segments and can undo a path rewrite', () => {
     expect(validateTarget(to + '/A-z_9.~')).toBe(to + '/A-z_9.~');
     const content = JSON.stringify({ path: from + '/uploads/a.png', other: to + '/studio/a.png' });

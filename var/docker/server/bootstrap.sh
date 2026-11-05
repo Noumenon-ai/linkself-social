@@ -14,7 +14,7 @@ grep -Eq '^(ssh-ed25519|ssh-rsa|ecdsa-sha2-nistp(256|384|521)) [A-Za-z0-9+/=]+( 
 [[ $ID == ubuntu && $VERSION_ID == 24.04 ]] || { echo 'Ubuntu 24.04 is required.' >&2; exit 1; }
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y ca-certificates curl gnupg python3 ufw fail2ban unattended-upgrades
+apt-get install -y ca-certificates curl gnupg python3 ufw fail2ban unattended-upgrades cron iproute2
 install -d -m 0755 /etc/apt/keyrings
 curl --fail --silent --show-error https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 chmod 0644 /etc/apt/keyrings/docker.asc
@@ -60,7 +60,8 @@ cat > /etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
 EOF
-systemctl enable --now fail2ban unattended-upgrades docker
+chmod 0644 /etc/apt/apt.conf.d/20auto-upgrades
+systemctl enable --now fail2ban unattended-upgrades docker cron
 systemctl restart fail2ban
 if [[ -z $(swapon --show --noheadings) ]]; then
     if [[ ! -e /swapfile ]]; then
@@ -97,6 +98,7 @@ else
 fi
 # Elasticsearch needs this on the host, including after a reboot.
 printf 'vm.max_map_count=262144\n' > /etc/sysctl.d/90-linkself.conf
+chmod 0644 /etc/sysctl.d/90-linkself.conf
 sysctl -p /etc/sysctl.d/90-linkself.conf >/dev/null
 echo 'Configured firewall, intrusion protection, security updates, logs, and Elasticsearch kernel limit.'
 

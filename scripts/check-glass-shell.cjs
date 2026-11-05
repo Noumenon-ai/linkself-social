@@ -797,6 +797,7 @@ async function checkChannelConnection(page, doc) {
       state.requests.push({path, ...options});
       if (!options.method) {
         if (state.rejectGet) throw new Error('Request failed');
+        if (state.holdGet) return new Promise(() => {});
         return {ok: true, status: 200, json: async () => ({url: 'state-' + state.requests.length})};
       }
       return new Promise((resolve, reject) => {
@@ -843,6 +844,8 @@ async function checkChannelConnection(page, doc) {
     [406, {msg: 'Check the application password'}, 'Check the application password'],
     [401, {message: 'Please sign in again'}, 'Please sign in again'],
     [402, {message: 'Channel limit reached'}, 'Channel limit reached'],
+    [409, {message: 'Channel already connected'}, 'Channel already connected'],
+    [403, {message: 'Connection is not available'}, 'Connection is not available'],
     [400, {message: 'Check the address', msg: 'Second message'}, 'Check the address'],
     [500, {msg: 'Try again later'}, 'Try again later'],
     [500, {}, 'Could not add provider'],
@@ -897,6 +900,13 @@ async function checkChannelConnection(page, doc) {
   check(standalone.requests.length === 1 && standalone.closed === 1 && standalone.navigation.length === 0, 'Standalone connection retains its GET and modal close flow');
   check(standalone.goto[0] === '/integrations/social/wordpress?state=state-1&code=' + Buffer.from(JSON.stringify({password: typed})).toString('base64') + '&onboarding=true', 'Standalone connection retains the original navigation');
   check(await page.evaluate(() => connection.afterRequest('/integrations/social-connect/wordpress', {method: 'POST'}, {status: 406})) === false, 'Standalone connections retain the trial response handler');
+  await page.evaluate(() => {connection.render(false); connection.holdGet = true;});
+  await field.fill(typed);
+  await button.click();
+  await page.waitForFunction(() => connection.requests.length === 1);
+  check(await page.locator('button[type="submit"]').isEnabled(), 'Standalone Connect stays enabled while a request is pending');
+  check(await page.locator('button[type="submit"]').textContent() === 'Connect', 'Standalone Connect keeps its label while a request is pending');
+  await page.evaluate(() => {connection.holdGet = false;});
   await page.evaluate(() => connection.render());
   check(await page.evaluate(() => connection.afterRequest('/posts', {method: 'POST'}, {status: 406})) === false, 'Other LinkSelf requests retain the trial response handler');
   check(await page.evaluate(() => connection.afterRequest('/integrations/social-connect/wordpress', {method: 'GET'}, {status: 406})) === false, 'Only connection POST requests use inline response handling');

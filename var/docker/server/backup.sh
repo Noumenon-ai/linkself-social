@@ -38,25 +38,25 @@ done
 docker image inspect "$helper_image" >/dev/null
 stop_writers
 echo 'Publishers, Temporal, Elasticsearch, and Redis stopped for a consistent backup.'
-dc exec -T postiz-postgres pg_dump -U postiz-user -d postiz-db-local -Fc > "$snapshot/studio.dump" 2> "$snapshot/database.log"
+dc exec -T postiz-postgres pg_dump -U postiz-user -d postiz-db-local -Fc </dev/null > "$snapshot/studio.dump" 2> "$snapshot/database.log"
 # Include every Temporal database, including SQL visibility if it exists.
 dc exec -T temporal-postgresql psql -U temporal -d postgres -At -v ON_ERROR_STOP=1 \
     -c "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres' ORDER BY datname" \
-    > "$snapshot/temporal-databases" 2>> "$snapshot/database.log"
+    </dev/null > "$snapshot/temporal-databases" 2>> "$snapshot/database.log"
 grep -qx temporal "$snapshot/temporal-databases" || die 'Temporal history database missing.'
 while IFS= read -r database; do
     [[ $database =~ ^[a-zA-Z0-9_]+$ ]] || die 'Unexpected Temporal database name.'
     dc exec -T temporal-postgresql pg_dump -U temporal -d "$database" -Fc \
-        > "$snapshot/temporal-$database.dump" 2>> "$snapshot/database.log"
+        </dev/null > "$snapshot/temporal-$database.dump" 2>> "$snapshot/database.log"
 done < "$snapshot/temporal-databases"
 archive_volume postiz /uploads "$snapshot/uploads.tar.gz"
 archive_volume postiz /config "$snapshot/config.tar.gz"
 archive_volume temporal-elasticsearch /usr/share/elasticsearch/data "$snapshot/elasticsearch.tar.gz"
 archive_volume postiz-redis /data "$snapshot/redis.tar.gz"
-docker inspect --format '{{.Image}}' "$(container temporal-elasticsearch)" > "$snapshot/elasticsearch-image"
+docker inspect --format '{{.Config.Image}}' "$(container temporal-elasticsearch)" > "$snapshot/elasticsearch-image-reference"
 (
     cd "$snapshot"
-    sha256sum ./*.dump ./*.tar.gz temporal-databases elasticsearch-image > SHA256SUMS
+    sha256sum ./*.dump ./*.tar.gz temporal-databases elasticsearch-image-reference > SHA256SUMS
 )
 touch "$snapshot/COMPLETE"
 find "$snapshot" -type f -exec chmod 0600 {} +

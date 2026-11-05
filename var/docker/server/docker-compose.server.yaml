@@ -1,5 +1,5 @@
 # Requires Docker Compose 2.24.4 or newer for list reset support.
-# Update the Caddy pin here, then stage that image on the laptop before moving.
+# Update the Caddy pin here, then stage that image on the source machine before moving.
 services:
   postiz:
     image: ${STUDIO_IMAGE:?set STUDIO_IMAGE to the staged studio image}

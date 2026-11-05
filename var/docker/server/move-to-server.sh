@@ -13,7 +13,7 @@ while [[ $# -gt 0 && $1 == --* ]]; do
         *) die 'Unknown option.' ;;
     esac
 done
-[[ $# -eq 3 ]] || die 'Usage: move-from-laptop.sh [--dry-run|--apply] --image TAG SSH_TARGET ORIGIN_HOST ENV_FILE'
+[[ $# -eq 3 ]] || die 'Usage: move-to-server.sh [--dry-run|--apply] --image TAG SSH_TARGET ORIGIN_HOST ENV_FILE'
 target=$1
 STUDIO_ORIGIN_HOST=$2
 [[ $target =~ ^[a-z_][a-z0-9_-]*@[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]] || die 'Use an admin@host SSH target without shell metacharacters.'
@@ -21,14 +21,14 @@ STUDIO_ORIGIN_HOST=$2
 [[ $STUDIO_ORIGIN_HOST != linkself.net ]] || die 'Use a separate origin hostname.'
 [[ $STUDIO_IMAGE =~ ^[a-zA-Z0-9][a-zA-Z0-9._/:-]*:[a-zA-Z0-9._-]+$ ]] || die 'Supply an explicit image tag.'
 export STUDIO_IMAGE STUDIO_ORIGIN_HOST
-export KIT_MODE=laptop
+export KIT_MODE=source
 init_stack "$3"
 ssh_cmd=(ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 "$target")
 for command in docker ssh tar curl python3 sha256sum flock getent; do
     command -v "$command" >/dev/null || die "Required command missing: $command."
 done
-[[ $(docker inspect --format '{{.State.Running}}' "$(container postiz)") == true ]] || die 'Laptop studio is not running; inspect an earlier cutover before proceeding.'
-# The server runs an image built for the final address, which differs from the laptop's.
+[[ $(docker inspect --format '{{.State.Running}}' "$(container postiz)") == true ]] || die 'Source machine studio is not running; inspect an earlier cutover before proceeding.'
+# The server runs an image built for the final address, which differs from the source machine's.
 [[ $(docker image inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$STUDIO_IMAGE" | grep -c '^LINKSELF_BASE_PATH=/dashboard/studio$') -eq 1 ]] || die 'The studio image was not built with LINKSELF_BASE_PATH=/dashboard/studio.'
 # Validate the destination model using the supplied env, without displaying it.
 server_compose=(docker compose --project-directory "$stack_root" --env-file "$LINKSELF_SOCIAL_ENV" -p linkself-server
@@ -54,23 +54,23 @@ origin_id=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=
 [[ -n $remote_id && $remote_id == "$origin_id" ]] || die 'Origin DNS and the SSH target do not reach the same Docker server.'
 local_arch=$(docker info --format '{{.Architecture}}')
 remote_arch=$("${ssh_cmd[@]}" docker info --format '{{.Architecture}}')
-[[ $local_arch == "$remote_arch" ]] || die 'Laptop Docker and server architectures differ; use a matching platform image and transfer procedure.'
+[[ $local_arch == "$remote_arch" ]] || die 'Source machine Docker and server architectures differ; use a matching platform image and transfer procedure.'
 "${ssh_cmd[@]}" 'bash -s' <<'REMOTE'
 set -euo pipefail
-test -w /srv/linkself-social
-test -w /srv/linkself-social-private
-test ! -e /srv/linkself-social-private/migration-started
-test ! -e /srv/linkself-social-private/studio.env
-test -z "$(docker ps -aq --filter label=com.docker.compose.project=linkself-server)"
-test -z "$(docker volume ls -q --filter label=com.docker.compose.project=linkself-server)"
+check() { local description=$1; shift; "$@" || { printf 'Server check failed: %s\n' "$description" >&2; exit 1; }; }
+check 'deployment directory must be writable' test -w /srv/linkself-social
+check 'private directory must be writable' test -w /srv/linkself-social-private
+check 'migration marker already exists; inspect the previous cutover' test ! -e /srv/linkself-social-private/migration-started
+check 'destination project must have no containers' test -z "$(docker ps -aq --filter label=com.docker.compose.project=linkself-server)"
+check 'destination project must have no volumes' test -z "$(docker volume ls -q --filter label=com.docker.compose.project=linkself-server)"
 version=$(docker compose version --short)
-test "$(printf '%s\n' 2.24.4 "${version#v}" | sort -V | head -n1)" = 2.24.4
-for command in python3 curl sha256sum flock; do command -v "$command" >/dev/null; done
+check 'Compose 2.24.4 or newer is required' test "$(printf '%s\n' 2.24.4 "${version#v}" | sort -V | head -n1)" = 2.24.4
+for command in python3 curl sha256sum flock ss; do check "required command missing: $command" command -v "$command" >/dev/null; done
 # Both ports must be available for Caddy, including its initial ACME challenge.
-test -z "$(ss -H -ltn 'sport = :80 or sport = :443')"
+check 'TCP ports 80 and 443 must be free' test -z "$(ss -H -ltn 'sport = :80 or sport = :443')"
 echo 'Server Docker, private directories, fresh destination, and free TLS ports checked.'
 REMOTE
-echo 'Plan: transfer all staged images and deployment files; copy the private env; stop laptop publishers; take a complete snapshot; restore; start the server; check HTTPS health.'
+echo 'Plan: transfer all staged images and deployment files; copy the private env; stop source machine publishers; take a complete snapshot; restore; start the server; check HTTPS health.'
 echo 'The source databases and volumes will remain in place. Source backups will not be pruned.'
 echo 'Before --apply, confirm the same server SSH host key for the target and origin hostname, and allow public inbound TCP 80 and 443 at the provider firewall.'
 if [[ $apply == false ]]; then
@@ -85,42 +85,41 @@ backup_root=$(realpath -m "$backup_root")
 install -d -m 0700 "$backup_root"
 exec 8> "$backup_root/.migration.lock"
 flock -n 8 || die 'Another migration is running.'
+source_stop_started=false
 failed() {
-    echo 'Cutover stopped on failure. The laptop data is retained. Do not start its worker until the server is stopped and rollback state is reconciled; follow README.md.' >&2
+    local status=$?
+    if [[ $status -ne 0 ]]; then
+        if [[ $source_stop_started == false ]]; then
+            echo 'Transfer failed before the source stop. Nothing was stopped; the move can be run again.' >&2
+        else
+            echo 'Cutover stopped on failure. The source machine data is retained. Do not start its worker until the server is stopped and rollback state is reconciled; follow README.md.' >&2
+        fi
+    fi
+    exit "$status"
 }
-trap failed ERR
-"${ssh_cmd[@]}" 'umask 077; touch /srv/linkself-social-private/migration-started'
+trap failed EXIT
 echo 'Transferring all staged images, including the studio image. No image pulls will be made.'
 docker save "${images[@]}" | "${ssh_cmd[@]}" docker load > /dev/null
 tar -C "$stack_root" -czf - docker-compose.linkself.yaml docker-compose.linkself.local.yaml \
     dynamicconfig var/docker/server | "${ssh_cmd[@]}" 'tar -xzf - -C /srv/linkself-social'
-"${ssh_cmd[@]}" 'umask 077; cat > /srv/linkself-social-private/studio.env; chmod 600 /srv/linkself-social-private/studio.env' < "$LINKSELF_SOCIAL_ENV"
+sed -E '/^[[:space:]]*(export[[:space:]]+)?(STUDIO_ORIGIN_HOST|STUDIO_IMAGE)[[:space:]]*=/d' "$LINKSELF_SOCIAL_ENV" |
+    "${ssh_cmd[@]}" 'umask 077; cat > /srv/linkself-social-private/studio.env; chmod 600 /srv/linkself-social-private/studio.env'
 # The supplied arguments are validated above and stored in the private dotenv file.
 printf '\nSTUDIO_ORIGIN_HOST=%s\nSTUDIO_IMAGE=%s\n' "$STUDIO_ORIGIN_HOST" "$STUDIO_IMAGE" |
     "${ssh_cmd[@]}" 'cat >> /srv/linkself-social-private/studio.env'
-"${ssh_cmd[@]}" 'cd /srv/linkself-social; bash -c '\''source var/docker/server/common.sh; init_stack /srv/linkself-social-private/studio.env; dc config --quiet'\''' >/dev/null
+"${ssh_cmd[@]}" 'bash /srv/linkself-social/var/docker/server/dc.sh /srv/linkself-social-private/studio.env config --quiet' >/dev/null
 echo 'Images, stack files, and private env transferred and validated.'
 cutover_root="$backup_root/cutover-$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -m 0700 "$cutover_root"
+"${ssh_cmd[@]}" 'umask 077; touch /srv/linkself-social-private/migration-started'
+source_stop_started=true
 bash "$kit_dir/backup.sh" "$LINKSELF_SOCIAL_ENV" "$cutover_root" --leave-stopped
 snapshot=$(find "$cutover_root" -mindepth 2 -maxdepth 2 -name COMPLETE -printf '%h\n')
 [[ -n $snapshot ]] || die 'No complete migration snapshot found.'
 "${ssh_cmd[@]}" 'umask 077; mkdir -m 700 /srv/linkself-social-private/migration'
 tar -C "$snapshot" -czf - . | "${ssh_cmd[@]}" 'tar -xzf - -C /srv/linkself-social-private/migration'
 "${ssh_cmd[@]}" 'bash /srv/linkself-social/var/docker/server/restore.sh --apply /srv/linkself-social-private/studio.env /srv/linkself-social-private/migration'
-"${ssh_cmd[@]}" 'bash -s' <<'REMOTE'
-set -euo pipefail
-source /srv/linkself-social/var/docker/server/common.sh
-init_stack /srv/linkself-social-private/studio.env
-dc up -d --pull never temporal-elasticsearch postiz-redis temporal temporal-ui
-ready=false
-for ((attempt=0; attempt<90; attempt++)); do
-    if dc exec -T temporal temporal operator cluster health --address temporal:7233 >/dev/null 2>&1; then ready=true; break; fi
-    sleep 2
-done
-[[ $ready == true ]] || die 'Temporal readiness timed out; studio has not been started.'
-dc up -d --pull never postiz caddy
-REMOTE
+"${ssh_cmd[@]}" 'bash /srv/linkself-social/var/docker/server/start-after-restore.sh /srv/linkself-social-private/studio.env' </dev/null
 healthy=false
 for ((attempt=0; attempt<90; attempt++)); do
     if curl --fail --silent --show-error --connect-timeout 5 --max-time 10 \
@@ -130,20 +129,19 @@ for ((attempt=0; attempt<90; attempt++)); do
     fi
     sleep 5
 done
-[[ $healthy == true ]] || die 'Origin HTTPS health timed out. Inspect Caddy DNS/TLS and studio logs; keep the laptop worker stopped.'
-printf 'Manual upload rewrite commands (replace the old origin, then inspect the dry-run counts):\nssh %s\n' "$target"
-printf '%s\n' 'cd /srv/linkself-social' 'source var/docker/server/common.sh' \
-    'init_stack /srv/linkself-social-private/studio.env' \
-    'OLD_UPLOAD_ORIGIN="https://<old-upload-host>"'
-printf 'dc exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio\n'
-printf 'dc exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio --apply\n'
+[[ $healthy == true ]] || die 'Origin HTTPS health timed out. Inspect Caddy DNS/TLS and studio logs; keep the source machine worker stopped.'
 printf 'Manual LinkSelf production setting: SOCIAL_ORIGIN_URL=https://%s\n' "$STUDIO_ORIGIN_HOST"
 cat <<'NEXT'
-Origin HTTPS health passed. The server worker is now active; the laptop worker is stopped.
+Origin HTTPS health passed. The server worker is now active; the source machine worker is stopped.
 Next manual steps (not executed):
-1. Follow README.md to rewrite old upload origins on the server: dry run, inspect counts, then --apply.
-2. Set SOCIAL_ORIGIN_URL=https://<origin-host> in LinkSelf production and redeploy its Vercel rewrite.
-3. Update provider redirect URIs to the browser-facing https://linkself.net/dashboard/studio paths listed by each provider setup screen.
-4. Verify login, uploads, a scheduled test post, and the browser route. Then stop the old tunnel.
-Rollback within the hour: first stop the server publishers. If they have run, take a new complete server backup and restore it to the stopped laptop before starting its worker. See README.md; never run both workers.
+1. Set SOCIAL_ORIGIN_URL to the origin above in LinkSelf production and redeploy its Vercel rewrite.
+2. Check https://linkself.net/dashboard/studio and its uploads route.
+3. On the server, set OLD_UPLOAD_ORIGIN to the previous upload origin, then run the upload rewrite dry run and inspect counts before applying:
+cd /srv/linkself-social
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio </dev/null
+bash var/docker/server/dc.sh /srv/linkself-social-private/studio.env exec -T postiz pnpm uploads:rewrite-origin --from="$OLD_UPLOAD_ORIGIN" --to=https://linkself.net/dashboard/studio --apply </dev/null
+4. Update provider redirect URIs to the browser-facing https://linkself.net/dashboard/studio paths listed by each provider setup screen.
+5. Verify login, uploads, a scheduled test post, and the browser route.
+6. Stop the old tunnel.
+Rollback within the hour: first stop the server publishers. Reverse rewritten upload addresses on the server in a one-off container before taking a new complete server backup, then restore it to the stopped source machine before starting its worker. See README.md; never run both workers.
 NEXT

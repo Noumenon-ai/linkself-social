@@ -1,6 +1,6 @@
 {$STUDIO_ORIGIN_HOST} {
     reverse_proxy postiz:5000 {
-        # Only a proxy in front may set this; here nothing is, so a caller cannot choose it.
+        # Nothing in front of this server sets this header.
         header_up -Cf-Connecting-Ip
     }
 }

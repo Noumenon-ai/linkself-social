@@ -18,7 +18,7 @@ snapshot=$(realpath "$3")
     sha256sum --check --status SHA256SUMS
 ) || die 'Snapshot checksum verification failed.'
 target_es=$(dc config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["temporal-elasticsearch"]["image"])')
-[[ $(docker image inspect --format '{{.Id}}' "$target_es") == "$(cat "$snapshot/elasticsearch-image")" ]] || die 'Elasticsearch image must exactly match the snapshot.'
+[[ $target_es == "$(cat "$snapshot/elasticsearch-image-reference")" ]] || die 'Elasticsearch image reference must exactly match the snapshot.'
 if [[ $replace == false ]]; then
     [[ -z $(dc ps --all --quiet) ]] || die 'Fresh restore requires an unused destination project. Use --replace only for an intentional recovery.'
     project=$(dc config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["name"])')

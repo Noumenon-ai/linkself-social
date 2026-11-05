@@ -1,4 +1,4 @@
-import { execFileSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
 
@@ -58,6 +58,132 @@ describe('Server deployment kit', () => {
     }));
   });
   afterAll(() => { if (scratch) rmSync(scratch, { recursive: true, force: true }); });
+
+  it.each(['backup.sh', 'bootstrap.sh', 'common.sh', 'dc.sh', 'move-to-server.sh', 'restore.sh', 'start-after-restore.sh'])(
+    '%s exists and passes Bash syntax validation', (name) => {
+      expect(execFileSync('bash', ['-n', join(kit, name)], { encoding: 'utf8' })).toBe('');
+    }
+  );
+
+  it('uses the wrapper in operator instructions', () => {
+    const readme = readFileSync(join(kit, 'README.md'), 'utf8');
+    expect(readme).not.toMatch(/(?:source|\.)\s+[^\n]*common\.sh/);
+    for (const path of filesIn(kit).filter((path) => path.endsWith('.sh'))) {
+      const script = readFileSync(path, 'utf8');
+      for (const line of script.split('\n').filter((line) => line.includes('common.sh'))) {
+        expect(line).toMatch(/^(?:# shellcheck source=|source "\$\(dirname)/);
+      }
+    }
+  });
+
+  it('uses source-machine and generic DNS wording throughout the kit', () => {
+    for (const path of filesIn(kit)) {
+      expect(readFileSync(path, 'utf8')).not.toMatch(/laptop|porkbun/i);
+    }
+  });
+
+  it('gives every Compose exec explicit stdin', () => {
+    const commands: string[] = [];
+    for (const path of filesIn(kit).filter((path) => path.endsWith('.sh'))) {
+      const script = readFileSync(path, 'utf8').replace(/\\\n\s*/g, ' ');
+      for (const line of script.split('\n').filter((line) => /\bdc exec\b/.test(line))) {
+        commands.push(line);
+        if (line.includes('pg_restore')) expect(line).toMatch(/< "\$snapshot\/[^"\n]+\.dump"/);
+        else expect(line).toContain('</dev/null');
+      }
+    }
+    expect(commands.length).toBeGreaterThanOrEqual(7);
+  });
+
+  it.each([
+    ['bare', 'CHECK_VALUE=private$dollar', 1],
+    ['double quoted', 'CHECK_VALUE="private$dollar"', 1],
+    ['partly quoted', "CHECK_VALUE='private$dollar'continued", 1],
+    ['single quoted', "CHECK_VALUE='private$dollar'", 0],
+    ['single quoted with comment', "CHECK_VALUE='private$dollar' # comment", 0],
+    ['comments and blanks', '# CHECK_VALUE=private$dollar\n\nPLAIN=ordinary', 0],
+    ['inline comment', 'PLAIN=ordinary # private$dollar\nEMPTY= # private$dollar', 0],
+  ])('validates %s env values without displaying them', (_label, contents, status) => {
+    const envPath = join(scratch, 'quoting.env');
+    writeFileSync(envPath, contents + '\n', { mode: 0o600 });
+    const result = spawnSync('bash', ['-c', 'source "$1"; check_env_values "$2"', 'check', join(kit, 'common.sh'), envPath], { encoding: 'utf8' });
+    expect(result.status).toBe(status);
+    expect(result.stdout).toBe('');
+    expect(result.stderr).not.toContain('private');
+    expect(result.stderr).not.toContain('$dollar');
+    if (status) expect(result.stderr).toContain('Env variable CHECK_VALUE');
+    else expect(result.stderr).toBe('');
+    expect(readFileSync(join(kit, 'common.sh'), 'utf8')).toContain('check_env_values "$LINKSELF_SOCIAL_ENV"');
+  });
+
+  it('waits for database TCP readiness without consuming the next input line', () => {
+    const result = execFileSync('bash', ['-c', `
+      source "$1"
+      dc() { [[ "$*" == 'exec -T database pg_isready -h 127.0.0.1 -U role -d database' ]] || exit 2; cat >/dev/null; }
+      wait_database database role database
+      IFS= read -r next
+      printf '%s' "$next"
+    `, 'check', join(kit, 'common.sh')], { encoding: 'utf8', input: 'next line\n' });
+    expect(result).toBe('next line');
+  });
+
+  it('dumps every listed Temporal database even when exec reads stdin', () => {
+    const snapshot = mkdtempSync(join(scratch, 'snapshot-'));
+    writeFileSync(join(snapshot, 'temporal-databases'), 'temporal\ntemporal_visibility\n');
+    const script = readFileSync(join(kit, 'backup.sh'), 'utf8');
+    const loop = script.slice(script.indexOf('while IFS= read -r database'), script.indexOf('archive_volume postiz'));
+    execFileSync('bash', ['-c', `
+      source "$1"
+      snapshot=$2
+      dc() { cat >/dev/null; printf '%s' "$*"; }
+      ${loop}
+    `, 'check', join(kit, 'common.sh'), snapshot]);
+    for (const database of ['temporal', 'temporal_visibility']) {
+      expect(readFileSync(join(snapshot, 'temporal-' + database + '.dump'), 'utf8'))
+        .toBe('exec -T temporal-postgresql pg_dump -U temporal -d ' + database + ' -Fc');
+    }
+  });
+
+  it.each([true, false])('stops studio workers before the container when running (%s)', (running) => {
+    const result = execFileSync('bash', ['-c', `
+      source "$1"
+      running=${running}
+      container() { printf '%s' "$1"; }
+      docker() { if [[ $* == *postiz && $running == true ]]; then echo true; else echo false; fi; }
+      dc() { printf '%s\n' "$*"; if [[ $1 == exec ]]; then cat >/dev/null; fi; if [[ $1 == stop && $4 == postiz ]]; then running=false; fi; }
+      stop_writers
+      IFS= read -r next
+      printf '%s\n' "$next"
+    `, 'check', join(kit, 'common.sh')], { encoding: 'utf8', input: 'next line\n' });
+    const commands = result.trim().split('\n');
+    if (running) expect(commands.shift()).toBe("exec -T postiz sh -c cd /app && pnpm exec pm2 stop all");
+    expect(commands).toEqual(['stop -t 15 postiz', 'stop -t 120 temporal-ui temporal', 'stop -t 120 temporal-elasticsearch postiz-redis', 'next line']);
+  });
+
+  it.each([true, false])('starts studio only after Temporal is healthy (%s)', (healthy) => {
+    const script = readFileSync(join(kit, 'start-after-restore.sh'), 'utf8');
+    const body = script.slice(script.indexOf('dc up'));
+    const result = spawnSync('bash', ['-c', `
+      source "$1"
+      sleep() { :; }
+      dc() {
+        if [[ $1 == exec ]]; then cat >/dev/null; return ${healthy ? 0 : 1}; fi
+        printf '%s\n' "$*"
+      }
+      ${body}
+      IFS= read -r next
+      printf '%s\n' "$next"
+    `, 'check', join(kit, 'common.sh')], { encoding: 'utf8', input: 'next line\n' });
+    expect(result.status).toBe(healthy ? 0 : 1);
+    expect(result.stdout).toContain('up -d --pull never temporal-elasticsearch postiz-redis temporal temporal-ui');
+    if (healthy) {
+      expect(result.stdout).toContain('up -d --pull never postiz caddy');
+      expect(result.stdout).toContain('next line');
+    } else {
+      expect(result.stdout).not.toContain('postiz caddy');
+      expect(result.stderr).toContain('Temporal readiness timed out; studio has not been started.');
+    }
+  });
 
   it('publishes only Caddy TCP 80 and 443 after all three files merge', () => {
     const published = Object.entries(model.services).flatMap(([name, service]: [string, any]) =>

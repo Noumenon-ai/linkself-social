@@ -55,7 +55,7 @@ function replaceUploadOrigin(text, from, to) {
   // A boundary avoids rewriting a URL embedded in another host or URL path.
   const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return text.replace(new RegExp('(^|[\\s"\'`(=<>\\[])' + escaped, 'g'), (match, boundary, offset) =>
-    text.startsWith(replacement, offset + boundary.length) ? match : boundary + replacement
+    replacement.startsWith(prefix) && text.startsWith(replacement, offset + boundary.length) ? match : boundary + replacement
   );
 }
 
