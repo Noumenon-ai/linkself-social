@@ -546,6 +546,10 @@ declaration(
 );
 
 check(
+  /html\[data-linkself-theme=['"]?glass-frame['"]?\]\s*\{[^}]*-webkit-font-smoothing:\s*antialiased/.test(css),
+  'Text is smoothed the same way as on LinkSelf pages'
+);
+check(
   /html\[data-linkself-theme=['"]?glass-frame['"]?\]\s*\{[^}]*scrollbar-gutter:\s*stable/.test(css),
   'Pages with and without a scrollbar keep the same width'
 );

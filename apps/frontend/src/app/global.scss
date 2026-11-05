@@ -3262,6 +3262,9 @@ html[data-linkself-theme='glass-frame'] {
 html[data-linkself-theme='glass-frame'] {
   background: #10151F;
   scrollbar-gutter: stable;
+  // LinkSelf's pages smooth text the same way, so nothing changes weight on a Mac.
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   --calendar-toolbar-height: 41px;
   --calendar-schedule-height: 238px;
 
