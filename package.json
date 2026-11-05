@@ -11,6 +11,7 @@
   },
   "packageManager": "pnpm@10.6.1",
   "scripts": {
+    "uploads:rewrite-origin": "node scripts/migrate-upload-origin.cjs",
     "dev": "pnpm run --filter ./apps/extension --filter ./apps/orchestrator --filter ./apps/backend --filter ./apps/frontend --parallel dev",
     "dev-backend": "pnpm run --filter ./apps/backend --filter ./apps/frontend --parallel dev",
     "pm2": "pnpm run pm2-run",

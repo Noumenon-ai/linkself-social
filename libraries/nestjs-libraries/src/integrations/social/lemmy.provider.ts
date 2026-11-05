@@ -15,7 +15,7 @@ import dayjs from 'dayjs';
 import { Integration } from '@prisma/client';
 import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import { LemmySettingsDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/lemmy.dto';
-import { getSsrfSafeDispatcher } from '@gitroom/nestjs-libraries/dtos/webhooks/ssrf.safe.dispatcher';
+import { fetchPublicInstance } from '@gitroom/nestjs-libraries/dtos/webhooks/ssrf.safe.dispatcher';
 import { Tool } from '@gitroom/nestjs-libraries/integrations/tool.decorator';
 
 export class LemmyProvider extends SocialAbstract implements SocialProvider {
@@ -155,42 +155,45 @@ export class LemmyProvider extends SocialAbstract implements SocialProvider {
     codeVerifier: string;
     refresh?: string;
   }) {
-    const body = JSON.parse(Buffer.from(params.code, 'base64').toString());
-
-    const load = await fetch(body.service + '/api/v3/user/login', {
-      // @ts-ignore - undici-only option; blocks SSRF to internal IPs
-      dispatcher: getSsrfSafeDispatcher(),
-      body: JSON.stringify({
-        username_or_email: body.identifier,
-        password: body.password,
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (load.status === 401) {
-      return 'Invalid credentials';
-    }
-
-    const { jwt } = await load.json();
-
     try {
-      const user = await (
-        await fetch(body.service + `/api/v3/user?username=${body.identifier}`, {
-          // @ts-ignore - undici-only option; blocks SSRF to internal IPs
-          dispatcher: getSsrfSafeDispatcher(),
+      const body = JSON.parse(Buffer.from(params.code, 'base64').toString());
+      if (!body.service || !body.identifier || !body.password)
+        return 'Invalid credentials';
+
+      const load = await fetchPublicInstance(
+        body.service + '/api/v3/user/login',
+        {
+          body: JSON.stringify({
+            username_or_email: body.identifier,
+            password: body.password,
+          }),
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
           },
-        })
+        }
+      );
+
+      const { jwt } = await load.json();
+
+      if (!jwt) return 'Invalid credentials';
+      const user = await (
+        await fetchPublicInstance(
+          body.service +
+            `/api/v3/user?username=${encodeURIComponent(body.identifier)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        )
       ).json();
 
+      if (!user?.person_view?.person?.id) return 'Invalid credentials';
       return {
-        refreshToken: jwt!,
+        refreshToken: AuthService.encryptCredential(jwt),
         expiresIn: dayjs().add(100, 'years').unix() - dayjs().unix(),
-        accessToken: jwt!,
+        accessToken: AuthService.encryptCredential(jwt),
         id: String(user.person_view.person.id),
         name:
           user.person_view.person.display_name ||
@@ -200,19 +203,18 @@ export class LemmyProvider extends SocialAbstract implements SocialProvider {
         username: body.identifier || '',
       };
     } catch (e) {
-      console.log(e);
-      return 'Invalid credentials';
+      return 'Could not connect to Lemmy. Check the service URL, identifier and password.';
     }
   }
 
-  private async getJwtAndService(integration: Integration): Promise<{ jwt: string; service: string }> {
+  private async getJwtAndService(
+    integration: Integration
+  ): Promise<{ jwt: string; service: string }> {
     const body = JSON.parse(
       AuthService.fixedDecryption(integration.customInstanceDetails!)
     );
 
     const options = {
-      // @ts-ignore - undici-only option; blocks SSRF to internal IPs
-      dispatcher: getSsrfSafeDispatcher(),
       body: JSON.stringify({
         username_or_email: body.identifier,
         password: body.password,
@@ -223,35 +225,31 @@ export class LemmyProvider extends SocialAbstract implements SocialProvider {
       },
     };
 
-    let login: Response;
     try {
-      login = await this.fetch(body.service + '/api/v3/user/login', options);
+      const login = await this.fetchPublicInstance(
+        body.service + '/api/v3/user/login',
+        options
+      );
+      const { jwt } = await login.json();
+      if (typeof jwt !== 'string' || !jwt) throw new Error();
+      return { jwt, service: body.service };
     } catch (err) {
-      // The request body holds the stored password, so the failure is rebuilt
-      // without it before it reaches the Temporal history and the Errors table.
-      const json = (err as any).details?.[0]?.json || '{}';
-      if (err instanceof BadBody) {
-        throw new BadBody(
-          this.identifier,
-          json,
-          {} as BodyInit,
-          err.message || 'Unknown Error'
-        );
-      }
+      // A malformed response can echo the password in a JSON parsing error.
       if (err instanceof RefreshToken) {
         throw new RefreshToken(
           this.identifier,
-          json,
-          {} as BodyInit,
-          err.message || 'Unknown Error'
+          '{}',
+          '{}',
+          'Lemmy session is no longer valid, please reconnect the channel'
         );
       }
-      throw err;
+      throw new BadBody(
+        this.identifier,
+        '{}',
+        '{}',
+        'Could not log in to Lemmy. Check the public service URL, identifier and password.'
+      );
     }
-
-    const { jwt } = await login.json();
-
-    return { jwt, service: body.service };
   }
 
   async post(
@@ -267,9 +265,7 @@ export class LemmyProvider extends SocialAbstract implements SocialProvider {
 
     for (const lemmy of firstPost.settings.subreddit) {
       const { post_view } = await (
-        await this.fetch(service + '/api/v3/post', {
-          // @ts-ignore - undici-only option; blocks SSRF to internal IPs
-          dispatcher: getSsrfSafeDispatcher(),
+        await this.fetchPublicInstance(service + '/api/v3/post', {
           body: JSON.stringify({
             community_id: +lemmy.value.id,
             name: lemmy.value.title,
@@ -330,9 +326,7 @@ export class LemmyProvider extends SocialAbstract implements SocialProvider {
 
     for (const singlePostId of postIds) {
       const { comment_view } = await (
-        await this.fetch(service + '/api/v3/comment', {
-          // @ts-ignore - undici-only option; blocks SSRF to internal IPs
-          dispatcher: getSsrfSafeDispatcher(),
+        await this.fetchPublicInstance(service + '/api/v3/comment', {
           body: JSON.stringify({
             post_id: +singlePostId,
             content: commentPost.message,
@@ -382,11 +376,12 @@ export class LemmyProvider extends SocialAbstract implements SocialProvider {
     const { jwt, service } = await this.getJwtAndService(integration);
 
     const { communities } = await (
-      await this.fetch(
-        service + `/api/v3/search?type_=Communities&sort=Active&q=${data.word}`,
+      await this.fetchPublicInstance(
+        service +
+          `/api/v3/search?type_=Communities&sort=Active&q=${encodeURIComponent(
+            data.word
+          )}`,
         {
-          // @ts-ignore - undici-only option; blocks SSRF to internal IPs
-          dispatcher: getSsrfSafeDispatcher(),
           headers: {
             Authorization: `Bearer ${jwt}`,
           },

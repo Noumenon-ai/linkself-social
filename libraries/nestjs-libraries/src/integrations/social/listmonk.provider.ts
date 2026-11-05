@@ -1,3 +1,4 @@
+import { fetchPublicInstance } from '@gitroom/nestjs-libraries/dtos/webhooks/ssrf.safe.dispatcher';
 import { makeSecureId } from '@gitroom/nestjs-libraries/services/make.secure.id';
 import { SocialAbstract } from '../social.abstract';
 import {
@@ -51,7 +52,7 @@ export class ListmonkProvider extends SocialAbstract implements SocialProvider {
       },
       {
         key: 'password',
-        label: 'Password',
+        label: 'API token',
         validation: `/^.{3,}$/`,
         type: 'password' as const,
       },
@@ -84,17 +85,17 @@ export class ListmonkProvider extends SocialAbstract implements SocialProvider {
     codeVerifier: string;
     refresh?: string;
   }) {
-    const body: { url: string; username: string; password: string } =
-      JSON.parse(Buffer.from(params.code, 'base64').toString());
-
-    console.log(body);
     try {
+      const body: { url: string; username: string; password: string } =
+        JSON.parse(Buffer.from(params.code, 'base64').toString());
+      if (!body.url || !body.username || !body.password)
+        return 'Invalid credentials';
       const basic = Buffer.from(body.username + ':' + body.password).toString(
         'base64'
       );
 
       const { data } = await (
-        await this.fetch(body.url + '/api/settings', {
+        await fetchPublicInstance(body.url + '/api/settings', {
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
@@ -103,18 +104,18 @@ export class ListmonkProvider extends SocialAbstract implements SocialProvider {
         })
       ).json();
 
+      if (!data?.['app.site_name']) return 'Invalid credentials';
       return {
-        refreshToken: basic,
+        refreshToken: AuthService.encryptCredential(basic),
         expiresIn: dayjs().add(100, 'years').unix() - dayjs().unix(),
-        accessToken: basic,
+        accessToken: AuthService.encryptCredential(basic),
         id: Buffer.from(body.url).toString('base64'),
         name: data['app.site_name'],
         picture: data['app.logo_url'] || '',
         username: data['app.site_name'],
       };
     } catch (e) {
-      console.log(e);
-      return 'Invalid credentials';
+      return 'Could not connect to Listmonk. Check the URL, username and API token.';
     }
   }
 
@@ -135,7 +136,7 @@ export class ListmonkProvider extends SocialAbstract implements SocialProvider {
     );
 
     const postTypes = await (
-      await this.fetch(`${body.url}/api/lists`, {
+      await this.fetchPublicInstance(`${body.url}/api/lists`, {
         headers: {
           Authorization: `Basic ${auth}`,
         },
@@ -162,7 +163,7 @@ export class ListmonkProvider extends SocialAbstract implements SocialProvider {
     );
 
     const postTypes = await (
-      await this.fetch(`${body.url}/api/templates`, {
+      await this.fetchPublicInstance(`${body.url}/api/templates`, {
         headers: {
           Authorization: `Basic ${auth}`,
         },
@@ -240,7 +241,7 @@ export class ListmonkProvider extends SocialAbstract implements SocialProvider {
     const {
       data: { uuid: postId, id: campaignId },
     } = await (
-      await this.fetch(body.url + '/api/campaigns', {
+      await this.fetchPublicInstance(body.url + '/api/campaigns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -265,17 +266,20 @@ export class ListmonkProvider extends SocialAbstract implements SocialProvider {
       })
     ).json();
 
-    await this.fetch(body.url + `/api/campaigns/${campaignId}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Basic ${auth}`,
-      },
-      body: JSON.stringify({
-        status: 'running',
-      }),
-    });
+    await this.fetchPublicInstance(
+      body.url + `/api/campaigns/${campaignId}/status`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Basic ${auth}`,
+        },
+        body: JSON.stringify({
+          status: 'running',
+        }),
+      }
+    );
 
     return [
       {

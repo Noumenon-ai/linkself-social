@@ -74,3 +74,54 @@ export function getSsrfSafeDispatcher(): Agent | undefined {
 export function getSsrfSafeAxios(): AxiosInstance {
   return process.env.DISABLE_SSRF_PROTECTION === 'true' ? axios : ssrfSafeAxios;
 }
+
+// User-entered instance URLs must stay public even when a deployment opts out
+// of the general dispatcher. Reject redirects so credentials never follow one.
+export function publicInstanceRequestOptions(
+  url: string,
+  options: RequestInit = {}
+): RequestInit {
+  let target: URL;
+  try {
+    target = new URL(url);
+  } catch {
+    throw new Error('Use a public HTTP or HTTPS URL.');
+  }
+  const hostname = target.hostname.replace(/^\[|\]$/g, '');
+  if (
+    !['http:', 'https:'].includes(target.protocol) ||
+    target.username ||
+    target.password ||
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    (net.isIP(hostname) && isBlockedIp(hostname))
+  ) {
+    throw new Error('Use a public HTTP or HTTPS URL.');
+  }
+  return {
+    ...options,
+    redirect: 'error',
+    signal: AbortSignal.timeout(15_000),
+    dispatcher: ssrfSafeDispatcher,
+  } as RequestInit;
+}
+
+export async function fetchPublicInstance(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const safeOptions = publicInstanceRequestOptions(url, options);
+  try {
+    const response = await fetch(new URL(url).href, safeOptions);
+    if (!response.ok) {
+      await response.body?.cancel();
+      throw new Error();
+    }
+    return response;
+  } catch {
+    // Do not propagate server bodies or request options containing credentials.
+    throw new Error(
+      'Could not connect. Check the credentials and public server URL.'
+    );
+  }
+}

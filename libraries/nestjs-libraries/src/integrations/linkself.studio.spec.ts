@@ -593,6 +593,22 @@ describe.each(['', '/dashboard/studio'])('Studio connection sessions %s', (base)
     service = new IntegrationService({} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any);
   });
   afterEach(() => { process.env = { ...env }; jest.clearAllMocks(); });
+  it.each(['devto', 'hashnode', 'wordpress', 'listmonk', 'nostr', 'lemmy'])('%s authentication refusal creates no channel', async (identifier) => {
+    await service.bindConnectionSession('state', session('one'));
+    data.set('organization:state', 'org');
+    data.set('connection-provider:state', identifier);
+    const provider = { customFields: (): any[] => [], authenticate: jest.fn().mockResolvedValue('Invalid credentials') };
+    const manager = { getAllowedSocialsIntegrations: () => [identifier], getSocialIntegration: () => provider };
+    jest.spyOn(service, 'assertCanConnect').mockResolvedValue(undefined);
+    const create = jest.spyOn(service, 'createOrUpdateIntegration');
+    const controller = new NoAuthIntegrationsController(manager as any, service, {} as any, { getOrgById: async () => ({id: 'org'}) } as any);
+    await expect(controller.connectSocialMedia(identifier, {state: 'state', code: 'code', timezone: '0'}, {
+      cookies: { [base ? 'linkself_studio_auth' : 'auth']: session('one') }, headers: {},
+    } as any)).rejects.toMatchObject({message: 'Invalid credentials'});
+    expect(provider.authenticate).toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    jest.restoreAllMocks();
+  });
   it('matches the initiating session', async () => {
     await service.bindConnectionSession('state', session('one'));
     await expect(service.assertConnectionSession('state', session('one'))).resolves.toBeUndefined();

@@ -51,6 +51,9 @@ export class CopilotController {
       process.env.OPENAI_API_KEY === undefined ||
       process.env.OPENAI_API_KEY === ''
     ) {
+      if (req.body?.method === 'info') {
+        return res.status(200).json({ agents: {} });
+      }
       Logger.warn('OpenAI API key not set, chat functionality will not work');
       return res.status(503).json({ message: 'AI is not configured' });
     }

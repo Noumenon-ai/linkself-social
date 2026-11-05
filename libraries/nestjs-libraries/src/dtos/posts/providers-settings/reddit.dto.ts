@@ -1,5 +1,6 @@
 import {
   ArrayMinSize,
+  ArrayMaxSize,
   IsBoolean,
   IsDefined,
   IsIn,
@@ -79,5 +80,6 @@ export class RedditSettingsDto {
   @Type(() => RedditSettingsValueDto)
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
+  @ArrayMaxSize(1)
   subreddit: RedditSettingsValueDto[];
 }

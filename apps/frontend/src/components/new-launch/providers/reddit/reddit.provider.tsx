@@ -168,7 +168,7 @@ const RedditSettings: FC = () => {
   const t = useT();
 
   const addField = useCallback(() => {
-    append({});
+    if (fields.length === 0) append({});
   }, [fields, append]);
   const deleteField = useCallback(
     (index: number) => async () => {
@@ -200,7 +200,7 @@ const RedditSettings: FC = () => {
           </div>
         ))}
       </div>
-      <Button onClick={addField}>{t('add_subreddit', 'Add Subreddit')}</Button>
+      {fields.length === 0 && <Button onClick={addField}>{t('add_subreddit', 'Add Subreddit')}</Button>}
       {fields.length === 0 && (
         <div className="text-red-500 text-[12px] mt-[10px]">
           {t(

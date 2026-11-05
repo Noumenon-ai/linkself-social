@@ -46,6 +46,17 @@ export class AuthService {
     return verify(token, process.env.JWT_SECRET!, options);
   }
 
+  // Mark new channel tokens; older rows stay readable until reconnect.
+  static encryptCredential(value: string) {
+    return 'encrypted:v1:' + AuthService.fixedEncryption(value);
+  }
+
+  static decryptCredential(value: string) {
+    return value.startsWith('encrypted:v1:')
+      ? AuthService.fixedDecryption(value.slice('encrypted:v1:'.length))
+      : value;
+  }
+
   static fixedEncryption(value: string) {
     return encrypt_legacy_using_IV(value);
   }

@@ -795,12 +795,32 @@ async function main() {
       'apps/frontend/src/fonts/figtree/figtree-latin-wght-normal.woff2'
     )
     .toString('base64');
+  const formBindings = {
+    ...shared, ...require('react-hook-form'), ...require('yup'),
+    yupResolver: require('@hookform/resolvers/yup').yupResolver,
+    useToaster: () => ({ show() {} }), useRouter: () => ({}),
+    useOrganizationLimits: () => ({ data: { channels: 25, channelsUsed: 0 } }),
+    Button, TranslatedLabel: ({label}) => label,
+  };
+  const { Input } = components('libraries/react-shared-libraries/src/form/input.tsx', ['Input'], formBindings);
+  const { CustomVariables, AddProviderComponent } = components(base + 'launches/add.provider.component.tsx', ['CustomVariables', 'AddProviderComponent'], {...formBindings, Input});
+  const ownKeyForms = ['dev.to', 'hashnode', 'wordpress', 'listmonk', 'nostr', 'lemmy'].map(identifier => {
+    const file = `libraries/nestjs-libraries/src/integrations/social/${identifier}.provider.ts`;
+    const source = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
+    const provider = source.statements.find(ts.isClassDeclaration);
+    const fields = provider.members.find(member => member.name?.getText(source) === 'customFields');
+    const variables = vm.runInNewContext(ts.transpileModule(`(function() ${fields.body.getText(source)})()`, {}).outputText);
+    return { identifier, variables, html: render(CustomVariables, {identifier, variables, gotoUrl() {}}) };
+  });
+  const channelChoices = [...ownKeyForms.map(({identifier}) => ({ identifier, name: identifier === 'wordpress' ? 'WordPress' : identifier })), ...Array.from({length: 15}, (_, index) => ({identifier: `network-${index}`, name: `Network ${index}`}))];
+  const channelGrid = render(AddProviderComponent, {social: channelChoices, article: [], invite: false});
+  const channelModal = html => `<div class="glass-modal" style="width:min(900px,calc(100vw - 32px));margin:16px auto;padding:16px">${html}</div>`;
   const config = require('../apps/frontend/tailwind.config.cjs');
   const styles = (
     await postcss([
       tailwind({
         ...config,
-        content: [{ raw: first + loaded, extension: 'html' }, { raw: read(base + 'launches/calendar.tsx'), extension: 'tsx' }],
+        content: [{ raw: first + loaded + channelGrid + ownKeyForms.map(form => form.html).join(''), extension: 'html' }, { raw: read(base + 'launches/calendar.tsx'), extension: 'tsx' }],
       }),
     ]).process(css, { from: undefined })
   ).css;
@@ -825,6 +845,28 @@ async function main() {
     });
     const page = await browser.newPage();
     await page.route('**/*', (route) => route.abort());
+    for (const width of [1515, 768, 390]) {
+      await page.setViewportSize({width, height: 1000});
+      await page.setContent(doc(channelModal(channelGrid)));
+      check(await page.locator('.glass-provider-tile').count() === 21, `${width}: Add Channel renders 21 tiles`);
+      const tilesFit = await page.locator('.glass-provider-grid').evaluate(grid => {
+        const rect = grid.getBoundingClientRect();
+        const tiles = [...grid.querySelectorAll('.glass-provider-tile')].map(tile => tile.getBoundingClientRect());
+        return grid.scrollWidth <= grid.clientWidth && tiles.every(tile => tile.left >= rect.left - 1 && tile.right <= rect.right + 1 && tile.height >= 44) && tiles.every((tile, index) => tiles.slice(index + 1).every(other => tile.right <= other.left + 1 || other.right <= tile.left + 1 || tile.bottom <= other.top + 1 || other.bottom <= tile.top + 1));
+      });
+      check(tilesFit, `${width}: Add Channel tiles fit without overlap`);
+      for (const form of ownKeyForms) {
+        await page.setContent(doc(channelModal(form.html)));
+        check(await page.locator('input').count() === form.variables.length, `${width}: ${form.identifier} renders every field`);
+        for (const field of form.variables) {
+          const input = page.getByRole('textbox', {name: field.label, exact: true});
+          const locator = field.type === 'password' ? page.locator(`input[aria-label="${field.label}"]`) : input;
+          check(await locator.count() === 1 && await locator.isVisible(), `${width}: ${form.identifier} labels ${field.key}`);
+          check(await locator.getAttribute('type') === field.type, `${width}: ${form.identifier} preserves ${field.key} input type`);
+        }
+        check(await page.locator('.glass-modal').evaluate(modal => modal.scrollWidth <= modal.clientWidth && [...modal.querySelectorAll('input')].every(input => input.getBoundingClientRect().right <= modal.getBoundingClientRect().right)), `${width}: ${form.identifier} fields fit the glass modal`);
+      }
+    }
     for (const [width, height] of [
       [1515, 1000],
       [1100, 800],

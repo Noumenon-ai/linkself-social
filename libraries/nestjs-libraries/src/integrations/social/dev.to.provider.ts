@@ -1,3 +1,4 @@
+import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import {
   AuthTokenDetails,
   PostDetails,
@@ -22,6 +23,17 @@ export class DevToProvider extends SocialAbstract implements SocialProvider {
     return 100000;
   }
   dto = DevToSettingsDto;
+
+  private async apiFetch(url: string, options: RequestInit) {
+    const response = await fetch(url, {
+      ...options,
+      redirect: 'error',
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!response.ok)
+      throw new Error('Invalid credentials or provider unavailable');
+    return response;
+  }
 
   async generateAuthUrl() {
     const state = makeSecureId(6);
@@ -71,20 +83,22 @@ export class DevToProvider extends SocialAbstract implements SocialProvider {
     codeVerifier: string;
     refresh?: string;
   }) {
-    const body = JSON.parse(Buffer.from(params.code, 'base64').toString());
     try {
+      const body = JSON.parse(Buffer.from(params.code, 'base64').toString());
+      if (!body.apiKey) return 'Invalid credentials';
       const { name, id, profile_image, username } = await (
-        await fetch('https://dev.to/api/users/me', {
+        await this.apiFetch('https://dev.to/api/users/me', {
           headers: {
             'api-key': body.apiKey,
           },
         })
       ).json();
 
+      if (!id || !name) return 'Invalid credentials';
       return {
         refreshToken: '',
         expiresIn: dayjs().add(100, 'years').unix() - dayjs().unix(),
-        accessToken: body.apiKey,
+        accessToken: AuthService.encryptCredential(body.apiKey),
         id,
         name,
         picture: profile_image || '',
@@ -98,9 +112,9 @@ export class DevToProvider extends SocialAbstract implements SocialProvider {
   @Tool({ description: 'Tag list', dataSchema: [] })
   async tags(token: string) {
     const tags = await (
-      await fetch('https://dev.to/api/tags?per_page=1000&page=1', {
+      await this.apiFetch('https://dev.to/api/tags?per_page=1000&page=1', {
         headers: {
-          'api-key': token,
+          'api-key': AuthService.decryptCredential(token),
         },
       })
     ).json();
@@ -111,9 +125,9 @@ export class DevToProvider extends SocialAbstract implements SocialProvider {
   @Tool({ description: 'Organization list', dataSchema: [] })
   async organizations(token: string) {
     const orgs = await (
-      await fetch('https://dev.to/api/articles/me/all?per_page=1000', {
+      await this.apiFetch('https://dev.to/api/articles/me/all?per_page=1000', {
         headers: {
-          'api-key': token,
+          'api-key': AuthService.decryptCredential(token),
         },
       })
     ).json();
@@ -128,9 +142,9 @@ export class DevToProvider extends SocialAbstract implements SocialProvider {
     const fullDetails = await Promise.all(
       allOrgs.map(async (org: string) => {
         return (
-          await fetch(`https://dev.to/api/organizations/${org}`, {
+          await this.apiFetch(`https://dev.to/api/organizations/${org}`, {
             headers: {
-              'api-key': token,
+              'api-key': AuthService.decryptCredential(token),
             },
           })
         ).json();
@@ -171,7 +185,7 @@ export class DevToProvider extends SocialAbstract implements SocialProvider {
         }),
         headers: {
           'Content-Type': 'application/json',
-          'api-key': accessToken,
+          'api-key': AuthService.decryptCredential(accessToken),
         },
       })
     ).json();

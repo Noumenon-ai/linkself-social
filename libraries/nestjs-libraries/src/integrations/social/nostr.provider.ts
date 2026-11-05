@@ -24,7 +24,7 @@ const list = [
   'wss://vault.iris.to',
 ];
 
-const pool = new SimplePool();
+const RELAY_TIMEOUT = 6_000;
 
 export class NostrProvider extends SocialAbstract implements SocialProvider {
   override maxConcurrentJob = 5;
@@ -33,7 +33,7 @@ export class NostrProvider extends SocialAbstract implements SocialProvider {
   isBetweenSteps = false;
   scopes = [] as string[];
   editor = 'normal' as const;
-  toolTip = 'Make sure you private a HEX key of your Nostr private key, you can get it from websites like iris.to'
+  toolTip = 'Enter your Nostr private key as 64 hexadecimal characters.';
 
   maxLength() {
     return 100000;
@@ -44,7 +44,7 @@ export class NostrProvider extends SocialAbstract implements SocialProvider {
       {
         key: 'password',
         label: 'Nostr private key',
-        validation: `/^.{3,}$/`,
+        validation: `/^[a-fA-F0-9]{64}$/`,
         type: 'password' as const,
       },
     ];
@@ -72,19 +72,25 @@ export class NostrProvider extends SocialAbstract implements SocialProvider {
   }
 
   private secretKey(password: string) {
+    if (!/^[a-fA-F0-9]{64}$/.test(password))
+      throw new Error('Invalid private key');
     return Uint8Array.from(
       (password.match(/.{1,2}/g) || []).map((byte: any) => parseInt(byte, 16))
     );
   }
 
   private async findRelayInformation(pubkey: string) {
-    // This queries ALL relays in parallel and resolves with
-    // the first matching event from ANY relay.
-    const evt = await pool.get(list, {
-      kinds: [0],
-      authors: [pubkey],
-      limit: 1,
-    });
+    const pool = new SimplePool();
+    let evt;
+    try {
+      evt = await pool.get(
+        list,
+        { kinds: [0], authors: [pubkey], limit: 1 },
+        { maxWait: RELAY_TIMEOUT }
+      );
+    } finally {
+      pool.destroy();
+    }
 
     if (!evt) return {};
 
@@ -103,36 +109,36 @@ export class NostrProvider extends SocialAbstract implements SocialProvider {
   }
 
   private async publish(pubkey: string, event: any) {
-    let id = '';
-    for (const relay of list) {
-      try {
-        const relayInstance = await Relay.connect(relay);
-        const value = new Promise<any>((resolve) => {
-          relayInstance.subscribe([{ kinds: [1], authors: [pubkey] }], {
-            eoseTimeout: 6000,
-            onevent: (event) => {
-              resolve(event);
-            },
-            oneose: () => {
-              resolve({});
-            },
-            onclose: () => {
-              resolve({});
-            },
-          });
-        });
-
-        await relayInstance.publish(event);
-        const all = await value;
-        relayInstance.close();
-        // relayInstance.close();
-        id = id || all?.id;
-      } catch (err) {
-        /**empty**/
-      }
-    }
-
-    return id;
+    const results = await Promise.all(
+      list.map(async (url) => {
+        const relay = new Relay(url, { enableReconnect: false });
+        let timeout: ReturnType<typeof setTimeout>;
+        try {
+          relay.publishTimeout = RELAY_TIMEOUT;
+          await Promise.race([
+            (async () => {
+              await relay.connect({ timeout: RELAY_TIMEOUT });
+              await relay.publish(event);
+            })(),
+            new Promise<never>((_, reject) => {
+              timeout = setTimeout(
+                () => reject(new Error('Relay timed out')),
+                RELAY_TIMEOUT
+              );
+            }),
+          ]);
+          return true;
+        } catch {
+          return false;
+        } finally {
+          clearTimeout(timeout!);
+          relay.close();
+        }
+      })
+    );
+    if (!results.some(Boolean))
+      throw new Error('No Nostr relay accepted the post. Please try again.');
+    return event.id;
   }
 
   async authenticate(params: {
@@ -150,23 +156,22 @@ export class NostrProvider extends SocialAbstract implements SocialProvider {
       return {
         id: pubkey,
         name: user.display_name || user.displayName || user.name || 'No Name',
-        accessToken: AuthService.signJWT({ password: body.password }),
+        accessToken: AuthService.encryptCredential(
+          AuthService.signJWT({ password: body.password })
+        ),
         refreshToken: '',
         expiresIn: dayjs().add(200, 'year').unix() - dayjs().unix(),
         picture: user?.picture || '',
         username: user.name || 'nousername',
       };
     } catch (e) {
-      console.log(e);
       return 'Invalid credentials';
     }
   }
 
   private buildContent(post: PostDetails): string {
     const mediaContent = post.media?.map((m) => m.path).join('\n\n') || '';
-    return mediaContent
-      ? `${post.message}\n\n${mediaContent}`
-      : post.message;
+    return mediaContent ? `${post.message}\n\n${mediaContent}` : post.message;
   }
 
   async post(
@@ -174,7 +179,9 @@ export class NostrProvider extends SocialAbstract implements SocialProvider {
     accessToken: string,
     postDetails: PostDetails[]
   ): Promise<PostResponse[]> {
-    const { password } = AuthService.verifyJWT(accessToken) as any;
+    const { password } = AuthService.verifyJWT(
+      AuthService.decryptCredential(accessToken)
+    ) as any;
     const [firstPost] = postDetails;
 
     const textEvent = finalizeEvent(
@@ -207,7 +214,9 @@ export class NostrProvider extends SocialAbstract implements SocialProvider {
     postDetails: PostDetails[],
     integration: Integration
   ): Promise<PostResponse[]> {
-    const { password } = AuthService.verifyJWT(accessToken) as any;
+    const { password } = AuthService.verifyJWT(
+      AuthService.decryptCredential(accessToken)
+    ) as any;
     const [commentPost] = postDetails;
     const replyToId = lastCommentId || postId;
 

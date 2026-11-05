@@ -43,7 +43,7 @@ describe('Copilot without an AI key', () => {
           json: jest.fn(),
         };
         await controller[endpoint](
-          { body: { method: 'info' } } as never,
+          { body: { method: 'agent/run' } } as never,
           response as never,
           {} as never
         );
@@ -57,16 +57,36 @@ describe('Copilot without an AI key', () => {
     }
   );
 
-  it('still dispatches configured chat requests', () => {
-    process.env.OPENAI_API_KEY = 'test-key';
-    const handler = jest.fn();
-    (copilotRuntimeNodeHttpEndpoint as jest.Mock).mockReturnValue(handler);
-    const request = {} as never;
-    const response = {} as never;
-    new CopilotController({} as never, {} as never).chatAgent(
-      request,
-      response
-    );
-    expect(handler).toHaveBeenCalledWith(request, response);
-  });
+  it.each([undefined, ''])(
+    'answers chat discovery quietly without a key (%s)',
+    (key) => {
+      if (key === undefined) delete process.env.OPENAI_API_KEY;
+      else process.env.OPENAI_API_KEY = key;
+      const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      new CopilotController({} as never, {} as never).chatAgent(
+        { body: { method: 'info' } } as never,
+        response as never
+      );
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.json).toHaveBeenCalledWith({ agents: {} });
+      expect(Logger.warn).not.toHaveBeenCalled();
+      expect(copilotRuntimeNodeHttpEndpoint).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['info', 'agent/run'])(
+    'still dispatches configured %s requests',
+    (method) => {
+      process.env.OPENAI_API_KEY = 'test-key';
+      const handler = jest.fn();
+      (copilotRuntimeNodeHttpEndpoint as jest.Mock).mockReturnValue(handler);
+      const request = { body: { method } } as never;
+      const response = {} as never;
+      new CopilotController({} as never, {} as never).chatAgent(
+        request,
+        response
+      );
+      expect(handler).toHaveBeenCalledWith(request, response);
+    }
+  );
 });

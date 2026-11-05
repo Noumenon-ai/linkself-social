@@ -1,3 +1,4 @@
+import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import { publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import {
   AuthTokenDetails,
@@ -29,6 +30,17 @@ export class HashnodeProvider extends SocialAbstract implements SocialProvider {
     return 10000;
   }
   dto = HashnodeSettingsDto;
+
+  private async apiFetch(url: string, options: RequestInit) {
+    const response = await fetch(url, {
+      ...options,
+      redirect: 'error',
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!response.ok)
+      throw new Error('Invalid credentials or provider unavailable');
+    return response;
+  }
 
   async generateAuthUrl() {
     const state = makeSecureId(6);
@@ -67,14 +79,15 @@ export class HashnodeProvider extends SocialAbstract implements SocialProvider {
     codeVerifier: string;
     refresh?: string;
   }) {
-    const body = JSON.parse(Buffer.from(params.code, 'base64').toString());
     try {
+      const body = JSON.parse(Buffer.from(params.code, 'base64').toString());
+      if (!body.apiKey) return 'Invalid credentials';
       const {
         data: {
           me: { name, id, profilePicture, username },
         },
       } = await (
-        await fetch('https://gql-beta.hashnode.com', {
+        await this.apiFetch('https://gql-beta.hashnode.com', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -95,10 +108,11 @@ export class HashnodeProvider extends SocialAbstract implements SocialProvider {
         })
       ).json();
 
+      if (!id || !name) return 'Invalid credentials';
       return {
         refreshToken: '',
         expiresIn: dayjs().add(100, 'years').unix() - dayjs().unix(),
-        accessToken: body.apiKey,
+        accessToken: AuthService.encryptCredential(body.apiKey),
         id,
         name,
         picture: profilePicture || '',
@@ -128,11 +142,11 @@ export class HashnodeProvider extends SocialAbstract implements SocialProvider {
         },
       },
     } = await (
-      await fetch('https://gql-beta.hashnode.com', {
+      await this.apiFetch('https://gql-beta.hashnode.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `${accessToken}`,
+          Authorization: `${AuthService.decryptCredential(accessToken)}`,
         },
         body: JSON.stringify({
           query: `
@@ -188,7 +202,9 @@ export class HashnodeProvider extends SocialAbstract implements SocialProvider {
                   ? {
                       coverImage: `${
                         settings?.main_image?.path?.indexOf('http') === -1
-                          ? `${publicApiUrl()}/${process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY}`
+                          ? `${publicApiUrl()}/${
+                              process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY
+                            }`
                           : ``
                       }${settings?.main_image?.path}`,
                     }
@@ -210,7 +226,7 @@ export class HashnodeProvider extends SocialAbstract implements SocialProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `${accessToken}`,
+          Authorization: `${AuthService.decryptCredential(accessToken)}`,
         },
         body: JSON.stringify({
           query,

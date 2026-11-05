@@ -10,6 +10,7 @@ import { setHeartbeatDetails } from '@gitroom/nestjs-libraries/temporal/temporal
 import {
   getSsrfSafeAxios,
   getSsrfSafeDispatcher,
+  publicInstanceRequestOptions,
 } from '@gitroom/nestjs-libraries/dtos/webhooks/ssrf.safe.dispatcher';
 import sharp from 'sharp';
 import { createReadStream, readFileSync, statSync } from 'fs';
@@ -585,6 +586,30 @@ export abstract class SocialAbstract {
     }
 
     return value;
+  }
+
+  protected async fetchPublicInstance(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    const safeOptions = publicInstanceRequestOptions(url, options);
+    try {
+      return await this.fetch(url, safeOptions, this.identifier);
+    } catch (err) {
+      // Keep provider classifications while discarding echoed credentials.
+      if (err instanceof RefreshToken) {
+        throw new RefreshToken(this.identifier, '{}', '{}', err.message);
+      }
+      if (err instanceof BadBody) {
+        throw new BadBody(this.identifier, '{}', '{}', err.message);
+      }
+      throw new BadBody(
+        this.identifier,
+        '{}',
+        '{}',
+        'Could not connect. Check the credentials and public server URL.'
+      );
+    }
   }
 
   async fetch(

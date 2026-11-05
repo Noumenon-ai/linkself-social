@@ -22,6 +22,9 @@ import { Tool } from '@gitroom/nestjs-libraries/integrations/tool.decorator';
 import { Integration } from '@prisma/client';
 import { hasExtension } from '@gitroom/helpers/utils/has.extension';
 
+const REDDIT_USER_AGENT =
+  'web:net.linkself.social:1.0 (LinkSelf Social; https://linkself.net)';
+
 // Travels through the workflow history between postPending, checkPostStatus
 // and finalizePost. The cursor makes every subreddit submit its own
 // finalizePost call, and `armed` is the submit-in-flight handshake: set by
@@ -95,6 +98,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
       await this.fetch('https://www.reddit.com/api/v1/access_token', {
         method: 'POST',
         headers: {
+          'User-Agent': REDDIT_USER_AGENT,
           'Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${Buffer.from(
             `${process.env.REDDIT_CLIENT_ID}:${process.env.REDDIT_CLIENT_SECRET}`
@@ -110,6 +114,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
     const { name, id, icon_img } = await (
       await this.fetch('https://oauth.reddit.com/api/v1/me', {
         headers: {
+          'User-Agent': REDDIT_USER_AGENT,
           Authorization: `Bearer ${accessToken}`,
         },
       })
@@ -151,6 +156,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
       await this.fetch('https://www.reddit.com/api/v1/access_token', {
         method: 'POST',
         headers: {
+          'User-Agent': REDDIT_USER_AGENT,
           'Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${Buffer.from(
             `${process.env.REDDIT_CLIENT_ID}:${process.env.REDDIT_CLIENT_SECRET}`
@@ -169,6 +175,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
     const { name, id, icon_img } = await (
       await this.fetch('https://oauth.reddit.com/api/v1/me', {
         headers: {
+          'User-Agent': REDDIT_USER_AGENT,
           Authorization: `Bearer ${accessToken}`,
         },
       })
@@ -199,6 +206,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
         {
           method: 'POST',
           headers: {
+            'User-Agent': REDDIT_USER_AGENT,
             Authorization: `Bearer ${accessToken}`,
           },
           body: formData,
@@ -229,7 +237,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
     });
 
     const d = await this.getSsrfSafeAxios().post('https:' + action, upload, {
-      headers: upload.getHeaders(),
+      headers: { ...upload.getHeaders(), 'User-Agent': REDDIT_USER_AGENT },
     });
 
     // S3 only echoes a <Location> body when the POST succeeds with 201; guard
@@ -267,6 +275,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
         {
           method: 'GET',
           headers: {
+            'User-Agent': REDDIT_USER_AGENT,
             Authorization: `Bearer ${accessToken}`,
           },
         },
@@ -445,7 +454,10 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
     // finds the armed marker and asks Reddit instead of resubmitting blindly.
     const value = data.subreddits[data.cursor].value;
     data.armed = {
-      sr: value.subreddit.replace(/^\/?r\//, '').replace(/^\/+|\/+$/g, '').toLowerCase(),
+      sr: value.subreddit
+        .replace(/^\/?r\//, '')
+        .replace(/^\/+|\/+$/g, '')
+        .toLowerCase(),
       title: value.title || '',
       armedAt: Date.now(),
       media: value.type === 'media',
@@ -504,13 +516,17 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
           }
         : {}),
       text: data.message,
-      sr: value.subreddit.replace(/^\/?r\//, '').replace(/^\/+|\/+$/g, '').toLowerCase(),
+      sr: value.subreddit
+        .replace(/^\/?r\//, '')
+        .replace(/^\/+|\/+$/g, '')
+        .toLowerCase(),
     };
 
     const all = await (
       await this.fetch('https://oauth.reddit.com/api/submit', {
         method: 'POST',
         headers: {
+          'User-Agent': REDDIT_USER_AGENT,
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -665,6 +681,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
       await this.fetch('https://oauth.reddit.com/api/comment', {
         method: 'POST',
         headers: {
+          'User-Agent': REDDIT_USER_AGENT,
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -713,6 +730,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
         {
           method: 'GET',
           headers: {
+            'User-Agent': REDDIT_USER_AGENT,
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/x-www-form-urlencoded',
           },
@@ -749,6 +767,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
           {
             method: 'GET',
             headers: {
+              'User-Agent': REDDIT_USER_AGENT,
               Authorization: `Bearer ${accessToken}`,
               'Content-Type': 'application/x-www-form-urlencoded',
             },
@@ -815,6 +834,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
         {
           method: 'GET',
           headers: {
+            'User-Agent': REDDIT_USER_AGENT,
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/x-www-form-urlencoded',
           },
@@ -833,6 +853,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
         {
           method: 'GET',
           headers: {
+            'User-Agent': REDDIT_USER_AGENT,
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/x-www-form-urlencoded',
           },
@@ -853,6 +874,7 @@ export class RedditProvider extends SocialAbstract implements SocialProvider {
               {
                 method: 'GET',
                 headers: {
+                  'User-Agent': REDDIT_USER_AGENT,
                   Authorization: `Bearer ${accessToken}`,
                   'Content-Type': 'application/x-www-form-urlencoded',
                 },

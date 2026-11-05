@@ -258,7 +258,7 @@ export const CustomVariables: FC<{
               {variable.hint ? (
                 <div className="flex flex-col gap-[6px]">
                   <div className="text-[14px] flex items-center gap-[6px]">
-                    <span>{variable.label}</span>
+                    <label htmlFor={`channel-${identifier}-${variable.key}`}>{variable.label}</label>
                     <span
                       data-tooltip-id="tooltip"
                       data-tooltip-content={variable.hint}
@@ -270,6 +270,9 @@ export const CustomVariables: FC<{
                   <Input
                     label=""
                     name={variable.key}
+                    id={`channel-${identifier}-${variable.key}`}
+                    aria-label={variable.label}
+                    autoComplete={variable.type === 'password' ? 'new-password' : 'off'}
                     type={variable.type == 'text' ? 'text' : 'password'}
                   />
                 </div>
@@ -277,6 +280,9 @@ export const CustomVariables: FC<{
                 <Input
                   label={variable.label}
                   name={variable.key}
+                    id={`channel-${identifier}-${variable.key}`}
+                    aria-label={variable.label}
+                    autoComplete={variable.type === 'password' ? 'new-password' : 'off'}
                   type={variable.type == 'text' ? 'text' : 'password'}
                 />
               )}
