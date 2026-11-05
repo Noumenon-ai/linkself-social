@@ -666,6 +666,7 @@ const GlassWeekAgenda: FC<{ days: dayjs.Dayjs[] }> = ({ days }) => {
                 <CalendarItem
                   key={`${post.id}-${postDates.get(post)?.valueOf()}`}
                   display="day"
+                  compact={false}
                   isBeforeNow={false}
                   date={postDates.get(post)!}
                   state={post.state}
@@ -1104,6 +1105,7 @@ export const ListView = () => {
                 <CalendarItem
                   key={post.id}
                   display="day"
+                  compact={false}
                   isBeforeNow={false}
                   date={fromUtc(post.publishDate)}
                   state={post.state}
@@ -1428,12 +1430,14 @@ export const CalendarColumn: FC<{
       className={clsx(
         'flex flex-col w-full min-h-full relative',
         display === 'month' && 'glass-date-tile',
+        linkselfUrl && (display === 'week' || display === 'day') && 'glass-time-slot',
         isBeforeNow && 'repeated-strip',
         loading && 'animate-pulse',
         isBeforeNow
           ? 'cursor-not-allowed'
           : 'border border-newTextColor/5 rounded-[8px]'
       )}
+      data-has-posts={postList.length > 0 || undefined}
       data-today={getDate.isSame(currentHour, 'day') || undefined}
       data-selected={getDate.format('YYYY-MM-DD') === selectedDay || undefined}
       data-outside={
@@ -1477,14 +1481,14 @@ export const CalendarColumn: FC<{
       )}
       <div
         className={clsx(
-          'relative flex flex-col flex-1 text-white rounded-[8px] min-h-[70px]',
+          'glass-slot-content relative flex flex-col flex-1 text-white rounded-[8px] min-h-[70px]',
           display === 'month' && 'mobile:min-h-[44px]',
           canDrop && 'border border-[var(--studio-accent,#612BD3)]'
         )}
       >
         <div
           className={clsx(
-            'flex-col text-[12px] pointer w-full flex scrollbar scrollbar-thumb-tableBorder scrollbar-track-secondary',
+            'glass-slot-posts flex-col text-[12px] pointer w-full flex scrollbar scrollbar-thumb-tableBorder scrollbar-track-secondary',
             isBeforeNow ? 'flex-1' : 'cursor-pointer',
             isBeforeNow && postList.length === 0 && 'col-calendar',
             // the "Date passed" hint is wider than a phone month cell
@@ -1500,7 +1504,7 @@ export const CalendarColumn: FC<{
             <div
               key={post.id}
               className={clsx(
-                'text-textColor p-[2.5px] relative flex flex-col justify-center items-center'
+                'glass-slot-post text-textColor p-[2.5px] relative flex flex-col justify-center items-center'
               )}
             >
               <div
@@ -1649,6 +1653,7 @@ const CalendarItem: FC<{
   state: State;
   display: 'day' | 'week' | 'month';
   showTime?: boolean;
+  compact?: boolean;
   post: Post & {
     integration: Integration;
     tags: {
@@ -1672,6 +1677,7 @@ const CalendarItem: FC<{
     display,
     deletePost,
     showTime,
+    compact = true,
     missingRelease,
     openPost,
   } = props;
@@ -1758,6 +1764,147 @@ const CalendarItem: FC<{
       </div>
     );
   }
+  if (linkselfUrl && compact && (display === 'week' || display === 'day')) {
+    const tag = post.tags?.[0]?.tag;
+    const content = `${state === 'DRAFT' ? t('draft', 'Draft') + ': ' : ''}${
+      stripHtmlValidation('none', post.content, false, true, false) ||
+      t('no_content', 'no content')
+    }`;
+    const actions = [
+      ...(copyDebugJson
+        ? [
+            {
+              label: t('copy_debug_json', 'Copy Debug JSON'),
+              action: copyDebugJson,
+              Icon: CopyDebug,
+            },
+          ]
+        : []),
+      ...((state === 'PUBLISHED' || state === 'ERROR') &&
+      !post.intervalInDays &&
+      post.releaseURL?.startsWith('http')
+        ? [
+            {
+              label: t('open_post', 'Open post'),
+              action: openPost,
+              Icon: OpenPost,
+            },
+          ]
+        : []),
+      ...(hasPostAnalytics &&
+      state === 'PUBLISHED' &&
+      post.releaseId &&
+      (post.releaseId !== 'missing' || missingRelease)
+        ? [
+            {
+              label: t('statistics', 'Statistics'),
+              action:
+                post.releaseId === 'missing' ? missingRelease : statistics,
+              Icon: Statistics,
+            },
+          ]
+        : []),
+      { label: t('preview', 'Preview'), action: preview, Icon: Preview },
+      {
+        label: t('duplicate', 'Duplicate'),
+        action: duplicatePost,
+        Icon: Duplicate,
+      },
+      { label: t('delete', 'Delete'), action: deletePost, Icon: DeletePost },
+    ];
+    return (
+      <div
+        ref={dragRef as any}
+        className={clsx(
+          'glass-frame glass-post glass-post-chip',
+          isBeforeNow && '!grayscale'
+        )}
+        data-state={state}
+        style={{ opacity }}
+      >
+        <button
+          type="button"
+          className="glass-chip-editor"
+          onClick={editPost}
+          title={content}
+        >
+          {tag?.color && (
+            <span
+              className="glass-chip-marker"
+              style={{ backgroundColor: tag.color }}
+              title={tag.name}
+            />
+          )}
+          <span className="glass-chip-avatar">
+            <img
+              src={post.integration.picture || withBasePath('/no-picture.jpg')}
+              alt={post.integration.name}
+            />
+            <img
+              className="glass-chip-platform"
+              src={withBasePath(
+                `/icons/platforms/${post.integration.providerIdentifier}.png`
+              )}
+              alt=""
+            />
+          </span>
+          {(state === 'ERROR' || state === 'PUBLISHED') && (
+            <span
+              className="glass-chip-status"
+              title={
+                state === 'ERROR'
+                  ? post.error ||
+                    t(
+                      'publishing_failed',
+                      'Publishing failed. Edit the post to try again.'
+                    )
+                  : t('published', 'Published')
+              }
+              aria-label={
+                state === 'ERROR'
+                  ? t('error', 'Error')
+                  : t('published', 'Published')
+              }
+            >
+              {state === 'ERROR' ? (
+                '!'
+              ) : (
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="m3 8 3 3 7-7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                </svg>
+              )}
+            </span>
+          )}
+          <span className="glass-chip-text">{content}</span>
+          {showTime && (
+            <time className="glass-chip-time">
+              {fromUtc(post.publishDate).format(
+                isUSCitizen() ? 'hh:mm A' : 'HH:mm'
+              )}
+            </time>
+          )}
+        </button>
+        <div className="glass-chip-actions">
+          {actions.map(({ label, action, Icon }) => (
+            <button
+              key={label}
+              type="button"
+              title={label}
+              aria-label={label}
+              onClick={action}
+            >
+              <Icon />
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       // @ts-ignore
@@ -1807,13 +1954,15 @@ const CalendarItem: FC<{
       )}
       <div
         className={clsx(
-          'text-white text-[11px] max-h-[24px] h-[24px] min-h-[24px] w-full rounded-tr-[10px] rounded-tl-[10px] flex items-center justify-center gap-[6px] px-[5px] bg-btnPrimary',
-          display === 'month' && 'mobile:hidden'
+          'text-white text-[11px] max-h-[24px] h-[24px] min-h-[24px] w-full rounded-tr-[10px] rounded-tl-[10px] flex items-center justify-center gap-[6px] px-[5px]',
+          !linkselfUrl && 'bg-btnPrimary',
+          display === 'month' && 'mobile:hidden',
+          linkselfUrl && 'glass-post-bar'
         )}
         style={{
-          backgroundColor: `var(--studio-marker, ${
-            post?.tags?.[0]?.tag?.color || 'transparent'
-          })`,
+          backgroundColor: linkselfUrl
+            ? post?.tags?.[0]?.tag?.color || 'transparent'
+            : `var(--studio-marker, ${post?.tags?.[0]?.tag?.color || 'transparent'})`,
         }}
       >
         <div

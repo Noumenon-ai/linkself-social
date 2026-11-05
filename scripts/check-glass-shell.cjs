@@ -270,7 +270,7 @@ for (const [file, name, currentNames, fixtures] of [
   ['layout/top.menu.tsx', 'TopMenu', ['TopMenu', 'StandaloneTopMenu'], [{}]],
 ]) {
   const current = components(base + file, currentNames, standaloneBindings)[name];
-  const previous = components(base + file, [name], standaloneBindings, head(base + file))[name];
+  const previous = components(base + file, currentNames, standaloneBindings, head(base + file))[name];
   for (const route of ['/launches', '/analytics', '/settings', '/plugs']) {
     pathname = route;
     user = { orgId: 'org', role: 'ADMIN', tier: 'PRO' };
@@ -302,14 +302,14 @@ for (const name of [
   'TrialTracker',
 ]) layoutBindings[name] = () => React.createElement('span', { 'data-widget': name });
 const { LayoutComponent: currentStandalone } = components(layoutFile, ['LayoutComponent', 'LayoutFrame'], layoutBindings);
-const { LayoutComponent: previousStandalone } = components(layoutFile, ['LayoutComponent'], layoutBindings, head(layoutFile));
+const { LayoutComponent: previousStandalone } = components(layoutFile, ['LayoutComponent', 'LayoutFrame'], layoutBindings, head(layoutFile));
 for (const fixture of [undefined, { tier: 'PRO' }, { tier: 'FREE' }, { tier: 'PRO', admin: true }]) {
   user = fixture;
   check(render(currentStandalone, { children: 'Content' }) === render(previousStandalone, { children: 'Content' }), `Standalone frame matches HEAD for ${fixture?.admin ? 'admin' : fixture?.tier || 'loading'}`);
 }
 user = undefined;
 const plainLogout = render(LogoutComponent);
-const { StudioTabs: previousStudioTabs } = components(base + 'layout/studio.tabs.tsx', ['StudioTabs'], shared, head(base + 'layout/studio.tabs.tsx'));
+const { StudioTabs: previousStudioTabs } = components(base + 'layout/studio.tabs.tsx', ['StudioTabs', 'studioPages', 'isStudioPage'], shared, head(base + 'layout/studio.tabs.tsx'));
 for (const url of ['https://example.test', 'https://example.test/', 'https://other.test', 'https://other.test/root/']) {
   linkselfUrl = url;
   const campaignHref = (html) => html.match(/href="([^"]*\/dashboard\/campaigns)"/)[1];
@@ -550,6 +550,208 @@ check(
   'Pages with and without a scrollbar keep the same width'
 );
 
+async function checkCalendarLayout(page, doc, loaded) {
+  const errors = [];
+  const onError = error => errors.push(error.message);
+  page.on('pageerror', onError);
+  await page.setViewportSize({ width: 1515, height: 1000 });
+  await page.setContent(doc(loaded));
+  const names = ['CalendarItem', 'CalendarColumn', 'WeekView', 'GlassWeekAgenda', 'MonthView',
+    'DayView', 'DaySlotColumn', 'slotDate', 'hours', 'channelColor', 'CopyDebug', 'OpenPost',
+    'Statistics', 'Preview', 'Duplicate', 'DeletePost', 'ListView'];
+  const code = `
+    const React = require('react');
+    const {useMemo, useCallback, useState, memo, Fragment} = React;
+    const {createRoot} = require('react-dom/client');
+    const {flushSync} = require('react-dom');
+    const dayjs = require('dayjs');
+    dayjs.extend(require('dayjs/plugin/isoWeek'));
+    dayjs.extend(require('dayjs/plugin/utc'));
+    dayjs.extend(require('dayjs/plugin/localizedFormat'));
+    const {groupBy, sortBy} = require('lodash');
+    const clsx = require('clsx');
+    const i18next = {resolvedLanguage: 'en'};
+    const newDayjs = (date) => dayjs(date || '2026-11-04T12:00:00');
+    const fromUtc = dayjs;
+    const isUSCitizen = () => false;
+    const useNow = () => newDayjs();
+    const useT = () => (_, fallback) => fallback;
+    const useUser = () => ({isSuperAdmin: true});
+    const useVariables = () => ({linkselfUrl: 'https://example.test'});
+    const withBasePath = p => p;
+    const stripHtmlValidation = (_, value) => value;
+    const CalendarContext = React.createContext(null);
+    let calendar;
+    const useCalendar = () => React.useContext(CalendarContext) || calendar;
+    const useDrop = () => [{canDrop: false}, () => {}];
+    window.dragItems = [];
+    const useDrag = factory => [{opacity: 1}, node => {
+      if (node) {node.draggable = true; window.dragItems.push(factory().item);}
+    }];
+    window.calendarActions = [];
+    const record = action => post => () => window.calendarActions.push([action, post?.id || post]);
+    const usePostActions = () => ({editPost: (post, duplicate) => record(duplicate ? 'duplicate' : 'edit')(post),
+      deletePost: record('delete'), copyDebugJson: record('debug'), openStatistics: record('statistics'),
+      openMissingRelease: record('missing'), openPost: record('open')});
+    const useLoadedPostDetails = () => record('details');
+    const useModals = () => ({openModal: () => window.calendarActions.push(['create'])});
+    const useFetch = () => () => {throw new Error('Unexpected request');};
+    const useAddProvider = () => () => {};
+    const WeekNowLine = () => null, DayNowLine = () => null;
+    const AddEditModal = () => null, SetSelectionModal = () => null;
+    const SafeImage = 'img', ChevronUpIcon = () => null;
+    ${declarations(base + 'launches/calendar.tsx', names)}
+    const root = createRoot(document.querySelector('.glass-calendar'));
+    window.renderCalendar = (display, count = 1) => {
+      const makePost = (id, hour, state = 'DRAFT') => ({id, group: id, content: 'A long draft caption that must stay on one line',
+        publishDate: '2026-11-05T' + hour + ':00:00', state,
+        tags: id === 'post0' ? [{tag: {name: 'Campaign', color: '#d45a73'}}] : [],
+        integration: {id: 'channel', name: 'Channel', providerIdentifier: 'network'},
+        releaseId: state === 'PUBLISHED' ? 'release' : null, error: 'Publishing failed'});
+      const posts = Array.from({length: count}, (_, i) => makePost('post' + i, '13', i === 1 ? 'ERROR' : i === 2 ? 'PUBLISHED' : 'DRAFT'));
+      posts.push(makePost('next', '14'));
+      calendar = {display, startDate: display === 'week' ? '2026-11-02' : display === 'month' ? '2026-11-01' : '2026-11-05',
+        selectedDay: '2026-11-05', currentHour: newDayjs().startOf('hour'), loading: false,
+        integrations: [{id: 'channel', name: 'Channel', hasPostAnalytics: true, time: []}],
+        posts, listPosts: posts, postDates: new Map(posts.map(p => [p, dayjs(p.publishDate)])),
+        sets: [], setSelectedDay() {}, reloadCalendarView() {}};
+      flushSync(() => root.render(React.createElement(display === 'week' ? WeekView : display === 'month' ? MonthView : display === 'list' ? ListView : DayView, {key: display + count})));
+    };
+    window.renderSingleChip = () => flushSync(() => root.render(React.createElement(CalendarItem, {
+      display: 'day', date: newDayjs(), isBeforeNow: true, state: 'DRAFT', post: calendar.posts[0],
+      integrations: calendar.integrations, editPost: record('edit')(calendar.posts[0]), showTime: true
+    })));
+    window.open = () => window.calendarActions.push(['preview']);
+    window.renderCalendar('week');
+  `;
+  const bundle = await require('esbuild').build({stdin: {contents: code, loader: 'tsx', resolveDir: process.cwd()}, bundle: true, write: false, platform: 'browser'});
+  await page.addScriptTag({content: bundle.outputFiles[0].text});
+  const chipSelector = '.glass-week-desktop .glass-post-chip';
+  const firstChip = page.locator(chipSelector).first();
+  await firstChip.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  const measure = (selector) => page.locator(selector).evaluateAll(nodes => nodes.map(n => {
+    const r = n.getBoundingClientRect();
+    return {top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height};
+  }));
+  let chips = await measure(chipSelector);
+  const firstCell = await firstChip.evaluate(n => {
+    const r = n.closest('.glass-calendar-cell').getBoundingClientRect();
+    return {top: r.top, bottom: r.bottom, height: r.height};
+  });
+  check(chips.length === 2, 'Week renders posts in two adjacent hours');
+  check(chips[0].height === 36, 'Week chip is 36px tall');
+  check(chips[0].top >= firstCell.top && chips[0].bottom <= firstCell.bottom, 'Week chip fits fully inside its cell');
+  check(firstCell.height === 44, 'One post fits a 44px week row');
+  check(chips[0].bottom <= chips[1].top, 'Adjacent hour posts do not overlap');
+  for (const fraction of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+    check(await firstChip.evaluate((n, fraction) => {
+      const r = n.getBoundingClientRect();
+      return n.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height * fraction));
+    }, fraction), `Week chip receives pointer hits at ${fraction * 100}% of its height`);
+  }
+  const emptyHeights = await page.locator('.glass-week-grid .glass-hour-label').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
+  check(emptyHeights.every(h => h === 44), 'Empty week rows remain 44px');
+  for (const fraction of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+    const before = await page.evaluate(() => window.calendarActions.length);
+    await firstChip.click({position: {x: 12, y: chips[0].height * fraction}});
+    check(await page.evaluate(before => window.calendarActions.length === before + 1 && window.calendarActions.at(-1)[0] === 'edit', before), `Clicking the chip at ${fraction * 100}% opens the editor`);
+  }
+  await page.mouse.move(0, 0);
+  await firstChip.locator('.glass-chip-editor').evaluate(n => n.blur());
+  check(await firstChip.locator('.glass-chip-actions').evaluate(n => getComputedStyle(n).opacity === '0'), 'Chip actions are hidden at rest');
+  await firstChip.hover();
+  check(await firstChip.locator('.glass-chip-actions').evaluate(n => getComputedStyle(n).opacity === '1'), 'Hover shows chip actions');
+  check(JSON.stringify(await measure(chipSelector)) === JSON.stringify(chips), 'Hover leaves chip size and position unchanged');
+  check(await firstChip.locator('.glass-chip-actions button').evaluateAll(nodes => nodes.every(n => {
+    const r = n.getBoundingClientRect(); return r.width >= 24 && r.height >= 24;
+  })), 'Chip action targets are at least 24px');
+  check(await firstChip.locator('.glass-chip-actions').evaluate(n => getComputedStyle(n).backgroundColor === 'rgb(34, 46, 64)'), 'Chip actions have a solid background');
+  await page.mouse.move(0, 0);
+  await firstChip.locator('.glass-chip-editor').focus();
+  check(await firstChip.locator('.glass-chip-actions').evaluate(n => getComputedStyle(n).opacity === '1'), 'Keyboard focus shows chip actions');
+  await firstChip.locator('.glass-chip-editor').press('Enter');
+  check(await page.evaluate(() => window.calendarActions.some(([action, id]) => action === 'edit' && id === 'post0')), 'Keyboard activation opens the post editor');
+  await firstChip.locator('[aria-label="Duplicate"]').click();
+  check(await page.evaluate(() => window.calendarActions.some(([action, id]) => action === 'duplicate' && id === 'post0') && !window.calendarActions.some(([action]) => action === 'create')), 'Duplicate uses its action without opening Create Post');
+  check(await firstChip.locator('.glass-chip-marker').evaluate(n => getComputedStyle(n).width === '3px' && getComputedStyle(n).backgroundColor === 'rgb(212, 90, 115)' && n.title === 'Campaign'), 'Tagged chip shows a 3px marker with its tag name');
+  check(await page.locator(chipSelector).nth(1).locator('.glass-chip-marker').count() === 0, 'Untagged chip has no marker');
+  check(await firstChip.locator('.glass-chip-text').evaluate(n => n.textContent.startsWith('Draft: ') && getComputedStyle(n).whiteSpace === 'nowrap' && getComputedStyle(n).textOverflow === 'ellipsis' && n.scrollWidth > n.clientWidth), 'Draft caption stays on one ellipsized line');
+  check(await firstChip.evaluate(n => n.draggable) && await page.evaluate(() => window.dragItems.some(item => item.id === 'post0' && item.interval === false && item.date)), 'Chip remains connected to post dragging');
+  await page.evaluate(() => window.renderCalendar('week', 3));
+  await page.locator(chipSelector).first().scrollIntoViewIfNeeded();
+  chips = await measure(chipSelector);
+  check(chips.length === 4 && chips.every(c => c.height === 36), 'Three posts in one slot and the next hour all use 36px chips');
+  for (let i = 0; i < chips.length - 1; i++) check(chips[i].bottom <= chips[i + 1].top, `Stacked post ${i + 1} does not overlap the following post`);
+  const stackedCell = await page.locator(chipSelector).first().evaluate(n => {
+    const r = n.closest('.glass-calendar-cell').getBoundingClientRect(); return {top: r.top, bottom: r.bottom, height: r.height};
+  });
+  check(stackedCell.height > 44 && chips.slice(0, 3).every(c => c.top >= stackedCell.top && c.bottom <= stackedCell.bottom), 'Week row grows to contain all three posts');
+  check(stackedCell.bottom <= chips[3].top, 'Expanded slot ends before the next hour post');
+  check(await page.locator('.glass-week-grid .glass-hour-label').evaluateAll(nodes => nodes.every((n, i) => i === 13 || n.getBoundingClientRect().height === 44)), 'Stacking posts leaves other empty rows at 44px');
+  check(await page.locator(chipSelector).evaluateAll(nodes => nodes.every(n => {
+    const r = n.getBoundingClientRect();
+    const add = n.closest('.glass-calendar-cell').querySelector('.glass-slot-label').getBoundingClientRect();
+    return add.height === 0 || add.top >= r.bottom || add.bottom <= r.top;
+  })), 'Slot add areas never cover a stacked chip');
+  for (let index = 0; index < 4; index++) {
+    const chip = page.locator(chipSelector).nth(index);
+    await chip.scrollIntoViewIfNeeded();
+    for (const fraction of [0.1, 0.3, 0.5, 0.7, 0.9]) check(await chip.evaluate((n, fraction) => {
+      const r = n.getBoundingClientRect();
+      return n.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height * fraction));
+    }, fraction), `Stacked chip ${index + 1} receives pointer hits at ${fraction * 100}%`);
+  }
+  const published = page.locator(`${chipSelector}[data-state="PUBLISHED"]`);
+  for (const [label, action] of [['Copy Debug JSON', 'debug'], ['Statistics', 'statistics'], ['Preview', 'preview'], ['Delete', 'delete']]) {
+    await published.locator(`[aria-label="${label}"]`).focus();
+    await published.locator(`[aria-label="${label}"]`).press('Enter');
+    check(await page.evaluate(action => window.calendarActions.at(-1)[0] === action, action), `${label} invokes its post action`);
+  }
+  for (const state of ['ERROR', 'PUBLISHED']) check(await page.locator(`${chipSelector}[data-state="${state}"]`).evaluate(n => {
+    const r = n.getBoundingClientRect(), b = n.querySelector('.glass-chip-status').getBoundingClientRect();
+    return b.height > 0 && b.top >= r.top && b.bottom <= r.bottom && b.left >= r.left && b.right <= r.right;
+  }), `${state} badge stays inside the chip`);
+  await page.evaluate(() => window.renderCalendar('week', 4));
+  const more = page.locator('.glass-week-desktop').getByText('+ Show more (1)', {exact: true});
+  await more.click();
+  check(await page.locator(chipSelector).count() === 5, 'Show more reveals the remaining slot post');
+  chips = await measure(chipSelector);
+  check(chips.every((c, i) => !i || chips[i - 1].bottom <= c.top), 'Expanded posts do not overlap');
+  await page.evaluate(() => window.renderCalendar('day', 3));
+  const dayChips = await measure('.glass-day-view .glass-post-chip');
+  check(dayChips.length === 4 && dayChips.every(c => c.height === 36), 'Day view renders compact chips');
+  check(dayChips.every((c, i) => !i || dayChips[i - 1].bottom <= c.top), 'Day posts stack without overlap');
+  await page.evaluate(() => window.renderCalendar('list', 3));
+  check(await page.locator('.glass-list-view .glass-post-chip').count() === 0, 'List view keeps its existing card layout');
+  const bars = await page.locator('.glass-list-view .glass-post-bar').evaluateAll(nodes => nodes.map(n => getComputedStyle(n).backgroundColor));
+  check(bars[0] === 'rgb(212, 90, 115)' && bars.slice(1).every(color => color === 'rgba(0, 0, 0, 0)'), 'List bars use the tag color and are transparent without a tag');
+  const listCards = await measure('.glass-list-view .glass-post');
+  check(listCards.every((c, i) => !i || listCards[i - 1].bottom <= c.top), 'List cards do not overlap');
+  for (const width of [1515, 390]) {
+    await page.setViewportSize({width, height: 1000});
+    await page.evaluate(() => window.renderCalendar('month', 3));
+    const tiles = await measure('.glass-month-grid .glass-date-tile');
+    check(tiles.length === 42, `${width}: month renders all day tiles`);
+    for (let row = 0; row < 6; row++) {
+      const week = tiles.slice(row * 7, row * 7 + 7);
+      check(week.every(tile => tile.height === week[0].height && tile.top === week[0].top), `${width}: month row ${row + 1} has aligned tiles of equal height`);
+    }
+    check(await page.locator('.glass-date-tile').evaluateAll(nodes => nodes.every(n => {
+      const r = n.getBoundingClientRect(), p = n.parentElement.getBoundingClientRect();
+      return r.top === p.top && r.bottom === p.bottom;
+    })), `${width}: month tiles fill their grid cells`);
+  }
+  await page.setViewportSize({width: 1515, height: 1000});
+  await page.evaluate(() => window.renderSingleChip());
+  const timed = page.locator('.glass-post-chip');
+  check(await timed.locator('.glass-chip-time').textContent() === '13:00', 'Compact chip displays the time when requested');
+  check(await timed.evaluate(n => getComputedStyle(n).filter === 'grayscale(1)'), 'Past compact chips retain greyscale');
+  check((await timed.boundingBox()).height === 36, 'Time and past styling keep the chip at 36px');
+  page.off('pageerror', onError);
+  check(errors.length === 0, `Calendar renders without browser errors: ${errors.join(', ')}`);
+}
+
 async function main() {
   let response;
   const integrationBindings = {
@@ -585,7 +787,7 @@ async function main() {
     await postcss([
       tailwind({
         ...config,
-        content: [{ raw: first + loaded, extension: 'html' }],
+        content: [{ raw: first + loaded, extension: 'html' }, { raw: read(base + 'launches/calendar.tsx'), extension: 'tsx' }],
       }),
     ]).process(css, { from: undefined })
   ).css;
@@ -915,6 +1117,7 @@ async function main() {
         `${width}: long content pushes the footer down with the page`
       );
     }
+    await checkCalendarLayout(page, doc, loaded);
     await page.setViewportSize({ width: 1515, height: 1000 });
     await page.setContent(doc(loaded));
     await page.evaluate(() => window.scrollTo(0, 0));
