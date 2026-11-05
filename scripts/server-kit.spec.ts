@@ -150,7 +150,8 @@ describe('Server deployment kit', () => {
       running=${running}
       container() { printf '%s' "$1"; }
       docker() { if [[ $* == *postiz && $running == true ]]; then echo true; else echo false; fi; }
-      dc() { printf '%s\n' "$*"; if [[ $1 == exec ]]; then cat >/dev/null; fi; if [[ $1 == stop && $4 == postiz ]]; then running=false; fi; }
+      exec 3>&1
+      dc() { printf '%s\n' "$*" >&3; if [[ $1 == exec ]]; then cat >/dev/null; fi; if [[ $1 == stop && $4 == postiz ]]; then running=false; fi; }
       stop_writers
       IFS= read -r next
       printf '%s\n' "$next"
