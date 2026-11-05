@@ -52,7 +52,7 @@ describe('Server deployment kit', () => {
       'config', '--format', 'json',
     ], {
       cwd: root,
-      env: { PATH: process.env.PATH, HOME: process.env.HOME, LINKSELF_SOCIAL_ENV: envPath },
+      env: { PATH: process.env.PATH, HOME: process.env.HOME, NODE_ENV: 'test', LINKSELF_SOCIAL_ENV: envPath },
       encoding: 'utf8',
       timeout: 30000,
     }));
