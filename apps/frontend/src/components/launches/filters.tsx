@@ -380,7 +380,7 @@ export const Filters = () => {
         </div>
       )}
       {isListView && (
-        <div className="flex flex-grow flex-row items-center gap-[10px] mobile:flex-wrap mobile:order-3 mobile:basis-full mobile:min-w-0 mobile:gap-[8px]">
+        <div className="glass-list-controls flex flex-grow flex-row items-center gap-[10px] mobile:flex-wrap mobile:order-3 mobile:basis-full mobile:min-w-0 mobile:gap-[8px]">
           <div
             className={clsx(
               'border h-[42px] border-newTableBorder bg-newTableBorder gap-[1px] flex items-center rounded-[8px] overflow-hidden mobile:order-2 mobile:w-full',
@@ -444,7 +444,7 @@ export const Filters = () => {
               </svg>
             </div>
           </div>
-          <div className="flex flex-row p-[4px] border border-newTableBorder rounded-[8px] text-[14px] font-[500] mobile:order-1 mobile:w-full mobile:overflow-x-auto">
+          <div className="glass-list-state flex flex-row p-[4px] border border-newTableBorder rounded-[8px] text-[14px] font-[500] mobile:order-1 mobile:w-full mobile:overflow-x-auto">
             {listStateOptions.map((option) => (
               <div
                 key={option.value}

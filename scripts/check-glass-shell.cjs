@@ -667,15 +667,21 @@ async function checkCalendarLayout(page, doc, loaded) {
   await firstChip.hover();
   check(await firstChip.locator('.glass-chip-actions').evaluate(n => getComputedStyle(n).opacity === '1'), 'Hover shows chip actions');
   check(JSON.stringify(await measure(chipSelector)) === JSON.stringify(chips), 'Hover leaves chip size and position unchanged');
-  check(await firstChip.locator('.glass-chip-actions button').evaluateAll(nodes => nodes.every(n => {
+  await firstChip.locator('.glass-chip-more').hover();
+  check(await firstChip.locator('.glass-chip-actions button').evaluateAll(nodes => nodes.length >= 4 && nodes.every(n => {
     const r = n.getBoundingClientRect(); return r.width >= 24 && r.height >= 24;
   })), 'Chip action targets are at least 24px');
+  check(await firstChip.locator('.glass-chip-action-list button').evaluateAll(nodes => nodes.every(n => {
+    const r = n.getBoundingClientRect(); const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+    return !!hit && n.contains(hit);
+  })), 'Every week chip action can be reached from the more button');
   check(await firstChip.locator('.glass-chip-actions').evaluate(n => getComputedStyle(n).backgroundColor === 'rgb(34, 46, 64)'), 'Chip actions have a solid background');
   await page.mouse.move(0, 0);
   await firstChip.locator('.glass-chip-editor').focus();
   check(await firstChip.locator('.glass-chip-actions').evaluate(n => getComputedStyle(n).opacity === '1'), 'Keyboard focus shows chip actions');
   await firstChip.locator('.glass-chip-editor').press('Enter');
   check(await page.evaluate(() => window.calendarActions.some(([action, id]) => action === 'edit' && id === 'post0')), 'Keyboard activation opens the post editor');
+  await firstChip.locator('.glass-chip-more').hover();
   await firstChip.locator('[aria-label="Duplicate"]').click();
   check(await page.evaluate(() => window.calendarActions.some(([action, id]) => action === 'duplicate' && id === 'post0') && !window.calendarActions.some(([action]) => action === 'create')), 'Duplicate uses its action without opening Create Post');
   check(await firstChip.locator('.glass-chip-marker').evaluate(n => getComputedStyle(n).width === '3px' && getComputedStyle(n).backgroundColor === 'rgb(212, 90, 115)' && n.title === 'Campaign'), 'Tagged chip shows a 3px marker with its tag name');
@@ -708,6 +714,7 @@ async function checkCalendarLayout(page, doc, loaded) {
   }
   const published = page.locator(`${chipSelector}[data-state="PUBLISHED"]`);
   for (const [label, action] of [['Copy Debug JSON', 'debug'], ['Statistics', 'statistics'], ['Preview', 'preview'], ['Delete', 'delete']]) {
+    await published.locator('.glass-chip-more').focus();
     await published.locator(`[aria-label="${label}"]`).focus();
     await published.locator(`[aria-label="${label}"]`).press('Enter');
     check(await page.evaluate(action => window.calendarActions.at(-1)[0] === action, action), `${label} invokes its post action`);
@@ -727,9 +734,11 @@ async function checkCalendarLayout(page, doc, loaded) {
   check(dayChips.length === 4 && dayChips.every(c => c.height === 36), 'Day view renders compact chips');
   check(dayChips.every((c, i) => !i || dayChips[i - 1].bottom <= c.top), 'Day posts stack without overlap');
   await page.evaluate(() => window.renderCalendar('list', 3));
-  check(await page.locator('.glass-list-view .glass-post-chip').count() === 0, 'List view keeps its existing card layout');
-  const bars = await page.locator('.glass-list-view .glass-post-bar').evaluateAll(nodes => nodes.map(n => getComputedStyle(n).backgroundColor));
-  check(bars[0] === 'rgb(212, 90, 115)' && bars.slice(1).every(color => color === 'rgba(0, 0, 0, 0)'), 'List bars use the tag color and are transparent without a tag');
+  const listChips = page.locator('.glass-list-view .glass-post-chip');
+  check(await listChips.count() > 0, 'List view uses the same one-line chips');
+  check(await page.locator('.glass-list-view .glass-post-bar').count() === 0, 'List view has no empty bar');
+  check(await listChips.first().locator('.glass-chip-marker').evaluate(n => getComputedStyle(n).backgroundColor === 'rgb(212, 90, 115)'), 'A tagged list post shows the tag colour');
+  check(await listChips.first().locator('.glass-chip-more').evaluate(n => getComputedStyle(n).display === 'none'), 'Wide list chips show their actions directly');
   const listCards = await measure('.glass-list-view .glass-post');
   check(listCards.every((c, i) => !i || listCards[i - 1].bottom <= c.top), 'List cards do not overlap');
   for (const width of [1515, 390]) {

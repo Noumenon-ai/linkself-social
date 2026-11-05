@@ -3232,6 +3232,22 @@ html[data-linkself-theme='glass-frame'] {
       grid-column: 1 / -1;
       grid-row: 3;
     }
+    .glass-calendar-actions .glass-list-controls {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      min-width: 0;
+    }
+    .glass-list-state {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .glass-list-state > div {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 0;
+      padding-inline: 6px;
+      white-space: nowrap;
+    }
     .glass-settings-content {
       padding: 12px;
     }
@@ -3474,10 +3490,13 @@ html[data-linkself-theme='glass-frame'] {
     flex: 0 0 36px;
     padding: 0;
     border-radius: var(--radius-small);
-    overflow: hidden;
     color: var(--text);
   }
+  .glass-post.glass-post-chip:is(:hover, :focus-within) {
+    z-index: 30;
+  }
   .glass-post-chip .glass-chip-editor {
+    overflow: hidden;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -3558,10 +3577,8 @@ html[data-linkself-theme='glass-frame'] {
     bottom: 0;
     display: flex;
     align-items: center;
-    max-width: calc(100% - 50px);
-    overflow-x: auto;
-    scrollbar-width: none;
     background: var(--inset);
+    border-radius: var(--radius-small);
     color: var(--text);
     opacity: 0;
     pointer-events: none;
@@ -3570,6 +3587,34 @@ html[data-linkself-theme='glass-frame'] {
   .glass-post-chip:focus-within .glass-chip-actions {
     opacity: 1;
     pointer-events: auto;
+  }
+  .glass-post-chip .glass-chip-actions button.glass-chip-more {
+    display: none;
+  }
+  .glass-chip-action-list {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+  // A week column can be narrower than the actions, and a bar under every hovered
+  // chip would cover the chip stacked below it. Week chips open them from one button.
+  .glass-week-grid .glass-post-chip .glass-chip-actions button.glass-chip-more {
+    display: flex;
+  }
+  .glass-week-grid .glass-chip-action-list {
+    position: absolute;
+    top: 100%;
+    inset-inline-end: 0;
+    display: none;
+    height: 36px;
+    padding-inline: 4px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+    background: var(--inset);
+    box-shadow: var(--shadow);
+  }
+  .glass-week-grid .glass-chip-actions:is(:hover, :focus-within) .glass-chip-action-list {
+    display: flex;
   }
   .glass-post-chip .glass-chip-actions button {
     display: flex;

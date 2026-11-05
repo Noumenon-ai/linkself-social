@@ -1105,7 +1105,6 @@ export const ListView = () => {
                 <CalendarItem
                   key={post.id}
                   display="day"
-                  compact={false}
                   isBeforeNow={false}
                   date={fromUtc(post.publishDate)}
                   state={post.state}
@@ -1890,6 +1889,19 @@ const CalendarItem: FC<{
           )}
         </button>
         <div className="glass-chip-actions">
+          <button
+            type="button"
+            className="glass-chip-more"
+            aria-label={t('more_actions', 'More actions')}
+            aria-haspopup="true"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              <circle cx="3" cy="8" r="1.5" fill="currentColor" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+              <circle cx="13" cy="8" r="1.5" fill="currentColor" />
+            </svg>
+          </button>
+          <div className="glass-chip-action-list">
           {actions.map(({ label, action, Icon }) => (
             <button
               key={label}
@@ -1901,6 +1913,7 @@ const CalendarItem: FC<{
               <Icon />
             </button>
           ))}
+          </div>
         </div>
       </div>
     );
