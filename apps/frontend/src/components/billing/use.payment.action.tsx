@@ -1,14 +1,15 @@
 import { useCallback } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js/pure';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 export const usePaymentAction = () => {
-  const { stripeClient } = useVariables();
+  const { stripeClient, linkselfUrl } = useVariables();
 
   return useCallback(
     // Consuming the PaymentIntent client_secret with the publishable key is
     // Stripe's intended flow: https://docs.stripe.com/api/payment_intents/object#payment_intent_object-client_secret
     async (clientSecret: string) => {
+      if (linkselfUrl) return { error: 'Manage billing in LinkSelf.' };
       try {
         const stripe = await loadStripe(stripeClient);
         const { error } = await stripe!.handleNextAction({ clientSecret });
@@ -19,6 +20,6 @@ export const usePaymentAction = () => {
         return { error: err?.message || 'Payment failed' };
       }
     },
-    [stripeClient]
+    [stripeClient, linkselfUrl]
   );
 };

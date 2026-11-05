@@ -951,7 +951,9 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
             )}
           >
             <div className="glass-editor-header bg-newBgColor h-[65px] rounded-s-[20px] !rounded-b-[0] mobile:hidden flex items-center gap-[12px] px-[20px] text-[20px] font-[600]">
-              {t('create_post_title', 'Create Post')}
+              {linkselfUrl && addEditSets
+                ? props.set ? 'Edit set' : 'Add a set'
+                : t('create_post_title', 'Create Post')}
               <CreationMethodBadge
                 creationMethod={existingData?.posts?.[0]?.creationMethod}
                 size="sm"

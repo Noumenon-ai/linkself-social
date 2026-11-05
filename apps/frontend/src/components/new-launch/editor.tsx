@@ -12,6 +12,7 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import clsx from 'clsx';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import EmojiPicker from 'emoji-picker-react';
 import { Theme } from 'emoji-picker-react';
@@ -674,6 +675,7 @@ export const Editor: FC<{
   const toaster = useToaster();
   const editorRef = useRef<undefined | { editor: any }>(undefined);
   const [loading, setLoading] = useState(false);
+  const { linkselfUrl } = useVariables();
   // the uploader is created once, so it reads the latest value from here
   const inlineImagesRef = useRef(inlineImages);
   inlineImagesRef.current = inlineImages;
@@ -995,7 +997,7 @@ export const Editor: FC<{
                 editorRef?.current?.editor?.commands?.focus('end');
               }}
             />
-            <div className="w-full pointer-events-none">
+            <div className={clsx('w-full pointer-events-none', linkselfUrl && !loading && 'hidden')}>
               <div className="w-full h-[46px] overflow-hidden absolute left-0 bg-newBgColorInner uppyChange mobile:isolate">
                 <Dashboard
                   height={46}
@@ -1013,6 +1015,7 @@ export const Editor: FC<{
             <div
               className={clsx(
                 'w-full h-[46px] bg-newBgColorInner cursor-text',
+                linkselfUrl && !loading && 'hidden',
                 // the upload progress shows over this space
                 flat && !loading && 'mobile:hidden'
               )}

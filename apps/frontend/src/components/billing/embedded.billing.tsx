@@ -2,7 +2,7 @@
 import { studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import { useVariables } from '@gitroom/react/helpers/variable.context';
-import { Stripe } from '@stripe/stripe-js';
+import type { Stripe } from '@stripe/stripe-js';
 
 import { FC, useEffect, useState } from 'react';
 import {

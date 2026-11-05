@@ -42,6 +42,26 @@ for (const [file, name, props] of [
   check(loaded[name](props) === null, `${name} stays inactive in LinkSelf mode`);
 }
 
+const { FirstBillingComponent } = component(
+  'apps/frontend/src/components/billing/first.billing.component.tsx',
+  ['FirstBillingComponent'],
+  { useVariables: () => ({ linkselfUrl: 'https://example.test' }) }
+);
+check(FirstBillingComponent() === null, 'LinkSelf never mounts Stripe checkout');
+
+// Importing the default Stripe entry point injects an external script even
+// when no billing component is mounted. Only type imports may use it.
+for (const file of ['first.billing.component', 'use.payment.action', 'embedded.billing']) {
+  const source = ts.createSourceFile(file, fs.readFileSync(
+    `apps/frontend/src/components/billing/${file}.tsx`, 'utf8'
+  ), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  check(!source.statements.some((statement) =>
+    ts.isImportDeclaration(statement) &&
+    statement.moduleSpecifier.text === '@stripe/stripe-js' &&
+    !statement.importClause?.isTypeOnly
+  ), `${file} cannot load Stripe as an import side effect`);
+}
+
 // Compile the named declarations from the real TSX; dependencies are injected below.
 function component(file, names, bindings) {
   const source = ts.createSourceFile(
@@ -1246,6 +1266,44 @@ async function checkChannelDialog() {
 }
 
 (async () => {
+  let billingVariables = { linkselfUrl: 'https://example.test', stripeClient: 'test-key' };
+  let stripeLoads = 0;
+  const { usePaymentAction } = component(
+    'apps/frontend/src/components/billing/use.payment.action.tsx',
+    ['usePaymentAction'],
+    {
+      useVariables: () => billingVariables,
+      useCallback: (callback) => callback,
+      loadStripe: async () => {
+        stripeLoads++;
+        return { handleNextAction: async () => ({}) };
+      },
+    }
+  );
+  check(!!(await usePaymentAction()('test-secret')).error, 'LinkSelf payment actions direct users to LinkSelf billing');
+  check(stripeLoads === 0, 'LinkSelf payment actions never load Stripe');
+  billingVariables = { ...billingVariables, linkselfUrl: '' };
+  check(!(await usePaymentAction()('test-secret')).error && stripeLoads === 1, 'Standalone billing retains Stripe payment actions');
+
+  const { CommentComposer } = component(
+    'apps/frontend/src/components/preview/comments.components.tsx',
+    ['CommentComposer'],
+    {
+      useT: () => (_, fallback) => fallback,
+      useUser: () => null,
+      useFetch: () => () => { throw new Error('Rendering the comment prompt must not send a request'); },
+      useToaster: () => ({}),
+      useModals: () => ({}),
+      useVariables: () => ({ linkselfUrl: 'https://example.test', recaptchaSiteKey: 'configured' }),
+      usePreviewComments: () => ({}),
+      useState: (value) => [value, () => {}],
+      useForm: () => ({}),
+      useCallback: (callback) => callback,
+    }
+  );
+  const commentPrompt = CommentComposer({});
+  check(commentPrompt.type === 'a' && text(commentPrompt) === 'Sign in to comment', 'LinkSelf CAPTCHA comments require sign-in without loading a blocked script');
+
   // Invoke the actual drop callback, including its optimistic update and PUT.
   const runDrop = async ({
     display = 'month',

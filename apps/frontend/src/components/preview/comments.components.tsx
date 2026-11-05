@@ -10,6 +10,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
+import { withBasePath } from '@gitroom/helpers/utils/base-path';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
@@ -129,7 +130,7 @@ const CommentComposer: FC<{
   const fetch = useFetch();
   const toast = useToaster();
   const modals = useModals();
-  const { recaptchaSiteKey } = useVariables();
+  const { recaptchaSiteKey, linkselfUrl } = useVariables();
   const { previewId, pending, setPending, mutate } = usePreviewComments();
   const [loading, setLoading] = useState(false);
   const form = useForm({ values: { content: '' } });
@@ -236,6 +237,12 @@ const CommentComposer: FC<{
     },
     [user?.id, recaptchaSiteKey, previewId, parentId, anchor, askForName]
   );
+
+  // LinkSelf's script policy excludes Google CAPTCHA. Keep anonymous CAPTCHA
+  // enforcement intact and use the authenticated comment flow instead.
+  if (linkselfUrl && recaptchaSiteKey && !user?.id) {
+    return <a href={withBasePath('/auth')} className="underline">Sign in to comment</a>;
+  }
 
   return (
     <FormProvider {...form}>

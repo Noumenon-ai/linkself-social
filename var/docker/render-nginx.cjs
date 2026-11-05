@@ -12,7 +12,7 @@ function renderNginx(template, value = '', linkself = process.env.LINKSELF_URL) 
     ? uploads.replace('__LINKSELF_BASE_PATH__', '').replace('            alias /uploads/;', '            alias /uploads/;\n            limit_except GET HEAD { deny all; }')
     : '';
   return template.replaceAll('__LINKSELF_BASE_PATH__', base)
-    .replace('__LINKSELF_API_HEADERS__', linkself ? `add_header X-Content-Type-Options "nosniff" always;\n            add_header Content-Security-Policy "default-src 'none'; sandbox" always;` : '')
+    .replace('__LINKSELF_API_HEADERS__', linkself ? `proxy_hide_header X-Content-Type-Options;\n            proxy_hide_header Content-Security-Policy;\n            add_header X-Content-Type-Options "nosniff" always;\n            add_header Content-Security-Policy "default-src 'none'; sandbox" always;` : '')
     .replace('        location / {', legacy + '\n\n        location / {');
 }
 

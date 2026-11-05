@@ -1,5 +1,6 @@
 import { FC, useCallback } from 'react';
 import clsx from 'clsx';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { ChevronUpIcon } from '@gitroom/frontend/components/ui/icons';
 
 const Arrow: FC<{
@@ -20,6 +21,7 @@ export const UpDownArrow: FC<{
   onChange: (type: 'up' | 'down') => void;
 }> = (props) => {
   const { isUp, isDown, onChange } = props;
+  const { linkselfUrl } = useVariables();
   const changePosition = useCallback(
     (type: 'up' | 'down') => () => {
       onChange(type);
@@ -34,7 +36,8 @@ export const UpDownArrow: FC<{
         disabled={!isUp}
         onClick={changePosition('up')}
         className={clsx(
-          'outline-none w-[20px] h-[20px] flex justify-center items-center',
+          'outline-none flex justify-center items-center',
+          linkselfUrl ? 'min-w-[24px] min-h-[24px]' : 'w-[20px] h-[20px]',
           isUp
             ? 'cursor-pointer'
             : 'pointer-events-none text-textColor opacity-50'
@@ -48,7 +51,8 @@ export const UpDownArrow: FC<{
         disabled={!isDown}
         onClick={changePosition('down')}
         className={clsx(
-          'outline-none rounded-bl-[20px] w-[20px] h-[20px] flex justify-center items-center',
+          'outline-none rounded-bl-[20px] flex justify-center items-center',
+          linkselfUrl ? 'min-w-[24px] min-h-[24px]' : 'w-[20px] h-[20px]',
           isDown
             ? 'cursor-pointer'
             : 'pointer-events-none text-textColor opacity-50'

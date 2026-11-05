@@ -99,6 +99,11 @@ it.each(['', '/dashboard/studio'])('renders LinkSelf response policy %s', (base)
   const config = renderNginx(readFileSync('var/docker/nginx.conf', 'utf8'), base, 'https://linkself.test');
   expect(config).toContain("Content-Security-Policy \"default-src 'none'; sandbox\" always");
   expect(config).toContain('X-Content-Type-Options "nosniff" always');
+  const apiLocation = config.match(/location [^\s]*\/api\/ \{([^}]+)\}/)?.[1];
+  for (const header of ['X-Content-Type-Options', 'Content-Security-Policy']) {
+    expect(apiLocation?.match(new RegExp(`proxy_hide_header ${header};`, 'g'))).toHaveLength(1);
+    expect(apiLocation?.match(new RegExp(`add_header ${header} `, 'g'))).toHaveLength(1);
+  }
   expect(config).not.toContain('__LINKSELF_');
   if (base) {
     expect(config).toContain('location /uploads/ {');
