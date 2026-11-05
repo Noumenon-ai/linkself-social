@@ -249,7 +249,7 @@ export const PlatformAnalytics = () => {
                   </div>
                   <ImageWithFallback
                     fallbackSrc={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
-                    src={integration.picture}
+                    src={integration.picture || withBasePath('/no-picture.jpg')}
                     className="rounded-[8px]"
                     alt={integration.identifier}
                     width={36}

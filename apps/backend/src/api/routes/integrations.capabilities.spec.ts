@@ -75,3 +75,33 @@ describe('Integration list capabilities', () => {
     }
   );
 });
+
+describe('Integration list pictures', () => {
+  const originalLinkselfUrl = process.env.LINKSELF_URL;
+  afterEach(() => {
+    if (originalLinkselfUrl === undefined) delete process.env.LINKSELF_URL;
+    else process.env.LINKSELF_URL = originalLinkselfUrl;
+  });
+
+  it.each([
+    ['https://linkself.net', null, ''],
+    ['https://linkself.net', '', ''],
+    [undefined, null, '/no-picture.jpg'],
+    ['', '', '/no-picture.jpg'],
+    ['https://linkself.net', 'https://example.com/avatar.jpg', 'https://example.com/avatar.jpg'],
+    [undefined, 'https://example.com/avatar.jpg', 'https://example.com/avatar.jpg'],
+  ])('returns the picture fallback for mode %s and picture %s', async (linkselfUrl, picture, expected) => {
+    if (linkselfUrl === undefined) delete process.env.LINKSELF_URL;
+    else process.env.LINKSELF_URL = linkselfUrl;
+    const controller = new IntegrationsController(
+      { getSocialIntegration: jest.fn().mockReturnValue({ editor: 'normal' }) } as never,
+      { getIntegrationsList: jest.fn().mockResolvedValue([
+        { id: 'channel', providerIdentifier: 'test-provider', postingTimes: '[]', picture },
+      ]) } as never,
+      {} as never,
+      {} as never
+    );
+    const result = await controller.getIntegrationList({ id: 'org' } as never);
+    expect(result.integrations[0].picture).toBe(expected);
+  });
+});

@@ -137,7 +137,7 @@ export class IntegrationsController {
             hasPostAnalytics: typeof findIntegration.postAnalytics === 'function' &&
               (findIntegration.postAnalyticsEnabled?.() ?? true),
             stripLinks: !!findIntegration?.stripLinks?.(),
-            picture: p.picture || '/no-picture.jpg',
+            picture: p.picture || (process.env.LINKSELF_URL ? '' : '/no-picture.jpg'),
             identifier: p.providerIdentifier,
             inBetweenSteps: p.inBetweenSteps,
             refreshNeeded: p.refreshNeeded,

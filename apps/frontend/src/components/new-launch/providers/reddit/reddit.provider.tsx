@@ -125,7 +125,7 @@ const RedditPreview: FC = (props) => {
                       <SafeImage
                         width={48}
                         height={48}
-                        src={integration?.picture!}
+                        src={integration?.picture || withBasePath('/no-picture.jpg')}
                         alt="x"
                         className="rounded-full w-full h-full relative z-[2]"
                       />

@@ -6,7 +6,7 @@ import { useOrganizationLimits } from '@gitroom/frontend/components/settings/use
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { Input } from '@gitroom/react/form/input';
 import { FieldValues, FormProvider, useForm } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { ApiKeyDto } from '@gitroom/nestjs-libraries/dtos/integrations/api.key.dto';
 import { useRouter } from 'next/navigation';
 import { TopTitle } from '@gitroom/frontend/components/launches/helpers/top.title.component';
+import { newDayjs } from '@gitroom/frontend/components/layout/set.timezone';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { object, string } from 'yup';
@@ -180,6 +181,8 @@ export const CustomVariables: FC<{
 }> = (props) => {
   const { close, gotoUrl, identifier, variables, onboarding, refresh } = props;
   const fetch = useFetch();
+  const { linkselfUrl } = useVariables();
+  const [error, setError] = useState('');
   const modals = useModals();
   const toaster = useToaster();
   const t = useT();
@@ -217,33 +220,70 @@ export const CustomVariables: FC<{
   });
   const submit = useCallback(
     async (data: FieldValues) => {
-      const params = new URLSearchParams();
-      if (onboarding) params.set('onboarding', 'true');
-      if (refresh) params.set('refresh', refresh);
-      const query = params.toString();
-      const response = await fetch(
-        `/integrations/social/${identifier}${query ? `?${query}` : ''}`
-      );
-      if (response.status === 402) {
-        return;
-      }
-      const { url, message } = await response.json();
-      if (!response.ok || !url) {
-        toaster.show(
-          message ||
-            t('could_not_connect_to_platform', 'Could not connect to the platform'),
-          'warning'
+      setError('');
+      const fallback = t('could_not_add_provider', 'Could not add provider');
+      try {
+        const params = new URLSearchParams();
+        if (onboarding) params.set('onboarding', 'true');
+        if (refresh) params.set('refresh', refresh);
+        const query = params.toString();
+        const response = await fetch(
+          `/integrations/social/${identifier}${query ? `?${query}` : ''}`
         );
-        return;
+        if (response.status === 402) {
+          return;
+        }
+        const { url, message } = await response.json();
+        if (!response.ok || !url) {
+          if (linkselfUrl) {
+            setError(message || fallback);
+            return;
+          }
+          toaster.show(
+            message ||
+              t('could_not_connect_to_platform', 'Could not connect to the platform'),
+            'warning'
+          );
+          return;
+        }
+        if (linkselfUrl) {
+          const result = await fetch(`/integrations/social-connect/${identifier}`, {
+            method: 'POST',
+            body: JSON.stringify({
+              state: url,
+              code: Buffer.from(JSON.stringify(data)).toString('base64'),
+              timezone: String(newDayjs().utcOffset()),
+            }),
+          });
+          if (result.status === 412) {
+            window.location.assign(withBasePath('/launches?precondition=true'));
+            return;
+          }
+          if (result.status !== 200 && result.status !== 201) {
+            const errorData = await result.json().catch(() => ({}));
+            setError(
+              (result.status === 406
+                ? errorData?.msg
+                : errorData?.message || errorData?.msg) || fallback
+            );
+            return;
+          }
+          window.location.assign(
+            withBasePath(`/launches?added=${identifier}&msg=Channel Updated${onboarding ? '&onboarding=true' : ''}`)
+          );
+          return;
+        }
+        modals.closeAll();
+        gotoUrl(
+          `/integrations/social/${identifier}?state=${url}&code=${Buffer.from(
+            JSON.stringify(data)
+          ).toString('base64')}${onboarding ? '&onboarding=true' : ''}`
+        );
+      } catch {
+        setError(fallback);
       }
-      modals.closeAll();
-      gotoUrl(
-        `/integrations/social/${identifier}?state=${url}&code=${Buffer.from(
-          JSON.stringify(data)
-        ).toString('base64')}${onboarding ? '&onboarding=true' : ''}`
-      );
     },
-    [fetch, identifier, onboarding, refresh, modals, gotoUrl, toaster, t]
+    [fetch, identifier, onboarding, refresh, modals, gotoUrl, toaster, t, linkselfUrl]
   );
 
   return (
@@ -254,42 +294,22 @@ export const CustomVariables: FC<{
           onSubmit={methods.handleSubmit(submit)}
         >
           {variables.map((variable) => (
-            <div key={variable.key}>
-              {variable.hint ? (
-                <div className="flex flex-col gap-[6px]">
-                  <div className="text-[14px] flex items-center gap-[6px]">
-                    <label htmlFor={`channel-${identifier}-${variable.key}`}>{variable.label}</label>
-                    <span
-                      data-tooltip-id="tooltip"
-                      data-tooltip-content={variable.hint}
-                      className="w-[16px] h-[16px] rounded-full border border-textColor/60 text-textColor/60 flex items-center justify-center text-[11px] leading-none cursor-help select-none"
-                    >
-                      i
-                    </span>
-                  </div>
-                  <Input
-                    label=""
-                    name={variable.key}
-                    id={`channel-${identifier}-${variable.key}`}
-                    aria-label={variable.label}
-                    autoComplete={variable.type === 'password' ? 'new-password' : 'off'}
-                    type={variable.type == 'text' ? 'text' : 'password'}
-                  />
-                </div>
-              ) : (
-                <Input
-                  label={variable.label}
-                  name={variable.key}
-                    id={`channel-${identifier}-${variable.key}`}
-                    aria-label={variable.label}
-                    autoComplete={variable.type === 'password' ? 'new-password' : 'off'}
-                  type={variable.type == 'text' ? 'text' : 'password'}
-                />
-              )}
-            </div>
+            <Input
+              key={variable.key}
+              label={variable.label}
+              hint={variable.hint}
+              name={variable.key}
+              id={`channel-${identifier}-${variable.key}`}
+              aria-label={variable.label}
+              autoComplete={variable.type === 'password' ? 'new-password' : 'off'}
+              type={variable.type == 'text' ? 'text' : 'password'}
+            />
           ))}
+          {error && <div role="alert" className="text-red-400 text-[13px] w-0 min-w-full">{error}</div>}
           <div>
-            <Button type="submit">{t('connect', 'Connect')}</Button>
+            <Button type="submit" loading={methods.formState.isSubmitting} disabled={methods.formState.isSubmitting}>
+              {t('connect', 'Connect')}
+            </Button>
           </div>
         </form>
       </FormProvider>

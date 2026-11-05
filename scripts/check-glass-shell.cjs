@@ -765,6 +765,145 @@ async function checkCalendarLayout(page, doc, loaded) {
   check(errors.length === 0, `Calendar renders without browser errors: ${errors.join(', ')}`);
 }
 
+async function checkChannelConnection(page, doc) {
+  await page.setContent(doc('<div class="glass-modal" id="channel-form"></div>'));
+  const code = `
+    const React = require('react');
+    const {useState, useMemo, useCallback, useEffect, useRef} = React;
+    const {createRoot} = require('react-dom/client');
+    const {flushSync} = require('react-dom');
+    const {useForm, FormProvider, useFormContext} = require('react-hook-form');
+    const {object, string} = require('yup');
+    const {yupResolver} = require('@hookform/resolvers/yup');
+    const clsx = require('clsx');
+    const Buffer = {from: value => ({toString: () => btoa(unescape(encodeURIComponent(value)))})};
+    const withBasePath = path => '/dashboard/studio' + path;
+    const newDayjs = () => ({utcOffset: () => -300});
+    const useT = () => (_, fallback) => fallback;
+    const TranslatedLabel = ({label}) => label;
+    const state = globalThis.connection = {requests: [], navigation: [], goto: [], closed: 0, linkself: true};
+    const window = {location: {href: 'https://linkself.net/dashboard/studio/launches', pathname: '/dashboard/studio/launches', assign: path => state.navigation.push(path)}};
+    const document = {cookie: ''};
+    state.location = window.location;
+    const useVariables = () => ({backendUrl: '', isSecured: true, linkselfUrl: state.linkself ? 'https://linkself.net' : ''});
+    const useModals = () => ({closeAll: () => state.closed++});
+    const useToaster = () => ({show: message => {state.toast = message;}});
+    const useReturnUrl = () => ({getAndClear() {}});
+    const deleteDialog = async () => {state.dialogs++; return false;};
+    const setCookie = (...args) => state.cookies.push(args);
+    const studioCookieName = name => name;
+    const linkselfPath = () => '/dashboard/social';
+    const fetch = async (path, options) => {
+      state.requests.push({path, ...options});
+      if (!options.method) {
+        if (state.rejectGet) throw new Error('Request failed');
+        return {ok: true, status: 200, json: async () => ({url: 'state-' + state.requests.length})};
+      }
+      return new Promise((resolve, reject) => {
+        state.finish = (status, data, invalidJson = false, rejected = false) => {
+          if (rejected) reject(new Error('Request failed'));
+          else resolve({status, json: async () => {
+            if (invalidJson) throw new Error('Response is not JSON');
+            return data;
+          }});
+        };
+      });
+    };
+    ${declarations('libraries/helpers/src/utils/custom.fetch.func.ts', ['customFetch'])}
+    const FetchContext = React.createContext(null);
+    const useFetch = () => React.useContext(FetchContext);
+    const FetchWrapperComponent = ({baseUrl, afterRequest, children}) => {
+      state.afterRequest = afterRequest;
+      return React.createElement(FetchContext.Provider, {value: customFetch({baseUrl, afterRequest})}, children);
+    };
+    ${declarations(base + 'layout/layout.context.tsx', ['LayoutContextInner'])}
+    ${declarations('libraries/react-shared-libraries/src/form/input.tsx', ['Input'])}
+    ${declarations('libraries/react-shared-libraries/src/form/button.tsx', ['ReactLoading', 'Button'])}
+    ${declarations(base + 'launches/add.provider.component.tsx', ['CustomVariables'])}
+    const root = createRoot(globalThis.document.getElementById('channel-form'));
+    state.render = (linkself = true, onboarding = false) => {
+      state.linkself = linkself;
+      state.requests = []; state.navigation = []; state.goto = []; state.closed = 0; state.dialogs = 0; state.cookies = [];
+      flushSync(() => root.render(React.createElement(LayoutContextInner, {key: String(linkself) + String(onboarding)}, React.createElement(CustomVariables, {
+        identifier: 'wordpress', onboarding,
+        refresh: 'channel-id', gotoUrl: path => state.goto.push(path),
+        variables: [{key: 'password', label: 'Application password', type: 'password', validation: '/.+/', hint: 'Create a password in your profile'}]
+      }))));
+    };
+    state.render();
+  `;
+  const bundle = await require('esbuild').build({stdin: {contents: code, loader: 'tsx', resolveDir: process.cwd()}, bundle: true, write: false, platform: 'browser'});
+  await page.addScriptTag({content: bundle.outputFiles[0].text});
+  const field = page.locator('input');
+  const button = page.getByRole('button', {name: 'Connect'});
+  const alert = page.getByRole('alert');
+  const typed = 'sample password é';
+  await field.fill(typed);
+  const cases = [
+    [406, {msg: 'Check the application password'}, 'Check the application password'],
+    [401, {message: 'Please sign in again'}, 'Please sign in again'],
+    [402, {message: 'Channel limit reached'}, 'Channel limit reached'],
+    [400, {message: 'Check the address', msg: 'Second message'}, 'Check the address'],
+    [500, {msg: 'Try again later'}, 'Try again later'],
+    [500, {}, 'Could not add provider'],
+    [500, null, 'Could not add provider'],
+    [500, {}, 'Could not add provider', true],
+    [500, {}, 'Could not add provider', false, true],
+  ];
+  for (const [status, data, message, invalidJson = false, rejected = false] of cases) {
+    const before = await page.evaluate(() => connection.requests.length);
+    await button.click();
+    await page.waitForFunction(count => connection.requests.length === count + 2, before);
+    check(await alert.count() === 0, 'A new connection attempt clears the inline error');
+    check(await button.getAttribute('aria-busy') === 'true' && await button.isDisabled(), 'Connect stays busy and disabled until the request finishes');
+    const requests = await page.evaluate(() => connection.requests.slice(-2));
+    check(requests[0].path === '/integrations/social/wordpress?refresh=channel-id' && !requests[0].method, 'Each connection attempt obtains a new state');
+    const body = JSON.parse(requests[1].body);
+    check(requests[1].path === '/integrations/social-connect/wordpress' && requests[1].method === 'POST', 'LinkSelf submits to the connection endpoint');
+    check(body.state === 'state-' + (before + 1) && body.timezone === '-300' && body.code === Buffer.from(JSON.stringify({password: typed})).toString('base64'), 'Connection body carries the current state, timezone and exact encoded fields');
+    await page.evaluate(args => connection.finish(...args), [status, data, invalidJson, rejected]);
+    await alert.waitFor();
+    check(await alert.textContent() === message, 'Connection failure displays the expected inline message');
+    check(await alert.evaluate(node => node.classList.contains('w-0') && node.classList.contains('min-w-full')), 'A long connection message wraps instead of widening the form');
+    check(await alert.evaluate(node => node.classList.contains('text-red-400') && node.classList.contains('text-[13px]') && !!node.nextElementSibling.querySelector('button')), 'Connection error appears directly above Connect');
+    check(await field.inputValue() === typed && !(await button.isDisabled()), 'Failed submission retains the field value and enables correction');
+    check(await page.evaluate(() => connection.goto.length === 0 && connection.navigation.length === 0 && connection.closed === 0 && connection.dialogs === 0 && connection.location.href === 'https://linkself.net/dashboard/studio/launches'), 'Failed LinkSelf submission keeps the form open without navigation or billing dialogs');
+  }
+  for (const [status, onboarding, expected] of [
+    [412, false, '/launches?precondition=true'],
+    [200, false, '/launches?added=wordpress&msg=Channel Updated'],
+    [201, true, '/launches?added=wordpress&msg=Channel Updated&onboarding=true'],
+  ]) {
+    await page.evaluate(onboarding => connection.render(true, onboarding), onboarding);
+    await field.fill(typed);
+    await button.click();
+    await page.waitForFunction(() => connection.requests.length === 2);
+    await page.evaluate(status => connection.finish(status, {}), status);
+    await page.waitForFunction(() => connection.navigation.length === 1);
+    check(await page.evaluate(() => connection.navigation[0]) === '/dashboard/studio' + expected, 'Connection status redirects to the prefixed launches page');
+    check(await page.evaluate(() => connection.goto.length === 0 && connection.requests.every(request => !request.path.includes('code='))), 'LinkSelf never navigates with the typed connection fields');
+    check((await page.evaluate(() => connection.requests[0].path)).includes('onboarding=true') === onboarding, 'Connection GET preserves onboarding');
+  }
+  await page.evaluate(() => {connection.render(); connection.rejectGet = true;});
+  await field.fill(typed);
+  await button.click();
+  await alert.waitFor();
+  check(await alert.textContent() === 'Could not add provider', 'A rejected state request displays the inline fallback');
+  await page.evaluate(() => {connection.rejectGet = false; connection.render(false, true);});
+  await field.fill(typed);
+  await button.click();
+  await page.waitForFunction(() => connection.goto.length === 1);
+  const standalone = await page.evaluate(() => ({requests: connection.requests, goto: connection.goto, closed: connection.closed, navigation: connection.navigation}));
+  check(standalone.requests.length === 1 && standalone.closed === 1 && standalone.navigation.length === 0, 'Standalone connection retains its GET and modal close flow');
+  check(standalone.goto[0] === '/integrations/social/wordpress?state=state-1&code=' + Buffer.from(JSON.stringify({password: typed})).toString('base64') + '&onboarding=true', 'Standalone connection retains the original navigation');
+  check(await page.evaluate(() => connection.afterRequest('/integrations/social-connect/wordpress', {method: 'POST'}, {status: 406})) === false, 'Standalone connections retain the trial response handler');
+  await page.evaluate(() => connection.render());
+  check(await page.evaluate(() => connection.afterRequest('/posts', {method: 'POST'}, {status: 406})) === false, 'Other LinkSelf requests retain the trial response handler');
+  check(await page.evaluate(() => connection.afterRequest('/integrations/social-connect/wordpress', {method: 'GET'}, {status: 406})) === false, 'Only connection POST requests use inline response handling');
+  await page.evaluate(() => connection.afterRequest('/integrations/social-connect/wordpress', {method: 'POST'}, {status: 401, headers: {get: name => name === 'logout' ? 'true' : null}}));
+  check(await page.evaluate(() => connection.location.href === '/dashboard/social'), 'Connection response handling preserves explicit logout navigation');
+}
+
 async function main() {
   let response;
   const integrationBindings = {
@@ -804,7 +943,7 @@ async function main() {
   };
   const { Input } = components('libraries/react-shared-libraries/src/form/input.tsx', ['Input'], formBindings);
   const { CustomVariables, AddProviderComponent } = components(base + 'launches/add.provider.component.tsx', ['CustomVariables', 'AddProviderComponent'], {...formBindings, Input});
-  const ownKeyForms = ['dev.to', 'hashnode', 'wordpress', 'listmonk', 'nostr', 'lemmy'].map(identifier => {
+  const ownKeyForms = ['bluesky', 'dev.to', 'hashnode', 'wordpress', 'listmonk', 'nostr', 'lemmy'].map(identifier => {
     const file = `libraries/nestjs-libraries/src/integrations/social/${identifier}.provider.ts`;
     const source = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
     const provider = source.statements.find(ts.isClassDeclaration);
@@ -812,7 +951,7 @@ async function main() {
     const variables = vm.runInNewContext(ts.transpileModule(`(function() ${fields.body.getText(source)})()`, {}).outputText);
     return { identifier, variables, html: render(CustomVariables, {identifier, variables, gotoUrl() {}}) };
   });
-  const channelChoices = [...ownKeyForms.map(({identifier}) => ({ identifier, name: identifier === 'wordpress' ? 'WordPress' : identifier })), ...Array.from({length: 15}, (_, index) => ({identifier: `network-${index}`, name: `Network ${index}`}))];
+  const channelChoices = [...ownKeyForms.map(({identifier}) => ({ identifier, name: identifier === 'wordpress' ? 'WordPress' : identifier })), ...Array.from({length: 14}, (_, index) => ({identifier: `network-${index}`, name: `Network ${index}`}))];
   const channelGrid = render(AddProviderComponent, {social: channelChoices, article: [], invite: false});
   const channelModal = html => `<div class="glass-modal" style="width:min(900px,calc(100vw - 32px));margin:16px auto;padding:16px">${html}</div>`;
   const config = require('../apps/frontend/tailwind.config.cjs');
@@ -863,10 +1002,17 @@ async function main() {
           const locator = field.type === 'password' ? page.locator(`input[aria-label="${field.label}"]`) : input;
           check(await locator.count() === 1 && await locator.isVisible(), `${width}: ${form.identifier} labels ${field.key}`);
           check(await locator.getAttribute('type') === field.type, `${width}: ${form.identifier} preserves ${field.key} input type`);
+          check(await locator.evaluate(node => getComputedStyle(node.parentElement).borderTopColor === 'rgba(0, 0, 0, 0)' && getComputedStyle(node.parentElement).justifyContent === 'flex-start'), `${width}: ${form.identifier} shows one box around ${field.key}`);
+          if (field.hint) {
+            const row = locator.locator('xpath=../..');
+            check(await row.getAttribute('data-unlabelled') === null && await row.getByText(field.hint, {exact: true}).isVisible(), `${width}: ${form.identifier} displays the hint within its labelled field row`);
+            check(await locator.getAttribute('hint') === null, 'Field hints are not passed to the input element');
+          }
         }
         check(await page.locator('.glass-modal').evaluate(modal => modal.scrollWidth <= modal.clientWidth && [...modal.querySelectorAll('input')].every(input => input.getBoundingClientRect().right <= modal.getBoundingClientRect().right)), `${width}: ${form.identifier} fields fit the glass modal`);
       }
     }
+    await checkChannelConnection(page, doc);
     for (const [width, height] of [
       [1515, 1000],
       [1100, 800],

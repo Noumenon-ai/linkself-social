@@ -1347,6 +1347,11 @@ html[data-linkself-theme='glass-frame'] {
     grid-column: 1 / -1;
     min-width: 0;
   }
+  .glass-field-row > div:has(> input:only-child) {
+    border-color: transparent;
+    background: transparent;
+    justify-content: flex-start;
+  }
   .glass-preview-empty {
     position: static;
     min-height: 60dvh;

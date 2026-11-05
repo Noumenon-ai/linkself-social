@@ -82,6 +82,15 @@ function LayoutContextInner(params: { children: ReactNode }) {
         return true;
       }
 
+      if (
+        linkselfUrl &&
+        options.method === 'POST' &&
+        url.startsWith('/integrations/social-connect/') &&
+        !logout
+      ) {
+        return true;
+      }
+
       if (response.status === 401 || response?.headers?.get('logout')) {
         if (!isSecured) {
           setCookie('auth', '', -10);

@@ -58,7 +58,7 @@ describe('Copilot without an AI key', () => {
   );
 
   it.each([undefined, ''])(
-    'answers chat discovery quietly without a key (%s)',
+    'lists the default agent for chat discovery, with no warning, without a key (%s)',
     (key) => {
       if (key === undefined) delete process.env.OPENAI_API_KEY;
       else process.env.OPENAI_API_KEY = key;
@@ -68,7 +68,10 @@ describe('Copilot without an AI key', () => {
         response as never
       );
       expect(response.status).toHaveBeenCalledWith(200);
-      expect(response.json).toHaveBeenCalledWith({ agents: {} });
+      expect(response.json).toHaveBeenCalledWith({
+        agents: { default: { description: '' } },
+        audioFileTranscriptionEnabled: false,
+      });
       expect(Logger.warn).not.toHaveBeenCalled();
       expect(copilotRuntimeNodeHttpEndpoint).not.toHaveBeenCalled();
     }

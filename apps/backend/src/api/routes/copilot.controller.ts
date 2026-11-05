@@ -51,8 +51,14 @@ export class CopilotController {
       process.env.OPENAI_API_KEY === undefined ||
       process.env.OPENAI_API_KEY === ''
     ) {
+      // Every studio page asks what the chat can reach, and the client takes the
+      // page down unless the agent it looks up is listed. Running it is still
+      // refused below.
       if (req.body?.method === 'info') {
-        return res.status(200).json({ agents: {} });
+        return res.status(200).json({
+          agents: { default: { description: '' } },
+          audioFileTranscriptionEnabled: false,
+        });
       }
       Logger.warn('OpenAI API key not set, chat functionality will not work');
       return res.status(503).json({ message: 'AI is not configured' });

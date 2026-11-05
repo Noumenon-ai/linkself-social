@@ -19,6 +19,7 @@ export const Input: FC<
     disableForm?: boolean;
     customUpdate?: () => void;
     label: string;
+    hint?: string;
     name: string;
     icon?: ReactNode;
     translationKey?: string;
@@ -27,6 +28,7 @@ export const Input: FC<
 > = (props) => {
   const {
     label,
+    hint,
     icon,
     removeError,
     customUpdate,
@@ -79,6 +81,7 @@ export const Input: FC<
           {...rest}
         />
       </div>
+      {hint && <div className="text-textColor/70 text-[12px]">{hint}</div>}
       {!removeError && (
         <div className="text-red-400 text-[12px]">{err || <>&nbsp;</>}</div>
       )}

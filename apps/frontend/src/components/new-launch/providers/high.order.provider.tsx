@@ -331,7 +331,7 @@ export const withProvider = function <T extends object>(params: {
                           width={42}
                           height={42}
                           className="min-w-[42px] min-h-[42px] w-[42px] h-[42px] rounded-full"
-                          src={selectedIntegration?.integration.picture}
+                          src={selectedIntegration?.integration.picture || withBasePath('/no-picture.jpg')}
                         />
                         <SafeImage
                           alt={selectedIntegration?.integration.identifier}

@@ -194,7 +194,7 @@ const OnboardingStep1: FC<{ onNext: () => void; onSkip: () => void }> = ({
               >
                 <div className="relative w-[28px] h-[28px]">
                   <SafeImage
-                    src={integration.picture}
+                    src={integration.picture || withBasePath('/no-picture.jpg')}
                     className="rounded-full"
                     alt={integration.identifier}
                     width={28}

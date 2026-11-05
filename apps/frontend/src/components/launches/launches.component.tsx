@@ -1050,7 +1050,7 @@ export const LaunchesComponent = () => {
                       <ImageWithFallback
                         key={integration.id}
                         fallbackSrc={withBasePath(`/icons/platforms/${integration.identifier}.png`)}
-                        src={integration.picture}
+                        src={integration.picture || withBasePath('/no-picture.jpg')}
                         className="rounded-full border-2 border-btnSimple"
                         alt={integration.identifier}
                         width={24}
