@@ -1,3 +1,4 @@
+import { studioRequestPolicy } from './services/auth/studio.request.policy';
 import { initializeSentry } from '@gitroom/nestjs-libraries/sentry/initialize.sentry';
 initializeSentry('backend', true);
 import compression from 'compression';
@@ -59,6 +60,8 @@ async function start() {
     },
   });
 
+  app.use(studioRequestPolicy);
+
   await startMcp(app);
 
   app.useGlobalPipes(
@@ -77,7 +80,7 @@ async function start() {
   app.useGlobalFilters(new PostValidationExceptionFilter());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  loadSwagger(app);
+  if (!process.env.LINKSELF_URL) loadSwagger(app);
 
   const port = process.env.PORT || 3000;
 

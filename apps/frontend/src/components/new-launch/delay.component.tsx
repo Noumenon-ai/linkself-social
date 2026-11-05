@@ -80,6 +80,16 @@ export const DelayComponent: FC<{
   return (
     <div ref={ref} className="relative">
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Delay comment"
+        aria-expanded={isOpen}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setIsOpen(!isOpen);
+          }
+        }}
         onClick={() => setIsOpen(!isOpen)}
         data-tooltip-id="tooltip"
         data-tooltip-content={
@@ -99,6 +109,14 @@ export const DelayComponent: FC<{
           <div className="grid grid-cols-4 gap-[4px]">
             {delayOptions.map((option) => (
               <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleSelectDelay(option.value);
+                  }
+                }}
                 onClick={() => handleSelectDelay(option.value)}
                 key={option.value}
                 className={clsx(
@@ -118,6 +136,7 @@ export const DelayComponent: FC<{
                 value={customValue}
                 onChange={(e) => setCustomValue(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
+                aria-label="Delay in minutes"
                 placeholder="Custom min"
                 className={clsx(
                   'flex-1 w-full h-[32px] px-[8px] rounded-[4px] bg-newBgColor border text-[13px] outline-none focus:border-[var(--studio-accent,#612BD3)]',

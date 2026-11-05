@@ -3077,3 +3077,183 @@ html[data-linkself-theme='glass-frame'] {
     margin-bottom: 12px;
   }
 }
+
+html[data-linkself-theme='glass-frame'] {
+  .glass-title h1 {
+    font-size: 24px;
+    line-height: 1.25;
+  }
+  .glass-settings {
+    align-self: flex-start;
+  }
+  .glass-settings-content {
+    flex: 0 0 auto;
+    align-self: flex-start;
+  }
+  .glass-settings-content .glass-settings-list {
+    margin: 12px 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .glass-settings-tabs > :is(button, a):not([aria-current='page']) {
+    background: transparent;
+    color: var(--muted);
+  }
+  .glass-settings-tabs > :is(button, a):not([aria-current='page']):hover {
+    background: var(--inset);
+    color: var(--text);
+  }
+  .glass-settings-tabs > :is(button, a)[aria-current='page'] {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  .glass-footer {
+    margin-top: auto;
+    padding-top: 16px;
+  }
+  .glass-footer nav {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  :is(.glass-shell, .glass-auth, .glass-modal) a:not(.network-preview *) {
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .glass-integration-cards {
+    justify-items: stretch;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  }
+  .glass-integration-cards > div {
+    cursor: default;
+    padding: 16px;
+  }
+  .glass-integration-cards button {
+    width: auto;
+    flex: 0 0 auto;
+    align-self: flex-start;
+  }
+  .glass-analytics-empty {
+    padding: 16px;
+    align-items: flex-start;
+  }
+  .glass-analytics-empty p {
+    text-align: start;
+    margin: 0;
+  }
+  .glass-analytics-empty button {
+    margin-top: 12px;
+  }
+  .glass-launches {
+    flex: 1;
+    align-self: stretch;
+  }
+  .glass-schedule {
+    align-self: start;
+  }
+  .glass-week-grid time {
+    white-space: nowrap;
+  }
+  @media (max-width: 760px) {
+    #left-menu > div {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+    #left-menu > div > div:first-child {
+      justify-content: flex-start;
+    }
+    .glass-navigation {
+      display: contents;
+    }
+    .glass-rail-primary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-column: 1 / -1;
+      grid-row: 2;
+      width: 100%;
+      gap: 0;
+      padding: 4px;
+      background: var(--inset);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+    }
+    #left-menu .glass-rail-primary .glass-rail-link {
+      min-width: 0;
+      width: 100%;
+      padding: 4px 0;
+    }
+    .glass-rail-bottom {
+      grid-column: 2;
+      grid-row: 1;
+      gap: 4px;
+    }
+    #left-menu .glass-rail-bottom .glass-rail-link {
+      min-width: 36px;
+      width: 36px;
+      min-height: 36px;
+      height: 36px;
+    }
+    #left-menu .glass-rail-bottom .glass-rail-link .glass-rail-label {
+      display: none;
+    }
+    .glass-rail-bottom .glass-avatar {
+      width: 32px;
+      height: 32px;
+    }
+    .glass-calendar-actions {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+    .glass-calendar-actions .glass-channels-button {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .glass-calendar-actions > button.bg-btnPrimary {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
+    }
+    .glass-calendar-actions .glass-calendar-filter-button {
+      grid-column: 3;
+      grid-row: 1;
+      order: 0;
+      width: 36px;
+    }
+    .glass-calendar-actions .glass-calendar-heading {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-content: space-between;
+    }
+    .glass-calendar-actions .glass-view-switch {
+      grid-column: 1 / -1;
+      grid-row: 3;
+    }
+    .glass-settings-content {
+      padding: 12px;
+    }
+  }
+}
+
+html[data-linkself-theme='glass-frame'] {
+  .glass-settings-content .glass-settings-section {
+    border: 0;
+    background: transparent;
+  }
+  .glass-settings-content .glass-settings-section > div {
+    padding: 12px 0;
+    background: transparent;
+  }
+  .glass-global-settings > :is(div, p) {
+    padding: 12px 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+  }
+  .glass-editor [role='button']:focus-visible {
+    opacity: 1;
+  }
+}

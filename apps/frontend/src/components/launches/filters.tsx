@@ -472,10 +472,12 @@ export const Filters = () => {
         <SelectChannels />
       </div>
       {calendar.integrations.length > 1 && (
-        <div
+        <button
+          type="button"
+          aria-label={t('filter_channels', 'Filter channels')}
           onClick={() => setFiltersOpen(true)}
           className={clsx(
-            'hidden mobile:flex mobile:order-2 relative w-[42px] h-[42px] rounded-[8px] border justify-center items-center cursor-pointer',
+            'glass-calendar-filter-button hidden mobile:flex mobile:order-2 relative w-[42px] h-[42px] rounded-[8px] border justify-center items-center cursor-pointer',
             calendar.selectedChannels
               ? 'border-[var(--studio-accent,#612BD3)] text-[var(--studio-text,#612BD3)]'
               : 'border-newTableBorder'
@@ -485,7 +487,7 @@ export const Filters = () => {
           {calendar.selectedChannels && (
             <div className="absolute top-[6px] end-[6px] w-[6px] h-[6px] rounded-full glass-accent bg-[var(--studio-accent,#612BD3)]" />
           )}
-        </div>
+        </button>
       )}
       <div
         className={clsx(

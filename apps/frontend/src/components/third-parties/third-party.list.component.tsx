@@ -139,14 +139,10 @@ export const ThirdPartyListComponent: FC<{ reload: () => void }> = (props) => {
   );
 
   return (
-    <div className="grid grid-cols-4 tablet:grid-cols-3 mobile:!grid-cols-2 gap-[10px] justify-items-center justify-center">
+    <div className="glass-integration-cards grid grid-cols-4 tablet:grid-cols-3 mobile:!grid-cols-2 gap-[10px] justify-items-center justify-center">
       {data?.filter((p: any) => !linkselfUrl || !p.requiresLongRunningRequests).map((p: any) => (
         <div
-          onClick={
-            p.installUrl
-              ? install(p.installUrl)
-              : addApiKey(p.title, p.identifier)
-          }
+          onClick={linkselfUrl ? undefined : p.installUrl ? install(p.installUrl) : addApiKey(p.title, p.identifier)}
           key={p.identifier}
           className="w-full h-full p-[20px] mobile:p-[14px] min-h-[100px] text-[14px] bg-newTableHeader hover:bg-newTableBorder rounded-[8px] transition-all text-textColor relative flex flex-col gap-[15px] cursor-pointer"
         >
@@ -159,7 +155,7 @@ export const ThirdPartyListComponent: FC<{ reload: () => void }> = (props) => {
           <div className="whitespace-pre-wrap text-left text-lg">{p.title}</div>
           <div className="whitespace-pre-wrap text-left">{p.description}</div>
           <div className="w-full flex">
-            <Button className="w-full">Add</Button>
+            <Button onClick={linkselfUrl ? p.installUrl ? install(p.installUrl) : addApiKey(p.title, p.identifier) : undefined} className={linkselfUrl ? 'glass-secondary' : 'w-full'} aria-label={linkselfUrl ? `Add ${p.title}` : undefined}>Add</Button>
           </div>
         </div>
       ))}

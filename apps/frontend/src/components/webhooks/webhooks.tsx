@@ -1,4 +1,5 @@
 'use client';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 import { APP_NAME } from '@gitroom/helpers/app-name';
 
@@ -21,6 +22,7 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 
 export const Webhooks: FC = () => {
   const fetch = useFetch();
+  const { linkselfUrl } = useVariables();
   const user = useUser();
   const modal = useModals();
   const toaster = useToaster();
@@ -63,7 +65,7 @@ export const Webhooks: FC = () => {
   return (
     <div className="flex flex-col">
       <h3 className="text-[20px]">
-        {t('webhooks', 'Webhooks')} ({data?.length || 0}/{user?.tier?.webhooks})
+        {t('webhooks', 'Webhooks')}{!linkselfUrl && ` (${data?.length || 0}/${user?.tier?.webhooks})`}
       </h3>
       <div className="text-customColor18 mt-[4px]">
         {t(
@@ -72,7 +74,7 @@ export const Webhooks: FC = () => {
         an HTTP request.`
         )}
       </div>
-      <div className="my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] flex gap-[24px]">
+      <div className="glass-settings-list my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] flex gap-[24px]">
         <div className="flex flex-col w-full">
           {!!data?.length && (
             <div className="glass-webhooks-table grid grid-cols-[1fr,1fr,1fr,1fr] w-full gap-y-[10px]">

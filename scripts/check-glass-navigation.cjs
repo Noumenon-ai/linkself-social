@@ -50,6 +50,8 @@ async function main() {
     usePathname: () => '/settings',
     useSearchParams: () => new URLSearchParams('tab=plugs'),
     URLSearchParams,
+    useRef: () => ({ current: null }), useEffect: () => {},
+    linkselfPath: (base, target) => new URL(target, base).toString(),
     clsx: require('clsx'),
     Link: ({ prefetch, ...props }) => React.createElement('a', props),
   };
@@ -98,7 +100,7 @@ async function main() {
   )}</div></div></aside><main class="glass-workspace glass-frame flex-1 min-w-0 flex flex-col"><div class="glass-topbar flex items-center"><div class="glass-heading"><h1 class="glass-title">Settings</h1></div></div>${renderToStaticMarkup(
     React.createElement(StudioTabs)
   )}<div class="glass-workspace-content flex flex-1 min-w-0"><div class="glass-settings"><div class="glass-settings-nav"><div class="glass-settings-tabs flex">${[
-    'Global Settings',
+    'General',
     'Sets',
     'Signatures',
     'Integrations',
@@ -126,7 +128,7 @@ async function main() {
   ).css;
   const temp = fs.mkdtempSync(path.join(process.cwd(), '.glass-navigation-'));
   const originalTmp = process.env.TMPDIR;
-  process.env.TMPDIR = temp;
+  process.env.TMPDIR = path.relative(process.cwd(), temp);
   let browser;
   let checks = 0;
   const check = (value, message) => {
@@ -153,12 +155,19 @@ async function main() {
     for (const width of [320, 390, 760, 761, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       const geometry = await page.evaluate(() => {
-        const rail = document.querySelector('.glass-navigation');
+        const rail = document.querySelector('.glass-rail-primary');
         const rows = [
           rail,
           ...document.querySelectorAll('.glass-settings-tabs'),
         ];
         return {
+          mainItems: [...rail.querySelectorAll('.glass-rail-link')].map((node) => {
+            const rect = node.getBoundingClientRect();
+            return { left: rect.left, right: rect.right, width: rect.width, top: rect.top };
+          }),
+          utilities: [...document.querySelectorAll('.glass-rail-bottom .glass-rail-link')].map((node) => ({
+            top: node.getBoundingClientRect().top, name: node.getAttribute('aria-label')
+          })),
           pageWidth: document.documentElement.scrollWidth,
           viewport: innerWidth,
           railWidth: document
@@ -176,12 +185,12 @@ async function main() {
             overflow: getComputedStyle(node).overflowX,
             tops: [
               ...node.querySelectorAll(
-                node === rail ? '.glass-rail-link, .glass-avatar' : 'a, button'
+                node === rail ? '.glass-rail-link' : 'a, button'
               ),
             ].map((item) => Math.round(item.getBoundingClientRect().top)),
             centers: [
               ...node.querySelectorAll(
-                node === rail ? '.glass-rail-link, .glass-avatar' : 'a, button'
+                node === rail ? '.glass-rail-link' : 'a, button'
               ),
             ].map((item) =>
               Math.round(
@@ -200,10 +209,9 @@ async function main() {
       );
       check(
         geometry.labels.length === 7 &&
-          geometry.labels.every(
-            (label) => label.size === '12px' && label.visible
-          ),
-        `${width}px: every rail destination has a visible 12px label`
+          geometry.labels.filter((label) => label.visible).length === (width <= 760 ? 5 : 7) &&
+          geometry.labels.filter((label) => label.visible).every((label) => label.size === '12px'),
+        `${width}px: main rail labels stay visible and utility labels collapse only on phones`
       );
       for (const [index, row] of geometry.rows.entries()) {
         if (index === 0 && width > 760) continue;
@@ -212,18 +220,23 @@ async function main() {
           `${width}px: navigation row ${index} stays on one line`
         );
         check(
-          row.overflow === 'auto',
-          `${width}px: navigation row ${index} scrolls internally`
+          index === 0 ? row.scrollWidth <= row.width : row.overflow === 'auto',
+          `${width}px: navigation row ${index} fits or scrolls as specified`
         );
       }
       if (width <= 390)
         check(
-          geometry.rows.every((row) => row.scrollWidth > row.width),
-          `${width}px: rail and both tab rows overflow internally`
+          geometry.rows.slice(1).every((row) => row.scrollWidth > row.width),
+          `${width}px: both tab rows overflow internally while the rail fits`
         );
+      if (width <= 760) {
+        check(geometry.mainItems.length === 5 && geometry.mainItems.every((item) => item.left >= 0 && item.right <= width), `${width}px: all five destinations are visible`);
+        check(Math.max(...geometry.mainItems.map((item) => item.width)) - Math.min(...geometry.mainItems.map((item) => item.width)) < 1, `${width}px: destinations have equal widths`);
+        check(geometry.utilities.length === 2 && geometry.utilities.every((item) => item.name && item.top < geometry.mainItems[0].top), `${width}px: named Settings and Logout controls stay in the top row`);
+      }
       if (width > 760)
         check(geometry.railWidth === 72, `${width}px: desktop rail is 72px`);
-      for (const selector of ['.glass-navigation', '.glass-studio-tabs']) {
+      for (const selector of ['.glass-rail-primary', '.glass-studio-tabs']) {
         const reachable = await page.locator(selector).evaluate((node) => {
           node.scrollLeft = node.scrollWidth;
           const last = node.lastElementChild.getBoundingClientRect();

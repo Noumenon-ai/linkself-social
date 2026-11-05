@@ -573,3 +573,85 @@ describe('LinkSelf provider policy and analytics', () => {
     }
   );
 });
+
+describe.each(['', '/dashboard/studio'])('Studio connection sessions %s', (base) => {
+  const env = { ...process.env };
+  let service: IntegrationService;
+  const data = new Map<string, string>();
+  const session = (id: string) => sign({ id, providerName: 'LOCAL' }, process.env.JWT_SECRET!);
+  beforeEach(() => {
+    process.env.LINKSELF_URL = 'https://linkself.test';
+    process.env.LINKSELF_BASE_PATH = base;
+    process.env.JWT_SECRET = 'test-session-secret';
+    data.clear();
+    (ioRedis.get as jest.Mock).mockImplementation(async (key) => data.get(key) || null);
+    (ioRedis.set as jest.Mock).mockImplementation(async (key, value, _ex, _ttl, nx) => {
+      if (nx && data.has(key)) return null;
+      data.set(key, value); return 'OK';
+    });
+    (ioRedis.del as jest.Mock).mockImplementation(async (...keys) => keys.forEach((key) => data.delete(key)));
+    service = new IntegrationService({} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any);
+  });
+  afterEach(() => { process.env = { ...env }; jest.clearAllMocks(); });
+  it('matches the initiating session', async () => {
+    await service.bindConnectionSession('state', session('one'));
+    await expect(service.assertConnectionSession('state', session('one'))).resolves.toBeUndefined();
+    await expect(service.assertConnectionSession('state', session('two'))).rejects.toMatchObject({ status: 403 });
+    await expect(service.assertConnectionSession('state')).rejects.toMatchObject({ status: 403 });
+  });
+  it('does not replace an existing session binding', async () => {
+    await service.bindConnectionSession('state', session('one'));
+    await expect(service.bindConnectionSession('state', session('two'))).rejects.toMatchObject({ status: 403 });
+  });
+  it('requires a valid session before the public callback', async () => {
+    await service.bindConnectionSession('state', session('one'));
+    const provider = { authenticate: jest.fn() };
+    const manager = { getAllowedSocialsIntegrations: () => ['test'], getSocialIntegration: () => provider };
+    const controller = new NoAuthIntegrationsController(manager as any, service, {} as any, {} as any);
+    await expect(controller.connectSocialMedia('test', { state: 'state', code: 'code', timezone: '0' }, {
+      cookies: { [base ? 'linkself_studio_auth' : 'auth']: session('two') }, headers: {},
+    } as any)).rejects.toMatchObject({ status: 403 });
+    expect(provider.authenticate).not.toHaveBeenCalled();
+  });
+  it('requires the session for page selection', async () => {
+    data.set('organization:state', 'org');
+    await service.bindConnectionSession('state', session('one'));
+    const controller = new NoAuthIntegrationsController({} as any, service, {} as any, {} as any);
+    await expect(controller.saveProviderPage('page', { state: 'state' }, { cookies: {}, headers: {} } as any)).rejects.toMatchObject({ status: 403 });
+  });
+  it('starts an enterprise connection only in its workspace', async () => {
+    data.set('organization:state', 'org');
+    data.set('connection-url:state', 'https://provider.test/connect');
+    await expect(service.startConnectionSession('other', 'state', session('one'))).rejects.toMatchObject({ status: 403 });
+    expect(await service.startConnectionSession('org', 'state', session('one'))).toEqual({ url: 'https://provider.test/connect' });
+    await expect(service.startConnectionSession('org', 'state', session('one'))).rejects.toMatchObject({ status: 400 });
+  });
+  it('allows only explicitly issued server credential states', async () => {
+    await expect(service.assertConnectionSession('state', undefined, true)).rejects.toMatchObject({ status: 403 });
+    data.set('connection-server:state', 'credentials');
+    await expect(service.assertConnectionSession('state', undefined, true)).resolves.toBeUndefined();
+    await expect(service.assertConnectionSession('state', undefined, false)).rejects.toMatchObject({ status: 403 });
+  });
+  it('finishes page selection with the initiating session and consumes its state', async () => {
+    await service.bindConnectionSession('state', session('one'));
+    data.set('organization:state', 'org');
+    data.set('connection-page:state', 'page');
+    data.set('connection-page-state:page', 'state');
+    const save = jest.spyOn(service, 'saveProviderPage').mockResolvedValue({ success: true });
+    await expect(service.completeConnectionPage('org', 'page', {}, session('two'))).rejects.toMatchObject({ status: 403 });
+    await expect(service.completeConnectionPage('org', 'other', { state: 'state' }, session('one'))).rejects.toMatchObject({ status: 403 });
+    expect(save).not.toHaveBeenCalled();
+    await expect(service.completeConnectionPage('org', 'page', {}, session('one'))).resolves.toEqual({ success: true });
+    await expect(service.completeConnectionPage('org', 'page', { state: 'state' }, session('one'))).rejects.toMatchObject({ status: 403 });
+    expect(save).toHaveBeenCalledTimes(1);
+  });
+  it('normalizes enterprise return paths while preserving local navigation', () => {
+    process.env.FRONTEND_URL = 'https://studio.test' + base;
+    expect(service.enterpriseReturnPath('https://studio.test/settings?tab=apps')).toBe('/settings?tab=apps');
+    expect(service.enterpriseReturnPath('https://linkself.test/dashboard/social')).toBe('/launches');
+    expect(() => service.enterpriseReturnPath('https://other.test/settings')).toThrow();
+  });
+  it.each(['https://other.test', '//other.test', '/%5cother.test'])('validates stored return path case %#', (path) => {
+    expect(() => service.validateReturnPath(path)).toThrow();
+  });
+});

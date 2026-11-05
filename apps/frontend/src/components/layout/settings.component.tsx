@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useMemo,
   useState,
+  useRef,
 } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { showMediaBox } from '@gitroom/frontend/components/media/media.component';
@@ -92,11 +93,11 @@ export const SettingsPopup: FC<{
     const arr = [];
     arr.push({
       tab: 'global_settings',
-      label: t('global_settings', 'Global Settings'),
+      label: linkselfUrl ? 'General' : t('global_settings', 'Global Settings'),
     });
     // Populate tabs based on user permissions
     if (canUseMcp && user?.tier?.public_api && isGeneral && showLogout) {
-      arr.push({ tab: 'agents', label: t('agents_dev', 'Agents / Dev') });
+      arr.push({ tab: 'agents', label: linkselfUrl ? 'Agents' : t('agents_dev', 'Agents / Dev') });
     }
     if (
       !linkselfUrl &&
@@ -110,7 +111,7 @@ export const SettingsPopup: FC<{
       arr.push({ tab: 'webhooks', label: t('webhooks_1', 'Webhooks') });
     }
     if (user?.tier?.autoPost) {
-      arr.push({ tab: 'autopost', label: t('auto_post', 'Auto Post') });
+      arr.push({ tab: 'autopost', label: linkselfUrl ? 'Autopost' : t('auto_post', 'Auto Post') });
     }
     if (user?.tier.current !== 'FREE') {
       arr.push({ tab: 'sets', label: t('sets', 'Sets') });
@@ -125,34 +126,28 @@ export const SettingsPopup: FC<{
     return arr;
   }, [user, isGeneral, showLogout, t, linkselfUrl, canUseMcp]);
 
-  const [tab, setTab] = useState(() => {
-    const requested = url.get('tab');
-    return (requested === 'agents' && linkselfUrl && !limits) ||
-      list.some((p) => p.tab === requested)
-      ? requested!
-      : 'global_settings';
-  });
-
+  const [upstreamTab, setTab] = useState(() => list.some((item) => item.tab === url.get('tab')) ? url.get('tab')! : 'global_settings');
+  const requested = url.get('tab');
+  const tab = linkselfUrl
+    ? list.some((item) => item.tab === requested) ? requested : 'global_settings'
+    : upstreamTab;
+  const tabsRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!linkselfUrl) return;
-    const requested = url.get('tab');
-    if (requested && list.some((item) => item.tab === requested))
-      setTab(requested);
-    else if (!requested) setTab('global_settings');
-  }, [url, list, linkselfUrl]);
+    if (linkselfUrl) tabsRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [tab, linkselfUrl]);
 
   useEffect(() => {
     loadProfile();
   }, []);
 
   useEffect(() => {
-    if (limits && !limits.mcp && tab === 'agents') setTab('global_settings');
+    if (!linkselfUrl && limits && !limits.mcp && tab === 'agents') setTab('global_settings');
   }, [limits, tab]);
 
   return (
     <div className={linkselfUrl ? 'glass-settings' : 'contents'}>
       <div className="glass-settings-nav bg-newBgColorInner p-[20px] mobile:p-[12px] flex flex-col transition-all w-[260px] mobile:w-full">
-        <div className="glass-settings-tabs flex flex-1 flex-col gap-[15px] mobile:flex-row mobile:gap-[8px] mobile:overflow-x-auto mobile:pb-[6px] scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
+        <div ref={tabsRef} aria-label="Studio settings" className="glass-settings-tabs flex flex-1 flex-col gap-[15px] mobile:flex-row mobile:gap-[8px] mobile:overflow-x-auto mobile:pb-[6px] scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
           {list.map(({ tab: tabKey, label }) => (
             <button
               type="button"
@@ -163,7 +158,7 @@ export const SettingsPopup: FC<{
                 tabKey === tab && 'bg-boxHover'
               )}
               onClick={() => {
-                setTab(tabKey);
+                if (!linkselfUrl) setTab(tabKey);
                 if (linkselfUrl) {
                   const query = new URLSearchParams(url.toString());
                   query.set('tab', tabKey);

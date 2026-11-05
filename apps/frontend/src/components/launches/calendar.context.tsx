@@ -1,5 +1,5 @@
 'use client';
-import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+import { withBasePath, studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import 'reflect-metadata';
 import {
@@ -346,7 +346,7 @@ export const CalendarWeekProvider: FC<{
           selectedDayForRange(newFilters.startDate, newFilters.endDate)
         );
       }
-      setDisplaySaved(newFilters.display, { path: studioCookiePath() });
+      setDisplaySaved(newFilters.display, studioPreferenceCookieOptions());
       setFilters(newFilters);
       setInternalData([]);
 

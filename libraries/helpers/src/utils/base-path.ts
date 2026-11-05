@@ -40,3 +40,28 @@ export function linkselfPath(url: string, path: string, studioUrl = frontendUrl(
   }
   return target.toString();
 }
+
+/** Validate a browser return path without resolving it against another origin. */
+export function isStudioReturnPath(value: unknown): value is string {
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return false;
+  try {
+    const decoded = decodeURIComponent(value);
+    return !decoded.startsWith('//') && !/[\\\x00-\x20\x7f]/.test(decoded) &&
+      new URL(value, 'https://studio.invalid').origin === 'https://studio.invalid';
+  } catch {
+    return false;
+  }
+}
+
+export function assertStudioBuildPath(built: string, runtime: string) {
+  if (built.replace(/\/+$/, '') !== runtime.replace(/\/+$/, '')) {
+    throw new Error('Studio build and runtime paths differ; rebuild with the configured path');
+  }
+}
+
+export function studioPreferenceCookieOptions() {
+  const linkself = typeof document === 'undefined'
+    ? !!process.env.LINKSELF_URL
+    : !!document.documentElement?.dataset?.linkselfTheme;
+  return { path: studioCookiePath(), ...(linkself ? { SameSite: 'Lax' as const } : {}) };
+}

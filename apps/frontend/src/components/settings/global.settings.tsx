@@ -23,7 +23,7 @@ export const GlobalSettings = () => {
   const t = useT();
   return (
     <div className="glass-global-settings flex flex-col">
-      <h3 className="text-[20px]">{t('global_settings', 'Global Settings')}</h3>
+      <h3 className="text-[20px]">{linkselfUrl ? 'General' : t('global_settings', 'Global Settings')}</h3>
       <AuthenticationComponent />
       <MetricComponent />
       {emailEnabled && <EmailNotificationsComponent />}

@@ -895,6 +895,15 @@ export const MultiMediaComponent: FC<{
 
                     <div className="w-full h-full relative group">
                       <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Media settings"
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            event.currentTarget.click();
+                          }
+                        }}
                         onClick={async () => {
                           modals.openModal({
                             title: t('media_settings', 'Media Settings'),
@@ -938,6 +947,15 @@ export const MultiMediaComponent: FC<{
                     </div>
 
                     <CloseCircleIcon
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Remove media"
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          clearMedia(index)();
+                        }
+                      }}
                       onClick={clearMedia(index)}
                       className="absolute -end-[4px] -top-[4px] mobile:-end-[8px] mobile:-top-[8px] mobile:w-[24px] mobile:h-[24px] z-[20] rounded-full bg-white"
                     />

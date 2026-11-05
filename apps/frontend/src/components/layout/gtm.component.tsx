@@ -9,10 +9,10 @@ import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 export const TrialTracker: FC = () => {
   const user = useUser();
-  const { googleAdsId, googleAdsTrialTracking } = useVariables();
+  const { googleAdsId, googleAdsTrialTracking, linkselfUrl } = useVariables();
   useEffect(() => {
     if (
-      typeof window === 'undefined' ||
+      linkselfUrl || typeof window === 'undefined' ||
       !user?.id ||
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
@@ -39,7 +39,8 @@ export const TrialTracker: FC = () => {
 export const GoogleTagManagerComponent: FC<{ gtmId?: string }> = ({
   gtmId,
 }) => {
-  if (!gtmId) {
+  const { linkselfUrl } = useVariables();
+  if (linkselfUrl || !gtmId) {
     return null;
   }
   return (

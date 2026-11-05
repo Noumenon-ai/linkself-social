@@ -1,6 +1,6 @@
 'use client';
 
-import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+import { withBasePath, studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import {
   AddProviderButton,
@@ -935,7 +935,7 @@ export const LaunchesComponent = () => {
                   </div>
                   <div
                     onClick={() =>
-                      setCollapseMenu(collapseMenu === '1' ? '0' : '1', { path: studioCookiePath() })
+                      setCollapseMenu(collapseMenu === '1' ? '0' : '1', studioPreferenceCookieOptions())
                     }
                     className="group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto mobile:hidden text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
                   >

@@ -23,6 +23,15 @@ export const SignatureBox: FC<{
   return (
     <>
       <div
+        aria-label="Add signature"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.currentTarget.click();
+          }
+        }}
         onClick={addSignature}
         data-tooltip-id="tooltip"
         data-tooltip-content="Add Signature"

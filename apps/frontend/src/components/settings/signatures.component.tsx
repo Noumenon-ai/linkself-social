@@ -67,7 +67,7 @@ export const SignaturesComponent: FC<{
           'You can add signatures to your account to be used in your posts.'
         )}
       </div>
-      <div className="glass-frame my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] mobile:p-[12px] flex gap-[24px]">
+      <div className="glass-settings-list glass-frame my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] mobile:p-[12px] flex gap-[24px]">
         <div className="flex flex-col w-full">
           {!!data?.length && (
             <div

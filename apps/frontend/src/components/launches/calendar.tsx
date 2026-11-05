@@ -566,6 +566,11 @@ export const WeekView = () => {
                 data-today={day.date.isSame(newDayjs(), 'day') || undefined}
                 className="p-2 text-center bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 z-[20]"
               >
+                {linkselfUrl ? (
+                  <time dateTime={day.date.format('YYYY-MM-DD')} aria-label={day.date.format('dddd, D MMMM YYYY')}>
+                    {day.date.format('ddd D')}
+                  </time>
+                ) : (<>
                 <div className="text-[14px] font-[500] text-newTableText">
                   {day.name}
                 </div>
@@ -581,6 +586,7 @@ export const WeekView = () => {
                   )}
                   {day.day}
                 </div>
+                </>)}
               </div>
             ))}
             {hours.map((hour) => (
@@ -854,7 +860,6 @@ export const ScheduledPosts = () => {
       aria-label={t('scheduled', 'Scheduled')}
     >
       <header>
-        <p>{day.format('dddd, D MMMM YYYY')}</p>
         <h2>{t('scheduled', 'Scheduled')}</h2>
         <label className="sr-only" htmlFor="schedule-day">
           {t('select_day', 'Select day')}
@@ -924,7 +929,7 @@ export const ScheduledPosts = () => {
         ))
       ) : (
         <div className="glass-empty mt-4">
-          <p>{t('no_loaded_posts', 'No loaded posts for this day.')}</p>
+          <p>{t('no_posts_this_day', 'No posts this day.')}</p>
           {integrations.length ? (
             <NewPost
               date={

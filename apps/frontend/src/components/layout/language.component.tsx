@@ -1,5 +1,6 @@
 'use client';
-import { studioCookiePath } from '@gitroom/helpers/utils/base-path';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
+import { studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import {
@@ -70,7 +71,7 @@ export const ChangeLanguageComponent = () => {
   const t = useT();
 
   const handleLanguageChange = (language: string) => {
-    setCookie(language, { path: studioCookiePath() });
+    setCookie(language, studioPreferenceCookieOptions());
     i18next.changeLanguage(language);
     modals.closeCurrent();
     const rtlLanguages = ['he', 'ar'];
@@ -123,6 +124,7 @@ export const ChangeLanguageComponent = () => {
   );
 };
 export const LanguageComponent = () => {
+  const { linkselfUrl } = useVariables();
   const modal = useModals();
   const currentLanguage = i18next.resolvedLanguage || fallbackLng;
   const t = useT();
@@ -133,6 +135,7 @@ export const LanguageComponent = () => {
       children: <ChangeLanguageComponent />,
     });
   };
+  if (linkselfUrl) return null;
   return (
     <div
       onClick={openModal}

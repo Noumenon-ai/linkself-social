@@ -17,3 +17,9 @@ export class ConnectIntegrationDto {
   @IsOptional()
   refresh?: string;
 }
+
+export class ConnectionSessionDto {
+  @IsString()
+  @IsDefined()
+  state: string;
+}

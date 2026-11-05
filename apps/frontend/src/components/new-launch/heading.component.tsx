@@ -36,6 +36,15 @@ export const HeadingComponent: FC<{
         className="flex p-[10px] gap-[5px] -left-[50%] rounded-[6px] bottom-[100%] opacity-0 pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100 bg-newColColor border border-newColColor z-[100] absolute transition-all mobile:static mobile:p-0 mobile:gap-[4px] mobile:opacity-100 mobile:pointer-events-auto mobile:bg-transparent mobile:border-0"
       >
         <div
+          aria-label="Heading 1"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setHeading(1)();
+            }
+          }}
           onClick={setHeading(1)}
           className="mobile:w-[40px] mobile:h-[40px] mobile:rounded-[8px] mobile:bg-newSettings mobile:flex mobile:justify-center mobile:items-center"
         >
@@ -54,6 +63,15 @@ export const HeadingComponent: FC<{
           </svg>
         </div>
         <div
+          aria-label="Heading 2"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setHeading(2)();
+            }
+          }}
           onClick={setHeading(2)}
           className="mobile:w-[40px] mobile:h-[40px] mobile:rounded-[8px] mobile:bg-newSettings mobile:flex mobile:justify-center mobile:items-center"
         >
@@ -72,6 +90,15 @@ export const HeadingComponent: FC<{
           </svg>
         </div>
         <div
+          aria-label="Heading 3"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setHeading(3)();
+            }
+          }}
           onClick={setHeading(3)}
           className="mobile:w-[40px] mobile:h-[40px] mobile:rounded-[8px] mobile:bg-newSettings mobile:flex mobile:justify-center mobile:items-center"
         >

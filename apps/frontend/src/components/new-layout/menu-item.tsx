@@ -28,7 +28,7 @@ export const MenuItem: FC<{
           (search
             ? settingsTab === new URLSearchParams(search).get('tab')
             : pathname !== '/settings' ||
-              !['sets', 'signatures', 'plugs'].includes(settingsTab))
+              settingsTab === 'global_settings')
       : currentPath.indexOf(path) === 0);
 
   const className = clsx(
@@ -39,7 +39,7 @@ export const MenuItem: FC<{
   const inner = (
     <>
       <div className="custom:scale-90 transition-transform">{icon}</div>
-      <div className="custom:text-[9px] minCustom:text-[10px] leading-[1.1] text-center">
+      <div className="glass-rail-label custom:text-[9px] minCustom:text-[10px] leading-[1.1] text-center">
         {label}
       </div>
     </>

@@ -9,11 +9,12 @@ const DAY = 1000 * 60 * 60 * 24;
 const cookieOptions = (expiresInDays: number, httpOnly: boolean) => ({
   domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
   ...(!process.env.NOT_SECURED
     ? {
         secure: true,
         httpOnly,
-        sameSite: 'none' as const,
+        sameSite: process.env.LINKSELF_URL ? 'lax' as const : 'none' as const,
       }
     : {}),
   expires: new Date(Date.now() + DAY * expiresInDays),

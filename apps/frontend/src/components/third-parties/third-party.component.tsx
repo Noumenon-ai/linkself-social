@@ -120,7 +120,7 @@ export const ThirdPartyComponent = () => {
         <h3 className="text-[20px]">{t('integrations', 'Integrations')}</h3>
       </div>
       {!isLoading && (
-        <div className="bg-sixth border-fifth border rounded-[4px] p-[24px]">
+        <div className="glass-settings-list bg-sixth border-fifth border rounded-[4px] p-[24px]">
           {!visibleIntegrations?.length ? (
             <div className="text-customColor18">No Integrations Yet</div>
           ) : (

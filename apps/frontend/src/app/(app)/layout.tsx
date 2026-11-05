@@ -26,7 +26,7 @@ import { ChangeDirClient } from '@gitroom/frontend/components/new-layout/change.
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const isLinkSelf = !!(process.env.LINKSELF_URL || process.env.NEXT_PUBLIC_LINKSELF_URL);
   const cookieStore = await cookies();
-  const language = cookieStore.get(cookieName)?.value || fallbackLng;
+  const language = isLinkSelf ? 'en' : cookieStore.get(cookieName)?.value || fallbackLng;
   return (
     <html data-linkself-theme={isLinkSelf ? 'glass-frame' : undefined}>
       <head>
@@ -45,7 +45,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           backendUrl={publicApiUrl()}
           plontoKey={process.env.NEXT_PUBLIC_POLOTNO!}
           stripeClient={process.env.STRIPE_PUBLISHABLE_KEY!}
-          isChatBase={!!process.env.CHATBASE_TOKEN}
+          isChatBase={!isLinkSelf && !!process.env.CHATBASE_TOKEN}
           aiEnabled={!!process.env.OPENAI_API_KEY}
           emailEnabled={!!process.env.EMAIL_PROVIDER}
           billingEnabled={!!process.env.STRIPE_PUBLISHABLE_KEY}
@@ -95,8 +95,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         >
           <SentryComponent>
             <HtmlComponent />
-            <FacebookComponent />
-            <GoogleTagManagerComponent gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+            {!isLinkSelf && <FacebookComponent />}
+            {!isLinkSelf && <GoogleTagManagerComponent gtmId={process.env.NEXT_PUBLIC_GTM_ID} />}
               <LayoutContext>
                 <UtmSaver />
                 {children}

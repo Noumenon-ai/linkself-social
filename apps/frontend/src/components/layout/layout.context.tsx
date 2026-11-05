@@ -21,7 +21,7 @@ export function setCookie(cname: string, cvalue: string, exdays: number) {
   const d = new Date();
   d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
   const expires = 'expires=' + d.toUTCString();
-  document.cookie = studioCookieName(cname) + '=' + cvalue + ';' + expires + ';path=' + studioCookiePath();
+  document.cookie = studioCookieName(cname) + '=' + cvalue + ';' + expires + ';path=' + studioCookiePath() + (document.documentElement.dataset.linkselfTheme ? ';SameSite=Lax' : '');
 }
 function LayoutContextInner(params: { children: ReactNode }) {
   const returnUrl = useReturnUrl();

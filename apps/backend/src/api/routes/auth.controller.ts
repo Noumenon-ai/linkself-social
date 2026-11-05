@@ -61,7 +61,7 @@ export class AuthController {
   ) {
     try {
       const getOrgFromCookie = this._authService.getOrgFromCookie(
-        req?.cookies?.[studioCookieName('org')]
+        process.env.LINKSELF_URL ? undefined : req?.cookies?.[studioCookieName('org')]
       );
 
       const { jwt, addedOrg } = await this._authService.routeAuth(
@@ -93,7 +93,7 @@ export class AuthController {
         register: true,
       });
     } catch (e: any) {
-      response.status(400).send(e.message);
+      response.status(400).type('text/plain').send(e.message);
     }
   }
 
@@ -109,7 +109,7 @@ export class AuthController {
   ) {
     try {
       const getOrgFromCookie = this._authService.getOrgFromCookie(
-        req?.cookies?.[studioCookieName('org')]
+        process.env.LINKSELF_URL ? undefined : req?.cookies?.[studioCookieName('org')]
       );
 
       const { jwt, addedOrg } = await this._authService.routeAuth(
@@ -131,7 +131,7 @@ export class AuthController {
         login: true,
       });
     } catch (e: any) {
-      response.status(400).send(e.message);
+      response.status(400).type('text/plain').send(e.message);
     }
   }
 
@@ -180,11 +180,12 @@ export class AuthController {
     response.cookie(studioCookieName('oauth_state'), state, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       expires: new Date(Date.now() + 1000 * 60 * 10),
@@ -210,11 +211,12 @@ export class AuthController {
     response.cookie(studioCookieName('auth'), activate, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
@@ -318,11 +320,12 @@ export class AuthController {
     response.cookie(studioCookieName('auth'), jwt, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),

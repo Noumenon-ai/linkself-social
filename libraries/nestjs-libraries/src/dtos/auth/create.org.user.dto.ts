@@ -1,5 +1,6 @@
 import {
   IsDefined,
+  IsIn,
   IsEmail,
   IsString,
   MaxLength,
@@ -18,6 +19,7 @@ export class CreateOrgUserDto {
 
   @IsString()
   @IsDefined()
+  @IsIn(Object.values(Provider))
   provider: Provider;
 
   @IsString()

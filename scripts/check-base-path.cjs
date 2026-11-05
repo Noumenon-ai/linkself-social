@@ -20,7 +20,7 @@ const exceptions = {
   backend: 'Backend decorators and provider API paths are internal routes, not browser URLs; public URL construction is checked separately.',
 };
 const roots = ['apps/frontend/src', 'libraries/helpers/src', 'libraries/react-shared-libraries/src'];
-const files = cp.execFileSync('git', ['ls-files', ...roots], { encoding: 'utf8' })
+const files = cp.execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', ...roots], { encoding: 'utf8' })
   .trim().split('\n').filter(f => /\.(tsx?|s?css)$/.test(f) && !/\.(spec|test)\.ts$/.test(f));
 const failures = [];
 const counts = {};
@@ -92,7 +92,7 @@ for (const file of files) {
   }
   visit(sf);
 }
-const backendFiles = cp.execFileSync('rg', ['--files', 'apps/backend/src', 'libraries/nestjs-libraries/src'], { encoding: 'utf8' })
+const backendFiles = cp.execFileSync('git', ['ls-files', 'apps/backend/src', 'libraries/nestjs-libraries/src'], { encoding: 'utf8' })
   .trim().split('\n').filter(f => /\.ts$/.test(f) && !/\.(spec|test)\.ts$/.test(f) && !/workflow|activit/.test(f));
 const rawPublicBase = /process\??\.env\??\.(?:FRONTEND_URL|NEXT_PUBLIC_BACKEND_URL)|process\.env\[['"](?:FRONTEND_URL|NEXT_PUBLIC_BACKEND_URL)['"]\]/;
 for (const file of backendFiles) {

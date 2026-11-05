@@ -29,6 +29,9 @@ export const UpDownArrow: FC<{
   return (
     <div className="flex flex-col gap-[8px] pt-[8px]">
       <button
+        type="button"
+        aria-label="Move post up"
+        disabled={!isUp}
         onClick={changePosition('up')}
         className={clsx(
           'outline-none w-[20px] h-[20px] flex justify-center items-center',
@@ -40,6 +43,9 @@ export const UpDownArrow: FC<{
         <Arrow flip={true} />
       </button>
       <button
+        type="button"
+        aria-label="Move post down"
+        disabled={!isDown}
         onClick={changePosition('down')}
         className={clsx(
           'outline-none rounded-bl-[20px] w-[20px] h-[20px] flex justify-center items-center',

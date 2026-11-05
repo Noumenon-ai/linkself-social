@@ -5,6 +5,7 @@ module.exports = {
   rootDir: '../..',
   testEnvironment: 'node',
   testMatch: [
+    '<rootDir>/apps/backend/src/api/routes/studio.responses.spec.ts',
     '<rootDir>/libraries/helpers/src/utils/base-path.spec.ts',
     '<rootDir>/apps/backend/src/services/auth/session.path.spec.ts',
     '<rootDir>/apps/frontend/src/proxy.spec.ts',

@@ -1,3 +1,7 @@
+import { validate } from 'class-validator';
+import { LoginUserDto } from '@gitroom/nestjs-libraries/dtos/auth/login.user.dto';
+import { CreateOrgUserDto } from '@gitroom/nestjs-libraries/dtos/auth/create.org.user.dto';
+import { AuthProviderManager } from '../../services/auth/providers/providers.manager';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { Reflector } from '@nestjs/core';
 import { ThrottlerException, ThrottlerStorageService } from '@nestjs/throttler';
@@ -150,5 +154,24 @@ describe('Sign-in form throttling', () => {
   ])('leaves %s as upstream', (handler) => {
     const method = (AuthController.prototype as any)[handler];
     expect(Reflect.getMetadata(GUARDS_METADATA, method)).toBeUndefined();
+  });
+});
+
+describe('Authentication input handling', () => {
+  it.each([LoginUserDto, CreateOrgUserDto])('validates provider values for form %#', async (Dto) => {
+    const dto = Object.assign(new Dto(), { provider: '<b>unknown</b>', password: 'password', email: 'test@example.test', company: 'Test' });
+    expect((await validate(dto)).some((error) => error.property === 'provider')).toBe(true);
+  });
+  it('returns a fixed provider error', () => {
+    const manager = new AuthProviderManager({} as any);
+    expect(() => manager.getProvider('<b>unknown</b>')).toThrow('Auth provider not found');
+  });
+  it.each(['login', 'register'] as const)('uses plain error responses for %s', async (method) => {
+    const service = { getOrgFromCookie: jest.fn(), routeAuth: jest.fn().mockRejectedValue(new Error('<b>unavailable</b>')) };
+    const controller = new AuthController(service as any, {} as any);
+    const response: any = { status: jest.fn().mockReturnThis(), type: jest.fn().mockReturnThis(), send: jest.fn() };
+    await controller[method]({ cookies: {} } as any, {} as any, response, '', '');
+    expect(response.type).toHaveBeenCalledWith('text/plain');
+    expect(response.status).toHaveBeenCalledWith(400);
   });
 });

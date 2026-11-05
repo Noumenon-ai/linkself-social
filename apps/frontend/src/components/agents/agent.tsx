@@ -1,6 +1,6 @@
 'use client';
 
-import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+import { withBasePath, studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import React, {
   createContext,
@@ -119,7 +119,7 @@ export const AgentList: FC<{ onChange: (arr: any[]) => void }> = ({
             {t('select_channels', 'Select Channels')}
           </h2>
           <div
-            onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1', { path: studioCookiePath() })}
+            onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1', studioPreferenceCookieOptions())}
             className="-mt-3 group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
           >
             <svg

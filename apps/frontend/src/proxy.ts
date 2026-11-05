@@ -12,13 +12,13 @@ import {
 acceptLanguage.languages(languages);
 
 // This function can be marked `async` if using `await` inside
-export async function proxy(request: NextRequest) {
+async function routeRequest(request: NextRequest, securityHeaders?: Record<string, string>) {
   const nextUrl = request.nextUrl;
   const authCookie =
     request.cookies.get(studioCookieName('auth')) ||
     request.headers.get('auth') ||
     nextUrl.searchParams.get('loggedAuth');
-  const lng = request.cookies.has(cookieName)
+  const lng = process.env.LINKSELF_URL ? 'en' : request.cookies.has(cookieName)
     ? acceptLanguage.get(request.cookies.get(cookieName).value)
     : acceptLanguage.get(
         request.headers.get('Accept-Language') ||
@@ -26,6 +26,7 @@ export async function proxy(request: NextRequest) {
       );
 
   const requestHeaders = new Headers(request.headers);
+  for (const [key, value] of Object.entries(securityHeaders || {})) requestHeaders.set(key, value);
   if (lng) {
     requestHeaders.set(headerName, lng);
   }
@@ -63,19 +64,29 @@ export async function proxy(request: NextRequest) {
     return topResponse;
   }
 
+  if (process.env.LINKSELF_URL && nextUrl.pathname === '/auth/logout') {
+    return NextResponse.redirect(new URL(withBasePath('/account-action?action=logout'), nextUrl.href));
+  }
+  if (process.env.LINKSELF_URL && authCookie && nextUrl.searchParams.has('org') && nextUrl.pathname !== '/account-action') {
+    const target = new URL(withBasePath('/account-action'), nextUrl.href);
+    target.searchParams.set('org', nextUrl.searchParams.get('org')!);
+    return NextResponse.redirect(target);
+  }
+
   // If the URL is logout, delete the cookie and redirect to login
-  if (nextUrl.href.indexOf('/auth/logout') > -1) {
+  if (!process.env.LINKSELF_URL && nextUrl.href.indexOf('/auth/logout') > -1) {
     const response = NextResponse.redirect(
       new URL(withBasePath('/auth/login'), nextUrl.href)
     );
     response.cookies.set(studioCookieName('auth'), '', {
       path: studioCookiePath(),
+      ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
 
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: false,
+            sameSite: process.env.LINKSELF_URL ? 'lax' : false,
           }
         : {}),
       maxAge: -1,
@@ -91,7 +102,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(withBasePath('/auth/login'), nextUrl.href));
   }
 
-  const org = nextUrl.searchParams.get('org');
+  const org = process.env.LINKSELF_URL ? null : nextUrl.searchParams.get('org');
   const url = new URL(nextUrl).search;
   if (!nextUrl.pathname.startsWith('/auth') && !authCookie) {
     const providers = ['google', 'settings'];
@@ -119,12 +130,13 @@ export async function proxy(request: NextRequest) {
       const redirect = NextResponse.redirect(new URL(withBasePath(`/`), nextUrl.href));
       redirect.cookies.set(studioCookieName('org'), org, {
         path: studioCookiePath(),
+      ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
         ...(!process.env.NOT_SECURED
           ? {
 
               secure: true,
               httpOnly: true,
-              sameSite: false,
+              sameSite: process.env.LINKSELF_URL ? 'lax' : false,
               domain: getCookieUrlFromDomain(frontendUrl()),
             }
           : {}),
@@ -150,12 +162,13 @@ export async function proxy(request: NextRequest) {
       if (id) {
         redirect.cookies.set(studioCookieName('showorg'), id, {
           path: studioCookiePath(),
+      ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
           ...(!process.env.NOT_SECURED
             ? {
 
                 secure: true,
                 httpOnly: true,
-                sameSite: false,
+                sameSite: process.env.LINKSELF_URL ? 'lax' : false,
                 domain: getCookieUrlFromDomain(frontendUrl()),
               }
             : {}),
@@ -184,3 +197,28 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)',
 };
+
+export async function proxy(request: NextRequest) {
+  if (!process.env.LINKSELF_URL) return routeRequest(request);
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const apiOrigin = process.env.NEXT_PUBLIC_BACKEND_URL
+    ? new URL(process.env.NEXT_PUBLIC_BACKEND_URL).origin : '';
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' https: data: blob:",
+    "media-src 'self' https: blob:",
+    "font-src 'self' data:",
+    `connect-src 'self' ${apiOrigin}`,
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'self'",
+    `form-action 'self' ${new URL(process.env.LINKSELF_URL).origin}`,
+  ].join('; ');
+  const response = await routeRequest(request, { 'x-nonce': nonce, 'Content-Security-Policy': csp });
+  response.headers.set('Content-Security-Policy', csp);
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  return response;
+}

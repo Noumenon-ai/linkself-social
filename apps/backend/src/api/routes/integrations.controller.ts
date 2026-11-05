@@ -1,3 +1,6 @@
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
+import { Request } from 'express';
+import { ConnectionSessionDto } from '@gitroom/nestjs-libraries/dtos/integrations/connect.integration.dto';
 import {
   Body,
   Controller,
@@ -7,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ioRedis } from '@gitroom/nestjs-libraries/redis/redis.service';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
@@ -53,8 +57,13 @@ export class IntegrationsController {
   async saveProviderPage(
     @GetOrgFromRequest() org: Organization,
     @Param('id') id: string,
-    @Body() body: any
+    @Body() body: any,
+    @Req() req?: Request
   ) {
+    if (process.env.LINKSELF_URL) {
+      return this._integrationService.completeConnectionPage(org.id, id, body,
+        req?.cookies?.[studioCookieName('auth')] || req?.headers.auth as string);
+    }
     return this._integrationService.saveProviderPage(org.id, id, body);
   }
 
@@ -216,6 +225,18 @@ export class IntegrationsController {
     );
   }
 
+  @Post('/session')
+  @CheckPolicies([AuthorizationActions.Create, Sections.CHANNEL])
+  async startSession(
+    @GetOrgFromRequest() org: Organization,
+    @Body() body: ConnectionSessionDto,
+    @Req() req: Request
+  ) {
+    return this._integrationService.startConnectionSession(
+      org.id, body.state, req.cookies?.[studioCookieName('auth')] || req.headers.auth as string
+    );
+  }
+
   @Get('/social/:integration')
   @CheckPolicies([AuthorizationActions.Create, Sections.CHANNEL])
   async getIntegrationUrl(
@@ -224,8 +245,10 @@ export class IntegrationsController {
     @Query('externalUrl') externalUrl: string,
     @Query('redirectUrl') redirectUrl: string,
     @Query('onboarding') onboarding: string,
-    @GetOrgFromRequest() org: Organization
+    @GetOrgFromRequest() org: Organization,
+    @Req() req?: Request
   ) {
+    if (process.env.LINKSELF_URL) this._integrationService.validateReturnPath(redirectUrl);
     await this._integrationService.assertCanConnect(org.id, integration, refresh);
 
     if (
@@ -266,6 +289,12 @@ export class IntegrationsController {
       const { codeVerifier, state, url } =
         await integrationProvider.generateAuthUrl(getExternalUrl);
 
+      if (process.env.LINKSELF_URL) {
+        await this._integrationService.bindConnectionSession(
+          state, req?.cookies?.[studioCookieName('auth')] || req?.headers.auth as string
+        );
+        await ioRedis.set(`connection-provider:${state}`, migrateTo || integration, 'EX', 3600);
+      }
       if (refresh) {
         await ioRedis.set(`refresh:${state}`, refresh, 'EX', 3600);
       }

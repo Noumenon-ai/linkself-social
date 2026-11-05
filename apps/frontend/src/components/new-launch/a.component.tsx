@@ -35,6 +35,15 @@ export const AComponent: FC<{
   };
   return (
     <div
+      aria-label="Insert link"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          event.currentTarget.click();
+        }
+      }}
       data-tooltip-id="tooltip"
       data-tooltip-content="Link"
       onClick={mark}

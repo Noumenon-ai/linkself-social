@@ -41,3 +41,42 @@ describe.each(['', '/dashboard/studio'])('proxy path %s', (base) => {
     expect(response.headers.get('location')).toBe(base ? 'https://linkself.net' + base + '/auth' : null);
   });
 });
+
+describe.each(['', '/dashboard/studio'])('LinkSelf browser policy %s', (base) => {
+  beforeEach(() => {
+    process.env.LINKSELF_URL = 'https://linkself.net';
+    process.env.FRONTEND_URL = 'https://linkself.net' + base;
+    process.env.LINKSELF_BASE_PATH = base;
+  });
+  const request = (path: string) => new NextRequest('https://linkself.net' + base + path, {
+    nextConfig: { basePath: base },
+    headers: { cookie: `${base ? 'linkself_studio_auth' : 'auth'}=token` },
+  });
+  it('serves browser policy on ordinary pages', async () => {
+    const response = await proxy(request('/launches'));
+    const csp = response.headers.get('Content-Security-Policy');
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("script-src 'self' 'nonce-");
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
+    expect(csp).toContain("frame-ancestors 'self'");
+    expect(response.headers.get('x-middleware-request-content-security-policy')).toBe(csp);
+  });
+  it('keeps ordinary query navigation non-mutating', async () => {
+    const response = await proxy(request('/launches?return=/auth/logout'));
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(response.headers.get('location')).toBeNull();
+  });
+  it('requires confirmation for session actions', async () => {
+    const response = await proxy(request('/auth/logout'));
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(response.headers.get('location')).toContain(base + '/account-action?action=logout');
+  });
+  it('requires confirmation for workspace invitations', async () => {
+    const { internalFetch } = require('@gitroom/helpers/utils/internal.fetch');
+    internalFetch.mockClear();
+    const response = await proxy(request('/launches?org=invitation'));
+    expect(response.headers.get('location')).toContain(base + '/account-action?org=invitation');
+    expect(internalFetch).not.toHaveBeenCalled();
+    expect(response.headers.get('set-cookie')).toBeNull();
+  });
+});

@@ -15,8 +15,8 @@ import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
 import useSWR from 'swr';
 
 export const ChatbaseComponent: FC = () => {
-  const { isChatBase } = useVariables();
-  if (!isChatBase) {
+  const { isChatBase, linkselfUrl } = useVariables();
+  if (linkselfUrl || !isChatBase) {
     return null;
   }
   return <ChatbaseComponentLoad />;

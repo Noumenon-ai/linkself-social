@@ -1,4 +1,6 @@
-import { frontendUrl } from '@gitroom/helpers/utils/base-path';
+import { createHash } from 'crypto';
+import { AuthService } from '@gitroom/helpers/auth/auth.service';
+import { frontendUrl, isStudioReturnPath } from '@gitroom/helpers/utils/base-path';
 import { OrganizationLimitsService } from '../organization-limits/organization.limits.service';
 import {
   forwardRef,
@@ -47,6 +49,64 @@ export class IntegrationService {
     private _temporalService: TemporalService,
     private _limitsService: OrganizationLimitsService
   ) {}
+
+  validateReturnPath(value?: string) {
+    if (process.env.LINKSELF_URL && value && !isStudioReturnPath(value)) {
+      throw new HttpException('Invalid return path', 400);
+    }
+    return value;
+  }
+
+  enterpriseReturnPath(value: string) {
+    if (!process.env.LINKSELF_URL || isStudioReturnPath(value)) return value;
+    try {
+      const target = new URL(value);
+      if (target.username || target.password) throw new Error();
+      if (target.origin === new URL(frontendUrl()).origin) {
+        return this.validateReturnPath(target.pathname + target.search + target.hash);
+      }
+      if (target.origin === new URL(process.env.LINKSELF_URL).origin) return '/launches';
+    } catch {}
+    throw new HttpException('Invalid return path', 400);
+  }
+
+  private sessionFingerprint(session?: string) {
+    try {
+      const user = AuthService.verifyJWT(session || '') as { id?: string; providerName?: string };
+      if (!user?.id || !user.providerName) throw new Error();
+      return createHash('sha256').update(session!).digest('hex');
+    } catch {
+      throw new HttpException('Studio session required', 403);
+    }
+  }
+
+  async bindConnectionSession(state: string, session?: string) {
+    if (!process.env.LINKSELF_URL) return;
+    const fingerprint = this.sessionFingerprint(session);
+    if (await ioRedis.set(`connection-session:${state}`, fingerprint, 'EX', 3600, 'NX') !== 'OK') {
+      throw new HttpException('Connection session unavailable', 403);
+    }
+  }
+
+  async assertConnectionSession(state: string, session?: string, serverCredentials = false) {
+    if (!process.env.LINKSELF_URL) return;
+    if (serverCredentials && !session && await ioRedis.get(`connection-server:${state}`) === 'credentials') return;
+    const fingerprint = this.sessionFingerprint(session);
+    if (await ioRedis.get(`connection-session:${state}`) !== fingerprint) {
+      throw new HttpException('Connection session unavailable', 403);
+    }
+  }
+
+  async startConnectionSession(orgId: string, state: string, session?: string) {
+    if (!process.env.LINKSELF_URL || await ioRedis.get(`organization:${state}`) !== orgId) {
+      throw new HttpException('Connection unavailable', 403);
+    }
+    const url = await ioRedis.get(`connection-url:${state}`);
+    if (!url) throw new HttpException('Connection unavailable', 400);
+    await this.bindConnectionSession(state, session);
+    await ioRedis.del(`connection-url:${state}`);
+    return { url };
+  }
 
   async changeActiveCron(orgId: string) {
     const data = await this._autopostsRepository.getAutoposts(orgId);
@@ -447,6 +507,19 @@ export class IntegrationService {
 
   async checkForDeletedOnceAndUpdate(org: string, page: string) {
     return this._integrationRepository.checkForDeletedOnceAndUpdate(org, page);
+  }
+
+  async completeConnectionPage(org: string, id: string, data: any, session?: string) {
+    if (!process.env.LINKSELF_URL) return this.saveProviderPage(org, id, data);
+    const state = data.state || await ioRedis.get(`connection-page-state:${id}`);
+    await this.assertConnectionSession(state, session);
+    if (await ioRedis.get(`organization:${state}`) !== org ||
+        await ioRedis.get(`connection-page:${state}`) !== id) {
+      throw new HttpException('Connection unavailable', 403);
+    }
+    const result = await this.saveProviderPage(org, id, data);
+    await ioRedis.del(`connection-session:${state}`, `organization:${state}`, `connection-page:${state}`, `connection-page-state:${id}`);
+    return result;
   }
 
   async saveProviderPage(org: string, id: string, data: any) {

@@ -1,5 +1,6 @@
 'use client';
 
+import { isStudioReturnPath } from '@gitroom/helpers/utils/base-path';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'next/navigation';
@@ -31,7 +32,7 @@ export const ContinueIntegration: FC<{
   const { push } = useRouter();
   const t = useT();
   const fetch = useFetch();
-  const { extensionId, backendUrl } = useVariables();
+  const { extensionId, backendUrl, linkselfUrl } = useVariables();
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [twoStepState, setTwoStepState] = useState<TwoStepState | null>(null);
@@ -41,10 +42,16 @@ export const ContinueIntegration: FC<{
   // Helper to handle navigation - redirects if logged or returnURL exists, otherwise shows inline
   const navigateOrShow = useCallback(
     (path: string, returnURL: string | undefined, successMessage: string) => {
-      if (returnURL) {
+      if (returnURL && (!linkselfUrl || isStudioReturnPath(returnURL))) {
         // If returnURL exists, always redirect to it with the path params
         const params = path.includes('?') ? path.split('?')[1] : '';
-        push(params ? `${returnURL}?${params}` : returnURL);
+        if (linkselfUrl) {
+          const target = new URL(returnURL, window.location.origin);
+          new URLSearchParams(params).forEach((value, key) => target.searchParams.set(key, value));
+          window.location.assign(target.pathname + target.search + target.hash);
+        } else {
+          push(params ? `${returnURL}?${params}` : returnURL);
+        }
       } else if (logged) {
         // If logged in without returnURL, use normal navigation
         push(path);
@@ -53,7 +60,7 @@ export const ContinueIntegration: FC<{
         setSuccessState({ message: successMessage });
       }
     },
-    [logged, push]
+    [logged, push, linkselfUrl]
   );
   const modifiedParams = useMemo(() => {
     if (provider === 'mewe') {

@@ -1,3 +1,5 @@
+import { studioCookieName } from '@gitroom/helpers/utils/base-path';
+import { Request } from 'express';
 import {
   Body,
   Controller,
@@ -5,6 +7,7 @@ import {
   HttpException,
   Param,
   Post,
+  Req,
   UseFilters,
 } from '@nestjs/common';
 import { ioRedis } from '@gitroom/nestjs-libraries/redis/redis.service';
@@ -45,7 +48,8 @@ export class NoAuthIntegrationsController {
   @UseFilters(new NotEnoughScopesFilter())
   async connectSocialMedia(
     @Param('integration') integration: string,
-    @Body() body: ConnectIntegrationDto
+    @Body() body: ConnectIntegrationDto,
+    @Req() req?: Request
   ) {
     if (
       !this._integrationManager
@@ -55,8 +59,16 @@ export class NoAuthIntegrationsController {
       throw new Error('Integration not allowed');
     }
 
-    const integrationProvider =
-      this._integrationManager.getSocialIntegration(integration);
+    const integrationProvider = this._integrationManager.getSocialIntegration(integration);
+    if (process.env.LINKSELF_URL) {
+      const session = req?.cookies?.[studioCookieName('auth')] || req?.headers.auth as string;
+      await this._integrationService.assertConnectionSession(
+        body.state, session, !!integrationProvider.customFields && !!req && !req.headers.origin && !session
+      );
+      if (await ioRedis.get(`connection-provider:${body.state}`) !== integration) {
+        throw new HttpException('Connection unavailable', 403);
+      }
+    }
 
     const getCodeVerifier = integrationProvider.customFields
       ? 'none'
@@ -79,6 +91,9 @@ export class NoAuthIntegrationsController {
     const refresh = await ioRedis.get(`refresh:${body.state}`);
     await this._integrationService.assertCanConnect(org.id, integration, refresh);
 
+    if (process.env.LINKSELF_URL && await ioRedis.set(`connection-used:${body.state}`, '1', 'EX', 3600, 'NX') !== 'OK') {
+      throw new HttpException('Connection already completed', 400);
+    }
     if (!integrationProvider.customFields) {
       await ioRedis.del(`login:${body.state}`);
     }
@@ -318,7 +333,9 @@ export class NoAuthIntegrationsController {
       await ioRedis.del(`webhookUrl:${body.state}`);
     }
 
-    const returnURL = await ioRedis.get(`redirect:${body.state}`);
+    const storedReturnURL = await ioRedis.get(`redirect:${body.state}`);
+    const returnURL = process.env.LINKSELF_URL
+      ? this._integrationService.validateReturnPath(storedReturnURL) : storedReturnURL;
     if (returnURL) {
       await ioRedis.del(`redirect:${body.state}`);
     }
@@ -342,6 +359,14 @@ export class NoAuthIntegrationsController {
       ...safeIntegration
     } = createUpdate as any;
 
+    if (process.env.LINKSELF_URL) {
+      if (integrationProvider.isBetweenSteps && !refresh) {
+        await ioRedis.set(`connection-page:${body.state}`, createUpdate.id, 'EX', 3600);
+        await ioRedis.set(`connection-page-state:${createUpdate.id}`, body.state, 'EX', 3600);
+      } else {
+        await ioRedis.del(`connection-session:${body.state}`, `organization:${body.state}`);
+      }
+    }
     return {
       ...safeIntegration,
       onboarding: onboarding === 'true',
@@ -352,7 +377,7 @@ export class NoAuthIntegrationsController {
   }
 
   @Post('/public/provider/:id/connect')
-  async saveProviderPage(@Param('id') id: string, @Body() body: any) {
+  async saveProviderPage(@Param('id') id: string, @Body() body: any, @Req() req?: Request) {
     if (!body.state) {
       throw new Error('Invalid state');
     }
@@ -362,8 +387,11 @@ export class NoAuthIntegrationsController {
       throw new Error('Organization not found');
     }
 
+    if (process.env.LINKSELF_URL) {
+      return this._integrationService.completeConnectionPage(organization, id, body,
+        req?.cookies?.[studioCookieName('auth')] || req?.headers.auth as string);
+    }
     const org = await this._organizationService.getOrgById(organization);
-
     return this._integrationService.saveProviderPage(org.id, id, body);
   }
 

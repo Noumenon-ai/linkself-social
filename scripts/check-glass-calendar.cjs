@@ -30,6 +30,18 @@ const check = (value, message) => {
   assert(value, message);
   count++;
 };
+for (const [file, name, props] of [
+  ['chatbase.component', 'ChatbaseComponent', {}],
+  ['gtm.component', 'GoogleTagManagerComponent', { gtmId: 'configured' }],
+  ['facebook.component', 'FacebookComponent', {}],
+]) {
+  const loaded = component(`apps/frontend/src/components/layout/${file}.tsx`, [name], {
+    useVariables: () => ({ linkselfUrl: 'https://example.test', isChatBase: true }),
+    process: { env: { NEXT_PUBLIC_FACEBOOK_PIXEL: 'configured' } },
+  });
+  check(loaded[name](props) === null, `${name} stays inactive in LinkSelf mode`);
+}
+
 // Compile the named declarations from the real TSX; dependencies are injected below.
 function component(file, names, bindings) {
   const source = ts.createSourceFile(
@@ -177,7 +189,7 @@ nodes(tree)
   .props.onChange({ target: { value: '2026-11-06' } });
 tree = ScheduledPosts();
 check(
-  text(tree).includes('No loaded posts for this day.'),
+  text(tree).includes('No posts this day.'),
   'Unloaded day has a real empty state'
 );
 check(
@@ -779,11 +791,13 @@ const { MenuItem } = component(
     Link: 'a',
   }
 );
-for (const tab of ['sets', 'signatures', 'plugs', 'global_settings']) {
+for (const tab of ['sets', 'signatures', 'plugs', 'agents', 'apps', 'global_settings']) {
   activeQuery = `tab=${tab}`;
   const paths = [
     '/settings?tab=sets',
     '/settings?tab=signatures',
+    '/settings?tab=agents',
+    '/settings?tab=apps',
     '/plugs',
     '/settings',
   ];
@@ -811,19 +825,19 @@ const { MenuItem: CategoryItem } = component(
 );
 const { StudioTabs } = component(
   'apps/frontend/src/components/layout/studio.tabs.tsx', ['StudioTabs'],
-  { usePathname: () => studioPath, useVariables: () => ({ linkselfUrl }), Link: 'a' }
+  { usePathname: () => studioPath, useVariables: () => ({ linkselfUrl }), Link: 'a', useRef: () => ({ current: null }), useEffect: () => {} }
 );
 for (const base of ['https://example.test', 'https://example.test/']) {
   linkselfUrl = base;
   for (const [route, selected] of [
-    ['/launches', 'Calendar'], ['/analytics', 'Analytics'], ['/media', 'Media'],
+    ['/launches', 'Calendar'], ['/analytics', 'Post analytics'], ['/media', 'Media'],
     ['/settings', 'Settings'], ['/plugs', 'Settings'], ['/launches/detail', 'Calendar'],
     ['/agents', undefined],
   ]) {
     studioPath = route;
     const links = nodes(StudioTabs()).filter((n) => n.type === 'a');
-    check(JSON.stringify(links.map(text)) === JSON.stringify(['Calendar', 'Analytics', 'Media', 'Settings', 'Channels setup', 'Campaigns']), `${route}: category tabs have the exact labels and order`);
-    check(JSON.stringify(links.map((n) => n.props.href)) === JSON.stringify(['/launches', '/analytics', '/media', '/settings', 'https://example.test/dashboard/social', 'https://example.test/dashboard/campaigns']), `${route}: category tabs resolve to exact destinations`);
+    check(JSON.stringify(links.map(text)) === JSON.stringify(['Calendar', 'Post analytics', 'Media', 'Campaigns', 'Settings']), `${route}: category tabs have the exact labels and order`);
+    check(JSON.stringify(links.map((n) => n.props.href)) === JSON.stringify(['/launches', '/analytics', '/media', 'https://example.test/dashboard/campaigns', '/settings']), `${route}: category tabs resolve to exact destinations`);
     check(links.every((n) => n.props.target === undefined), `${route}: every tab uses the same tab`);
     check(JSON.stringify(links.filter((n) => n.props['aria-current'] === 'page').map(text)) === JSON.stringify(selected ? [selected] : []), `${route}: only the current Studio tab is selected`);
     const rail = nodes(TopMenu()).filter((n) => n.type === 'menu-item').map((n) => CategoryItem(n.props));
@@ -849,7 +863,7 @@ const { SettingsPopup } = component(
     useForm: () => ({ watch: () => '', handleSubmit: () => () => {} }),
     useModals: () => ({}), useCallback: (f) => f, useEffect: () => {},
     useSearchParams: () => new URLSearchParams(`tab=${settingsTab}`), useRouter: () => ({}),
-    useState: (init) => [init(), () => {}], useT: () => (_, fallback) => fallback,
+    useRef: () => ({ current: null }), useState: (init) => [init(), () => {}], useT: () => (_, fallback) => fallback,
     clsx, FormProvider: 'form-provider', SVGLine: 'svg-line',
     GlobalSettings: 'global-settings', Sets: 'sets', SignaturesComponent: 'signatures',
     Plugs: 'plugs', ThirdPartyComponent: 'integrations', AppsComponent: 'apps',
@@ -863,7 +877,7 @@ for (const plan of ['FREE', 'PRO']) {
     const allowed = plan === 'PRO' || !['sets', 'signatures'].includes(settingsTab);
     check(buttons.some((n) => text(n).trim() === 'Plugs'), `${plan}: Plugs remains in Settings' second row`);
     check(['Sets', 'Signatures'].every((label) => buttons.some((n) => text(n).trim() === label) === (plan === 'PRO')), `${plan}: Settings preserves Sets and Signatures feature permissions`);
-    check(buttons.filter((n) => n.props['aria-current'] === 'page').map(text).join().trim() === ({ global_settings: 'Global Settings', plugs: 'Plugs', sets: 'Sets', signatures: 'Signatures' })[allowed ? settingsTab : 'global_settings'], `${plan}: second row tracks ${settingsTab} independently`);
+    check(buttons.filter((n) => n.props['aria-current'] === 'page').map(text).join().trim() === ({ global_settings: 'General', plugs: 'Plugs', sets: 'Sets', signatures: 'Signatures' })[allowed ? settingsTab : 'global_settings'], `${plan}: second row tracks ${settingsTab} independently`);
   }
 }
 check(fs.readFileSync('apps/frontend/src/app/(app)/(site)/plugs/page.tsx', 'utf8').includes("redirect('/settings?tab=plugs')"), '/plugs still redirects to the Settings Plugs tab');

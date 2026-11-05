@@ -2,8 +2,10 @@
 import { withBasePath } from '@gitroom/helpers/utils/base-path';
 
 import Script from 'next/script';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 export const FacebookComponent = () => {
-  if (!process.env.NEXT_PUBLIC_FACEBOOK_PIXEL) {
+  const { linkselfUrl } = useVariables();
+  if (linkselfUrl || !process.env.NEXT_PUBLIC_FACEBOOK_PIXEL) {
     return null;
   }
   return (

@@ -40,7 +40,7 @@ describe('Enterprise browser login', () => {
   };
   let controller: EnterpriseController;
   let response: Response;
-  let orgs: { getOrgByApiKey: jest.Mock; getOrganizationOwner: jest.Mock };
+  let orgs: { getOrgById: jest.Mock; getOrgByApiKey: jest.Mock; getOrganizationOwner: jest.Mock };
   let log: jest.SpyInstance;
   const claims = () => ({
     apiKey: 'private-key',
@@ -65,6 +65,7 @@ describe('Enterprise browser login', () => {
     process.env.FRONTEND_URL = 'https://social.linkself.net';
     delete process.env.NOT_SECURED;
     orgs = {
+      getOrgById: jest.fn().mockResolvedValue({ id: 'org', deletedAt: null }),
       getOrgByApiKey: jest
         .fn()
         .mockResolvedValue({ id: 'org', deletedAt: null as Date | null }),
@@ -177,8 +178,9 @@ describe('Enterprise browser login', () => {
     ['empty apiKey', { apiKey: '' }],
     ['missing jti', { jti: undefined }],
     ['login shape', { providerName: 'LOCAL' }],
-    ['invite shape', { orgId: 'org' }],
+    ['invite shape', { orgId: 'org', timeLimit: now + 60 }],
     ['reset shape', { expires: now + 60 }],
+    ['unrelated claims', { orgId: 'org', plan: 'free', channels: 3 }],
   ])('rejects %s', async (_, overrides) => {
     const payload = { ...claims(), ...overrides };
     const encodedPayload = JSON.parse(JSON.stringify(payload));
@@ -188,6 +190,40 @@ describe('Enterprise browser login', () => {
     await controller.login(jwt, response);
     rejected();
     expect(ioRedis.set).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])('preserves enterprise connection mode %s', async (credentials) => {
+    process.env.LINKSELF_URL = 'https://linkself.test';
+    process.env.NEXT_PUBLIC_BACKEND_URL = 'https://studio.test/api';
+    const manager = {
+      getAllowedSocialsIntegrations: () => ['test'],
+      getSocialIntegration: () => ({
+        customFields: credentials ? [{ key: 'credential' }] : undefined,
+        generateAuthUrl: async () => ({ state: 'state', codeVerifier: 'verifier', url: credentials ? 'state' : 'https://provider.test/connect' }),
+      }),
+    };
+    const integrationService = { assertCanConnect: jest.fn(), enterpriseReturnPath: () => '/launches' };
+    const connection = new EnterpriseController(manager as any, orgs as any, integrationService as any, {} as any, {} as any);
+    const result = await connection.redirectParams(token({ apiKey: 'private-key', provider: 'test', redirectUrl: '/launches', webhookUrl: 'https://linkself.test/callback' }));
+    if (credentials) {
+      expect(result).toBe('state');
+      expect(ioRedis.set).toHaveBeenCalledWith('connection-server:state', 'credentials', 'EX', 3600);
+    } else {
+      const url = new URL(result!);
+      expect(url.pathname).toBe('/api/enterprise/login');
+      const claims = verify(url.searchParams.get('params')!, process.env.JWT_SECRET!) as any;
+      expect(claims.orgId).toBe('org');
+      expect(claims.apiKey).toBeUndefined();
+      expect(claims.redirect).toBe('/connection-start?state=state');
+      expect(claims.exp - claims.iat).toBe(60);
+    }
+  });
+
+  it('resolves a signed organization identifier without an API key', async () => {
+    await controller.login(token({ ...claims(), apiKey: undefined, orgId: 'org' }), response);
+    expect(orgs.getOrgById).toHaveBeenCalledWith('org');
+    expect(orgs.getOrgByApiKey).not.toHaveBeenCalled();
+    expect(response.cookie).toHaveBeenCalledTimes(2);
   });
 
   it('rejects an invalid signature', async () => {

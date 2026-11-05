@@ -1,6 +1,6 @@
 'use client';
-
 import { useVariables } from '@gitroom/react/helpers/variable.context';
+
 import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
@@ -78,7 +78,7 @@ export const Autopost: FC = () => {
           'Autopost creates drafts from your RSS new items, review and schedule them from the calendar to publish them'
         )}
       </div>
-      <div className="my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] flex gap-[24px]">
+      <div className="glass-settings-list my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] flex gap-[24px]">
         <div className="flex flex-col w-full">
           {!!data?.length && (
             <div className="glass-autopost-table grid grid-cols-[1fr,1fr,1fr,1fr,1fr] w-full gap-y-[10px]">

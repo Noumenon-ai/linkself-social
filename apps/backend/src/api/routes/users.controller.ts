@@ -155,11 +155,12 @@ export class UsersController {
     response.cookie(studioCookieName('impersonate'), id, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
@@ -310,11 +311,12 @@ export class UsersController {
     response.cookie(studioCookieName('showorg'), id, {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
@@ -338,6 +340,9 @@ export class UsersController {
     @Req() req: Request,
     @Res({ passthrough: true }) response: Response
   ) {
+    if (process.env.LINKSELF_URL) {
+      throw new HttpException('Manage your account in LinkSelf settings', 403);
+    }
     const impersonate = req.cookies[studioCookieName('impersonate')] || req.headers.impersonate;
     if (impersonate) {
       throw new HttpException(
@@ -375,11 +380,12 @@ export class UsersController {
     response.cookie(studioCookieName('auth'), '', {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       maxAge: -1,
@@ -389,11 +395,12 @@ export class UsersController {
     response.cookie(studioCookieName('showorg'), '', {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       maxAge: -1,
@@ -403,11 +410,12 @@ export class UsersController {
     response.cookie(studioCookieName('impersonate'), '', {
       domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
       ...(!process.env.NOT_SECURED
         ? {
             secure: true,
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
           }
         : {}),
       maxAge: -1,

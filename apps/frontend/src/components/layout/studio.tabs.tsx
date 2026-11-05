@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
 import { linkselfPath } from '@gitroom/helpers/utils/base-path';
 import { usePathname } from 'next/navigation';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
@@ -8,20 +9,24 @@ import { useVariables } from '@gitroom/react/helpers/variable.context';
 export const StudioTabs = () => {
   const { linkselfUrl, frontEndUrl } = useVariables();
   const pathname = usePathname();
+  const nav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    nav.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [pathname]);
   if (!linkselfUrl) return null;
 
   const base = linkselfUrl.replace(/\/$/, '');
   const tabs = [
     { label: 'Calendar', path: '/launches' },
-    { label: 'Analytics', path: '/analytics' },
+    { label: 'Post analytics', path: '/analytics' },
     { label: 'Media', path: '/media' },
-    { label: 'Settings', path: '/settings' },
-    { label: 'Channels setup', path: `${base}/dashboard/social` },
     { label: 'Campaigns', path: `${base}/dashboard/campaigns` },
+    { label: 'Settings', path: '/settings' },
   ];
 
   return (
     <nav
+      ref={nav}
       className="glass-studio-tabs glass-settings-tabs flex"
       aria-label="Studio"
     >

@@ -38,6 +38,15 @@ export const MobileTopBar: FC<{
   return (
     <div className="hidden mobile:flex sticky top-0 z-[450] h-[60px] items-center gap-[8px] px-[16px] bg-newBgColorInner select-none">
       <div
+        aria-label="Back to calendar"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.currentTarget.click();
+          }
+        }}
         onClick={onBack}
         className="w-[24px] h-[24px] flex justify-center items-center cursor-pointer text-[var(--studio-muted,#A3A3A3)]"
       >

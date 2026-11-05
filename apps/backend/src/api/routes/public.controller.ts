@@ -156,6 +156,8 @@ export class PublicController {
     @Res() res: Response,
     @Req() req: Request
   ) {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
     const { url } = query;
     if (!url.endsWith('mp4')) {
       return res.status(400).send('Invalid video URL');
@@ -213,8 +215,7 @@ export class PublicController {
       throw new Error(`Upstream error: ${r.statusText}`);
     }
 
-    const type = r.headers.get('content-type') ?? 'application/octet-stream';
-    res.setHeader('Content-Type', type);
+    res.setHeader('Content-Type', 'video/mp4');
 
     const contentRange = r.headers.get('content-range');
     if (contentRange) res.setHeader('Content-Range', contentRange);

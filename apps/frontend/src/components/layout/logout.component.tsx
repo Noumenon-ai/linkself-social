@@ -25,6 +25,14 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         t('yes_logout', 'Yes logout')
       )
     ) {
+      if (linkselfUrl) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = linkselfPath(linkselfUrl, '/api/auth/logout', frontEndUrl);
+        document.body.appendChild(form);
+        form.submit();
+        return;
+      }
       if (!isSecured) {
         setCookie('auth', '', -10);
         setCookie('showorg', '', -10);

@@ -14,11 +14,12 @@ export const removeAuth = (res: Response) => {
   res.cookie(studioCookieName('auth'), '', {
     domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
     path: studioCookiePath(),
+    ...(process.env.LINKSELF_URL ? { sameSite: 'lax' as const } : {}),
     ...(!process.env.NOT_SECURED
       ? {
           secure: true,
           httpOnly: true,
-          sameSite: 'none',
+          sameSite: process.env.LINKSELF_URL ? 'lax' : 'none',
         }
       : {}),
     expires: new Date(0),

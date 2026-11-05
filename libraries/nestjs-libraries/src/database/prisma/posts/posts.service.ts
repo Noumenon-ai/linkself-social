@@ -1,3 +1,4 @@
+import { sanitizePostContent } from '@gitroom/helpers/utils/sanitize.post.content';
 import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { OrganizationLimitsService } from '../organization-limits/organization.limits.service';
 import {
@@ -1185,7 +1186,9 @@ export class PostsService {
 
       post.value = (post.value || []).map((p, i) => ({
         ...p,
-        content: removeLinks ? stripLinks(updateContent[i]) : updateContent[i],
+        content: process.env.LINKSELF_URL
+          ? sanitizePostContent(removeLinks ? stripLinks(updateContent[i]) : updateContent[i])
+          : removeLinks ? stripLinks(updateContent[i]) : updateContent[i],
       }));
 
       const { posts } = await this._postRepository.createOrUpdatePost(

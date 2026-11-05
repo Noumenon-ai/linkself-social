@@ -1,4 +1,5 @@
-import { frontendUrl } from '@gitroom/helpers/utils/base-path';
+import { randomUUID } from 'crypto';
+import { frontendUrl, publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import { OrganizationLimitsService } from '@gitroom/nestjs-libraries/database/prisma/organization-limits/organization.limits.service';
 import {
   EnterpriseLimitsRequestDto,
@@ -55,6 +56,7 @@ export class EnterpriseController {
       typeof payload !== 'object' ||
       'providerName' in payload || // login token (full User row)
       (!limits && 'orgId' in payload) || // team invite token
+      'timeLimit' in payload ||
       'expires' in payload // password reset token
     ) {
       throw new Error('Invalid enterprise token');
@@ -74,17 +76,20 @@ export class EnterpriseController {
     let reason = 'invalid token';
     try {
       const payload = this.verifyEnterpriseToken<{
-        apiKey: string;
+        apiKey?: string;
+        orgId?: string;
         jti: string;
         exp: number;
         iat: number;
         redirect?: string;
-      }>(params);
+      }>(params, true);
       reason = 'invalid claims';
       const now = Math.floor(Date.now() / 1000);
+      const loginClaims = ['orgId', 'apiKey', 'jti', 'iat', 'exp', 'redirect', 'nbf'];
       if (
-        typeof payload.apiKey !== 'string' ||
-        !payload.apiKey ||
+        Object.keys(payload).some((key) => !loginClaims.includes(key)) ||
+        !((typeof payload.orgId === 'string' && payload.orgId) ||
+          (typeof payload.apiKey === 'string' && payload.apiKey)) ||
         typeof payload.jti !== 'string' ||
         !payload.jti ||
         !Number.isFinite(payload.exp) ||
@@ -109,9 +114,9 @@ export class EnterpriseController {
         throw new Error();
       }
       reason = 'organization unavailable';
-      const org = await this._organizationService.getOrgByApiKey(
-        payload.apiKey
-      );
+      const org = payload.orgId
+        ? await this._organizationService.getOrgById(payload.orgId)
+        : await this._organizationService.getOrgByApiKey(payload.apiKey!);
       if (!org || org.deletedAt) throw new Error();
       reason = 'organization owner unavailable';
       const user = await this._organizationService.getOrganizationOwner(org.id);
@@ -208,6 +213,7 @@ export class EnterpriseController {
         throw new Error('Organization not found');
       }
 
+      if (process.env.LINKSELF_URL) load.redirectUrl = this._integrationService.enterpriseReturnPath(load.redirectUrl);
       await this._integrationService.assertCanConnect(
         org.id,
         load.provider,
@@ -238,6 +244,20 @@ export class EnterpriseController {
       await ioRedis.set(`organization:${state}`, org.id, 'EX', 3600);
       await ioRedis.set(`login:${state}`, codeVerifier, 'EX', 3600);
 
+      if (process.env.LINKSELF_URL) {
+        await ioRedis.set(`connection-provider:${state}`, load.provider, 'EX', 3600);
+        if (integrationProvider.customFields) {
+          await ioRedis.set(`connection-server:${state}`, 'credentials', 'EX', 3600);
+          return state;
+        }
+        await ioRedis.set(`connection-url:${state}`, url, 'EX', 3600);
+        const issued = Math.floor(Date.now() / 1000);
+        const login = AuthService.signJWT({
+          orgId: org.id, jti: randomUUID(), iat: issued, exp: issued + 60,
+          redirect: `/connection-start?state=${encodeURIComponent(state)}`,
+        });
+        return `${publicApiUrl()}/enterprise/login?${new URLSearchParams({ params: login })}`;
+      }
       return url;
     } catch (err) {
       if (

@@ -427,6 +427,15 @@ export const EditorWrapper: FC<{
       {!!internal && !existingData?.integration && (
         <div
           className="mt-[12px] flex gap-[20px] items-center cursor-pointer select-none mobile:mt-0 mobile:w-[40px] mobile:h-[40px] mobile:justify-center mobile:rounded-[8px] mobile:bg-btnSimple"
+          aria-label="Use shared content"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              event.currentTarget.click();
+            }
+          }}
           onClick={goBackToGlobal}
         >
           <div className="flex gap-[6px] items-center mobile:hidden">
@@ -583,6 +592,15 @@ export const EditorWrapper: FC<{
                 </div>
                 {items.length > 1 && (
                   <TrashIcon
+                    aria-label="Remove post item"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        deletePost(index)();
+                      }
+                    }}
                     onClick={deletePost(index)}
                     data-tooltip-id="tooltip"
                     data-tooltip-content={t(
@@ -1065,6 +1083,15 @@ export const Editor: FC<{
                             </>
                           )}
                         <div
+                          aria-label="Insert emoji"
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              event.currentTarget.click();
+                            }
+                          }}
                           data-tooltip-id="tooltip"
                           data-tooltip-content={t(
                             'insert_emoji',

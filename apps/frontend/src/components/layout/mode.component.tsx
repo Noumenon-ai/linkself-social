@@ -1,5 +1,5 @@
 'use client';
-import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+import { studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import { useCallback, useEffect, useState } from 'react';
 import useCookie from 'react-use-cookie';
@@ -14,7 +14,7 @@ const ModeComponent = () => {
 
   const changeMode = useCallback(() => {
     modeEmitter.emit('mode', mode === 'dark' ? 'light' : 'dark');
-    setMode(mode === 'dark' ? 'light' : 'dark', { path: studioCookiePath() });
+    setMode(mode === 'dark' ? 'light' : 'dark', studioPreferenceCookieOptions());
   }, [mode]);
 
   useEffect(() => {

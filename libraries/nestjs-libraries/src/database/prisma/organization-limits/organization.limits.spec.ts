@@ -34,10 +34,12 @@ jest.mock('../../../openai/openai.service', () => ({
   OpenaiService: class {},
 }));
 
-jest.mock('@gitroom/helpers/utils/sanitize.post.content', () => ({
-  sanitizePostContent: (value: string) => value,
-  postContentPlainText: (value: string) => value,
-}));
+
+
+// Load the installed sanitizer through Node's native ESM-compatible loader.
+jest.mock('isomorphic-dompurify', () =>
+  (process as any).getBuiltinModule('module').createRequire(process.cwd() + '/package.json')('isomorphic-dompurify')
+);
 
 describe('Organization limits', () => {
   const env = { ...process.env };
@@ -479,6 +481,14 @@ describe('Organization limits', () => {
       integrationService.enableChannel('org', 100, '2')
     ).resolves.toBeUndefined();
   });
+  it.each(['WEB', 'API', 'MCP', 'AUTOPOST'])('normalizes stored content from %s', async (source) => {
+    const body = postBody();
+    body.posts[0].value[0].content = '<p onclick="void(0)">Hello<strong> there</strong></p><script>void(0)</script>';
+    await postService.createPost('org', body, source as any);
+    const stored = postRepository.createOrUpdatePost.mock.calls[0][3].value[0].content;
+    expect(stored).toBe('<p>Hello<strong> there</strong></p>');
+  });
+
   it('refuses at the monthly limit on the common creation path', async () => {
     posts = fillPosts(30);
     await expect(

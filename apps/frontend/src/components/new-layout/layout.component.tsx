@@ -94,7 +94,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
         <MantineWrapper>
           <ToolTip />
           <Toaster />
-          <TrialTracker />
+          {!linkselfUrl && <TrialTracker />}
           <CheckPayment check={searchParams.get('check') || ''} mutate={mutate}>
             <ShowMediaBoxModal />
             <ShowLinkedinCompany />
@@ -183,7 +183,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                           {!linkselfUrl && (
                             <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
                           )}
-                          <LanguageComponent />
+                          {!linkselfUrl && <LanguageComponent />}
                           <div className="contents mobile:hidden">
                             <ChromeExtensionComponent />
                           </div>
@@ -200,7 +200,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                       </div>
                       {linkselfUrl && (
                         <footer className="glass-footer">
-                          <span>LinkSelf Social</span>
+                          <a href={linkselfPath(linkselfUrl, '/dashboard', frontEndUrl)}>LinkSelf</a>
                           <nav aria-label="Footer">
                             <a
                               href={linkselfPath(linkselfUrl, '/privacy', frontEndUrl)}
@@ -210,6 +210,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                             <a href={linkselfPath(linkselfUrl, '/terms', frontEndUrl)}>
                               Terms
                             </a>
+                            <a href={linkselfPath(linkselfUrl, '/report', frontEndUrl)}>Report a problem</a>
                             <SourceAttribution />
                           </nav>
                         </footer>

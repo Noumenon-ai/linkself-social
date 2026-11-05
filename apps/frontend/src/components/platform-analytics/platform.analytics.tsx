@@ -1,6 +1,6 @@
 'use client';
 
-import { withBasePath, studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+import { withBasePath, studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 
 import useSWR from 'swr';
 import { useCallback, useMemo, useState } from 'react';
@@ -185,7 +185,7 @@ export const PlatformAnalytics = () => {
               {t('channels')}
             </h2>
             <div
-              onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1', { path: studioCookiePath() })}
+              onClick={() => setCollapseMenu(collapseMenu === '1' ? '0' : '1', studioPreferenceCookieOptions())}
               className="group-[.sidebar]:rotate-[180deg] group-[.sidebar]:mx-auto text-btnText bg-btnSimple rounded-[6px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer select-none"
             >
               <svg

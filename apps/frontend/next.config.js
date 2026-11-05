@@ -10,7 +10,7 @@ if (basePath && !/^\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*$/.test(basePath)) {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   basePath,
-  env: { LINKSELF_BASE_PATH: basePath },
+  env: { LINKSELF_BASE_PATH: basePath, LINKSELF_BUILD_BASE_PATH: basePath },
   experimental: {
     proxyTimeout: 90_000,
   },

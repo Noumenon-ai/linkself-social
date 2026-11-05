@@ -1,3 +1,4 @@
+import { isStudioReturnPath, assertStudioBuildPath, studioPreferenceCookieOptions } from './base-path';
 import { readFileSync } from 'fs';
 import { customFetch } from './custom.fetch.func';
 import {
@@ -80,4 +81,43 @@ it('normalizes trailing slashes and checks prefix boundaries', () => {
 });
 it.each(['//evil.test', '/a;return 200;', '/a/../b', 'studio', '/a\nb'])('rejects unsafe nginx prefix %s', (base) => {
   expect(() => renderNginx('__LINKSELF_BASE_PATH__', base)).toThrow();
+});
+
+it.each(['https://other.test/path', '//other.test', '/%2fother.test', '/\\other.test', '/%5cother.test', '/%0a/path', '/%'])('validates return path case %#', (value) => {
+  expect(isStudioReturnPath(value)).toBe(false);
+});
+it.each(['/launches', '/dashboard/social?added=true', '/settings#account'])('accepts local return path case %#', (value) => {
+  expect(isStudioReturnPath(value)).toBe(true);
+});
+it.each([['', '/dashboard/studio'], ['/dashboard/studio', ''], ['/first', '/second']])('checks startup path case %#', (built, runtime) => {
+  expect(() => assertStudioBuildPath(built, runtime)).toThrow();
+});
+it('accepts matching startup paths', () => {
+  expect(() => assertStudioBuildPath('/dashboard/studio', '/dashboard/studio/')).not.toThrow();
+});
+it.each(['', '/dashboard/studio'])('renders LinkSelf response policy %s', (base) => {
+  const config = renderNginx(readFileSync('var/docker/nginx.conf', 'utf8'), base, 'https://linkself.test');
+  expect(config).toContain("Content-Security-Policy \"default-src 'none'; sandbox\" always");
+  expect(config).toContain('X-Content-Type-Options "nosniff" always');
+  expect(config).not.toContain('__LINKSELF_');
+  if (base) {
+    expect(config).toContain('location /uploads/ {');
+    expect(config).toContain('limit_except GET HEAD { deny all; }');
+  }
+});
+
+it('sets the preference cookie policy in LinkSelf mode', () => {
+  process.env.LINKSELF_URL = 'https://linkself.test';
+  expect(studioPreferenceCookieOptions()).toMatchObject({ SameSite: 'Lax' });
+  delete process.env.LINKSELF_URL;
+  expect(studioPreferenceCookieOptions()).not.toHaveProperty('SameSite');
+});
+it('checks the runtime path during server registration', async () => {
+  const { register } = await import('../../../../apps/frontend/src/instrumentation');
+  process.env.LINKSELF_BUILD_BASE_PATH = '/dashboard/studio';
+  process.env.LINKSELF_BASE_PATH = '';
+  await expect(register()).rejects.toThrow('Studio build and runtime paths differ');
+  process.env.LINKSELF_BASE_PATH = '/dashboard/studio';
+  delete process.env.NEXT_PUBLIC_SENTRY_DSN;
+  await expect(register()).resolves.toBeUndefined();
 });

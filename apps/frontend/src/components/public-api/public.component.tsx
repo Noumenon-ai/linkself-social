@@ -360,7 +360,7 @@ const McpSection = ({
         );
 
   return (
-    <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
+    <div className="glass-settings-section bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
       <div className="bg-newBgColorInner px-[20px] mobile:px-[14px] py-[14px] border-b border-newBorder flex items-start justify-between gap-[12px] mobile:flex-col">
         <div>
           <div className="text-[15px] font-[600]">
@@ -644,7 +644,7 @@ const CliSection = ({ apiKey }: { apiKey: string }) => {
       : steps;
 
   return (
-    <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
+    <div className="glass-settings-section bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
       <div className="bg-newBgColorInner px-[20px] mobile:px-[14px] py-[14px] border-b border-newBorder flex items-start justify-between gap-[12px] mobile:flex-col">
         <div>
           <div className="text-[15px] font-[600]">
@@ -801,7 +801,7 @@ const PublicApiContent = () => {
           'and you will receive a pos_ prefixed token that works with the API, MCP, and CLI — just like an API Key.'
         )}
       </div>
-      <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
+      <div className="glass-settings-section bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
         <div className="bg-newBgColorInner px-[20px] mobile:px-[14px] py-[14px] border-b border-newBorder flex items-start justify-between gap-[12px] mobile:flex-col">
           <div>
             <div className="text-[15px] font-[600]">

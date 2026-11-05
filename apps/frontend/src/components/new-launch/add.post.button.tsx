@@ -15,6 +15,21 @@ export const AddPostButton: FC<{
   return (
     <div className="flex">
       <div
+        aria-label={
+          props.postComment === PostComment.ALL
+            ? 'Add comment or post'
+            : props.postComment === PostComment.POST
+            ? 'Add post'
+            : 'Add comment'
+        }
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.currentTarget.click();
+          }
+        }}
         onClick={onClick}
         className="select-none cursor-pointer h-[34px] rounded-[6px] flex glass-accent bg-[var(--studio-accent,#D82D7E)] gap-[8px] justify-center items-center pl-[16px] pr-[20px] text-[13px] font-[600] mt-[12px] mobile:w-[40px] mobile:h-[40px] mobile:p-0 mobile:mt-0 mobile:rounded-[8px]"
       >

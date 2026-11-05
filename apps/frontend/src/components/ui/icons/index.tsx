@@ -1,4 +1,4 @@
-import { studioCookieName, studioCookiePath } from '@gitroom/helpers/utils/base-path';
+import { studioCookieName, studioCookiePath, studioPreferenceCookieOptions } from '@gitroom/helpers/utils/base-path';
 import React, { FC, SVGProps, useEffect } from 'react';
 import clsx from 'clsx';
 import useCookie from 'react-use-cookie';
@@ -873,7 +873,7 @@ export const NoMediaIcon: FC = () => {
 
   useEffect(() => {
     modeEmitter.on('mode', (value) => {
-      setMode(value, { path: studioCookiePath() });
+      setMode(value, studioPreferenceCookieOptions());
     });
 
     return () => {

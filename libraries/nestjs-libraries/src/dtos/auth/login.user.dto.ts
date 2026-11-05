@@ -1,5 +1,6 @@
 import {
   IsDefined,
+  IsIn,
   IsEmail,
   IsString,
   MinLength,
@@ -16,6 +17,7 @@ export class LoginUserDto {
 
   @IsString()
   @IsDefined()
+  @IsIn(Object.values(Provider))
   provider: Provider;
 
   @IsString()
