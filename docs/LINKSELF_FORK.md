@@ -50,7 +50,8 @@ serves users (AGPL-3.0 section 13).
 - 2026-11-05 (c1878551): added the studio server migration, backup and restore kit.
 - 2026-11-05 (9644c7f2): updated dependencies within their existing major versions.
 - 2026-11-05 (b5cc1338, cefe7bd3): repaired the server kit after review and a second rehearsal.
-- 2026-11-05: widened the calendar's hour column so the current time fits.
+- 2026-11-05 (9a993826): widened the calendar's hour column so the current time fits.
+- 2026-11-06 (70bcbc23): files over 4 MB upload in parts under the LinkSelf mount.
 
 ## Running the staging stack
 ```
