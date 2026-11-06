@@ -1,6 +1,26 @@
 import { frontendUrl } from '@gitroom/helpers/utils/base-path';
 import { IUploadProvider, UploadedStream } from './upload.interface';
-import { createWriteStream, mkdirSync, unlink, writeFileSync } from 'fs';
+import {
+  createReadStream,
+  createWriteStream,
+  mkdirSync,
+  unlink,
+  writeFileSync,
+} from 'fs';
+import { mkdir, readdir, readFile, rm, stat, writeFile } from 'fs/promises';
+import { randomBytes } from 'crypto';
+import { BadRequestException } from '@nestjs/common';
+import {
+  StartChunkedUploadDto,
+  CompleteChunkedUploadDto,
+} from '../dtos/media/chunked.upload.dto';
+import {
+  getMaxSize,
+  maxSizeStream,
+  UPLOAD_ALLOWED_MIME,
+  uploadOriginalName,
+  uploadStreamToStorage,
+} from './custom.upload.validation';
 import { resolve, sep } from 'path';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
@@ -26,6 +46,183 @@ const LOCAL_STORAGE_ALLOWED_MIME = new Set<string>([
 ]);
 export class LocalStorage implements IUploadProvider {
   constructor(private uploadDirectory: string) {}
+
+  private chunkedDirectory() {
+    return resolve(this.uploadDirectory, '.chunked');
+  }
+
+  async startChunkedUpload(org: string, data: StartChunkedUploadDto) {
+    if (
+      typeof data.name !== 'string' ||
+      !data.name ||
+      !UPLOAD_ALLOWED_MIME.has(data.mimeType) ||
+      !Number.isSafeInteger(data.size) ||
+      data.size < 1 ||
+      data.size > getMaxSize(data.mimeType)
+    ) {
+      throw new BadRequestException('Invalid upload details');
+    }
+
+    const root = this.chunkedDirectory();
+    await mkdir(root, { recursive: true, mode: 0o700 });
+    for (const entry of await readdir(root, { withFileTypes: true })) {
+      if (!entry.isDirectory() || !/^[a-f0-9]{64}$/.test(entry.name)) continue;
+      const folder = resolve(root, entry.name);
+      const created = await stat(resolve(folder, 'metadata.json'))
+        .catch(() => stat(folder))
+        .catch(() => null);
+      if (created && created.mtimeMs < Date.now() - 24 * 60 * 60 * 1000) {
+        await rm(folder, { recursive: true, force: true });
+      }
+    }
+
+    const uploadId = randomBytes(32).toString('hex');
+    const folder = resolve(root, uploadId);
+    await mkdir(folder, { mode: 0o700 });
+    try {
+      await writeFile(
+        resolve(folder, 'metadata.json'),
+        JSON.stringify({
+          org,
+          name: data.name,
+          size: data.size,
+          mimeType: data.mimeType,
+          createdAt: Date.now(),
+        }),
+        { mode: 0o600, flag: 'wx' }
+      );
+      return { uploadId };
+    } catch (err) {
+      await rm(folder, { recursive: true, force: true });
+      throw err;
+    }
+  }
+
+  private async withChunkedUpload<T>(
+    org: string,
+    uploadId: string,
+    complete: boolean,
+    action: (folder: string, data: StartChunkedUploadDto) => Promise<T>
+  ) {
+    if (!/^[a-f0-9]{64}$/.test(uploadId)) {
+      throw new BadRequestException('Invalid upload id');
+    }
+    const folder = resolve(this.chunkedDirectory(), uploadId);
+    const data = await readFile(resolve(folder, 'metadata.json'), 'utf8')
+      .then((value) => JSON.parse(value))
+      .catch(() => null);
+    if (!data || data.org !== org) {
+      throw new BadRequestException('Upload not found');
+    }
+    // Serializes part writes and completion, including across backend processes.
+    const lock = resolve(folder, 'lock');
+    await mkdir(lock).catch(() => {
+      throw new BadRequestException('Upload is busy');
+    });
+    let remove = complete;
+    try {
+      if (data.createdAt < Date.now() - 24 * 60 * 60 * 1000) {
+        throw new BadRequestException('Upload expired');
+      }
+      return await action(folder, data);
+    } catch (err) {
+      remove = true;
+      throw err;
+    } finally {
+      await rm(remove ? folder : lock, { recursive: true, force: true });
+    }
+  }
+
+  async uploadChunk(
+    org: string,
+    uploadId: string,
+    index: string,
+    body: Readable
+  ) {
+    await this.withChunkedUpload(org, uploadId, false, async (folder, data) => {
+      if (!/^(0|[1-9][0-9]{0,2})$/.test(index) || Number(index) >= 256) {
+        throw new BadRequestException('Invalid part index');
+      }
+      const target = resolve(folder, `${index}.part`);
+      await pipeline(
+        body,
+        maxSizeStream(4 * 1024 * 1024),
+        createWriteStream(target, {
+          flags: 'wx',
+          mode: 0o600,
+        })
+      );
+      let total = 0;
+      for (const name of await readdir(folder)) {
+        if (name.endsWith('.part'))
+          total += (await stat(resolve(folder, name))).size;
+      }
+      if (!(await stat(target)).size || total > data.size) {
+        throw new BadRequestException('Invalid upload size');
+      }
+    });
+  }
+
+  async abortChunkedUpload(org: string, uploadId: string) {
+    await this.withChunkedUpload(org, uploadId, true, async () => {});
+  }
+
+  async completeChunkedUpload(
+    org: string,
+    uploadId: string,
+    body: CompleteChunkedUploadDto
+  ) {
+    return this.withChunkedUpload(org, uploadId, true, async (folder, data) => {
+      if (
+        !Number.isInteger(body.partCount) ||
+        body.partCount < 1 ||
+        body.partCount > 256 ||
+        (body.preventSave !== undefined &&
+          typeof body.preventSave !== 'boolean')
+      ) {
+        throw new BadRequestException('Invalid completion details');
+      }
+      const parts = (await readdir(folder)).filter((name) =>
+        name.endsWith('.part')
+      );
+      const ordered = Array.from(
+        { length: body.partCount },
+        (_, index) => `${index}.part`
+      );
+      if (
+        parts.length !== ordered.length ||
+        ordered.some((name) => !parts.includes(name))
+      ) {
+        throw new BadRequestException('Invalid upload parts');
+      }
+      let size = 0;
+      for (const name of ordered)
+        size += (await stat(resolve(folder, name))).size;
+      if (size !== data.size)
+        throw new BadRequestException('Invalid upload size');
+
+      const stream = Readable.from(
+        (async function* () {
+          for (const name of ordered) {
+            yield* createReadStream(resolve(folder, name));
+          }
+        })()
+      );
+      try {
+        const uploaded = await uploadStreamToStorage(
+          this,
+          Readable.toWeb(stream) as any,
+          size
+        );
+        return {
+          ...uploaded,
+          originalname: uploadOriginalName(data.name, uploaded.ext),
+        };
+      } finally {
+        stream.destroy();
+      }
+    });
+  }
 
   // Files live under /YYYY/MM/DD with a random name; creates the folder
   private newFilePath(ext: string) {

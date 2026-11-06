@@ -1,4 +1,8 @@
 import { Readable } from 'stream';
+import {
+  StartChunkedUploadDto,
+  CompleteChunkedUploadDto,
+} from '../dtos/media/chunked.upload.dto';
 
 export interface UploadedStream {
   filename: string;
@@ -8,6 +12,22 @@ export interface UploadedStream {
 }
 
 export interface IUploadProvider {
+  startChunkedUpload?(
+    org: string,
+    data: StartChunkedUploadDto
+  ): Promise<{ uploadId: string }>;
+  uploadChunk?(
+    org: string,
+    uploadId: string,
+    index: string,
+    body: Readable
+  ): Promise<void>;
+  abortChunkedUpload?(org: string, uploadId: string): Promise<void>;
+  completeChunkedUpload?(
+    org: string,
+    uploadId: string,
+    data: CompleteChunkedUploadDto
+  ): Promise<UploadedStream>;
   uploadSimple(path: string): Promise<string>;
   uploadFile(file: Express.Multer.File): Promise<any>;
   // Streams the body straight into storage without buffering it. The caller

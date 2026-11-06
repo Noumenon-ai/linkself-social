@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   Req,
   Res,
@@ -25,6 +26,10 @@ import { UploadFactory } from '@gitroom/nestjs-libraries/upload/upload.factory';
 import { SaveMediaInformationDto } from '@gitroom/nestjs-libraries/dtos/media/save.media.information.dto';
 import { VideoDto } from '@gitroom/nestjs-libraries/dtos/videos/video.dto';
 import { VideoFunctionDto } from '@gitroom/nestjs-libraries/dtos/videos/video.function.dto';
+import {
+  StartChunkedUploadDto,
+  CompleteChunkedUploadDto,
+} from '@gitroom/nestjs-libraries/dtos/media/chunked.upload.dto';
 
 @ApiTags('Media')
 @Controller('/media')
@@ -82,6 +87,41 @@ export class MediaController {
     const file = await this.storage.uploadSimple(image.output);
 
     return this._mediaService.saveFile(org.id, file.split('/').pop(), file);
+  }
+
+  @Post('/chunked/start')
+  startChunkedUpload(
+    @GetOrgFromRequest() org: Organization,
+    @Body() body: StartChunkedUploadDto
+  ) {
+    return this._mediaService.startChunkedUpload(org.id, body);
+  }
+
+  @Put('/chunked/:uploadId/:index')
+  uploadChunk(
+    @GetOrgFromRequest() org: Organization,
+    @Param('uploadId') uploadId: string,
+    @Param('index') index: string,
+    @Req() req: Request
+  ) {
+    return this._mediaService.uploadChunk(org.id, uploadId, index, req);
+  }
+
+  @Post('/chunked/:uploadId/complete')
+  completeChunkedUpload(
+    @GetOrgFromRequest() org: Organization,
+    @Param('uploadId') uploadId: string,
+    @Body() body: CompleteChunkedUploadDto
+  ) {
+    return this._mediaService.completeChunkedUpload(org.id, uploadId, body);
+  }
+
+  @Delete('/chunked/:uploadId')
+  abortChunkedUpload(
+    @GetOrgFromRequest() org: Organization,
+    @Param('uploadId') uploadId: string
+  ) {
+    return this._mediaService.abortChunkedUpload(org.id, uploadId);
   }
 
   @Post('/upload-server')

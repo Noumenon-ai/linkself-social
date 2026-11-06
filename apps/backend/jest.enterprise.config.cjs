@@ -10,6 +10,8 @@ module.exports = {
     '<rootDir>/scripts/migrate-upload-origin.spec.ts',
     '<rootDir>/scripts/server-kit.spec.ts',
     '<rootDir>/apps/backend/src/api/routes/studio.responses.spec.ts',
+    '<rootDir>/apps/backend/src/api/routes/media.chunked.spec.ts',
+    '<rootDir>/apps/frontend/src/components/media/studio.upload.spec.ts',
     '<rootDir>/libraries/helpers/src/utils/base-path.spec.ts',
     '<rootDir>/apps/backend/src/services/auth/session.path.spec.ts',
     '<rootDir>/apps/frontend/src/proxy.spec.ts',

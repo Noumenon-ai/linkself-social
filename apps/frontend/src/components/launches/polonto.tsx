@@ -18,6 +18,7 @@ import Toolbar from 'polotno/toolbar/toolbar';
 import ZoomButtons from 'polotno/toolbar/zoom-buttons';
 import { Button } from '@gitroom/react/form/button';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
+import { uploadMedia } from '@gitroom/react/helpers/uppy.upload';
 import { PictureGeneratorSection } from '@gitroom/frontend/components/launches/polonto/polonto.picture.generation';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { loadVars, useVariables } from '@gitroom/react/helpers/variable.context';
@@ -40,6 +41,7 @@ const ActionControls = ({ store }: any) => {
   const close = useContext(CloseContext);
   const [load, setLoad] = useState(false);
   const fetch = useFetch();
+  const { linkselfUrl, storageProvider } = useVariables();
   return (
     <div>
       <Button
@@ -49,14 +51,9 @@ const ActionControls = ({ store }: any) => {
         onClick={async () => {
           setLoad(true);
           const blob = await store.toBlob();
-          const formData = new FormData();
-          formData.append('file', blob, 'media.png');
-          const data = await (
-            await fetch('/media/upload-simple', {
-              method: 'POST',
-              body: formData,
-            })
-          ).json();
+          const data = await uploadMedia(fetch, blob, 'media.png', {
+            linkselfUrl, storageProvider,
+          });
           close.setMedia([
             {
               id: data.id,

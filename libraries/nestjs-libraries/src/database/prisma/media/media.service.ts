@@ -1,4 +1,9 @@
 import { frontendUrl } from '@gitroom/helpers/utils/base-path';
+import { Readable } from 'stream';
+import {
+  StartChunkedUploadDto,
+  CompleteChunkedUploadDto,
+} from '@gitroom/nestjs-libraries/dtos/media/chunked.upload.dto';
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { MediaRepository } from '@gitroom/nestjs-libraries/database/prisma/media/media.repository';
 import { OpenaiService } from '@gitroom/nestjs-libraries/openai/openai.service';
@@ -97,6 +102,47 @@ export class MediaService {
 
   async deleteMedia(org: string, id: string) {
     return this._mediaRepository.deleteMedia(org, id);
+  }
+
+  private chunkedStorage() {
+    if (
+      !process.env.LINKSELF_URL ||
+      !this.storage.startChunkedUpload ||
+      !this.storage.uploadChunk ||
+      !this.storage.completeChunkedUpload ||
+      !this.storage.abortChunkedUpload
+    ) {
+      throw new BadRequestException('Chunked uploads are unavailable');
+    }
+    return this.storage;
+  }
+
+  startChunkedUpload(org: string, body: StartChunkedUploadDto) {
+    return this.chunkedStorage().startChunkedUpload(org, body);
+  }
+
+  uploadChunk(org: string, uploadId: string, index: string, body: Readable) {
+    return this.chunkedStorage().uploadChunk(org, uploadId, index, body);
+  }
+
+  abortChunkedUpload(org: string, uploadId: string) {
+    return this.chunkedStorage().abortChunkedUpload(org, uploadId);
+  }
+
+  async completeChunkedUpload(
+    org: string,
+    uploadId: string,
+    body: CompleteChunkedUploadDto
+  ) {
+    const storage = this.chunkedStorage();
+    const file = await storage.completeChunkedUpload(org, uploadId, body);
+    try {
+      if (body.preventSave === true) return { path: file.path };
+      return await this.saveFile(org, file.filename, file.path, file.originalname);
+    } catch (err) {
+      await storage.removeFile(file.path);
+      throw err;
+    }
   }
 
   getMediaById(id: string) {

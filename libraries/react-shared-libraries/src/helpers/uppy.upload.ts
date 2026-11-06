@@ -3,8 +3,185 @@ import AwsS3Multipart from '@uppy/aws-s3';
 import sha256 from 'sha256';
 import Transloadit from '@uppy/transloadit';
 import { BasePlugin } from '@uppy/core';
+import { fetcher } from '@uppy/utils/lib/fetcher';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const CHUNKED_UPLOAD_THRESHOLD = 3.5 * 1024 * 1024;
+const CHUNK_SIZE = 4 * 1024 * 1024;
+
+export async function uploadMedia(
+  fetch: any,
+  file: Blob,
+  name: string,
+  options: {
+    linkselfUrl?: string;
+    storageProvider: string;
+    endpoint?: 'upload-simple' | 'upload-server';
+    preventSave?: boolean;
+    mimeType?: string;
+    signal?: AbortSignal;
+    onProgress?: (bytes: number) => void;
+  }
+) {
+  const newFetch = async (url: string, init: RequestInit) => {
+    const response = await fetch(url, { ...init, signal: options.signal });
+    if (!response.ok)
+      throw new Error(await response.text().catch(() => 'Upload failed'));
+    return response;
+  };
+  if (
+    !options.linkselfUrl ||
+    options.storageProvider !== 'local' ||
+    file.size <= CHUNKED_UPLOAD_THRESHOLD
+  ) {
+    const formData = new FormData();
+    formData.append('file', file, name);
+    if (options.preventSave) formData.append('preventSave', 'true');
+    const response = await newFetch(
+      `/media/${options.endpoint || 'upload-simple'}`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    options.onProgress?.(file.size);
+    return response.json();
+  }
+
+  const { uploadId } = await (
+    await newFetch('/media/chunked/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        size: file.size,
+        mimeType: options.mimeType || file.type,
+      }),
+    })
+  ).json();
+  try {
+    const partCount = Math.ceil(file.size / CHUNK_SIZE);
+    for (let index = 0; index < partCount; index++) {
+      const end = Math.min(file.size, (index + 1) * CHUNK_SIZE);
+      await newFetch(`/media/chunked/${uploadId}/${index}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: file.slice(index * CHUNK_SIZE, end),
+      });
+      options.onProgress?.(end);
+    }
+    return await (
+      await newFetch(`/media/chunked/${uploadId}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partCount, preventSave: !!options.preventSave }),
+      })
+    ).json();
+  } catch (err) {
+    await fetch(`/media/chunked/${uploadId}`, { method: 'DELETE' }).catch(
+      () => {}
+    );
+    throw err;
+  }
+}
+
+export class LocalChunkedUpload extends BasePlugin<any, any, any> {
+  private requests = new Map<string, AbortController>();
+  private singleUpload: XHRUpload<any, any>;
+
+  constructor(uppy: any, opts: any) {
+    super(uppy, opts);
+    this.id = 'LocalChunkedUpload';
+    this.type = 'uploader';
+    this.singleUpload = new XHRUpload(uppy, {
+      endpoint: `${opts.backendUrl}/media/upload-server`,
+      withCredentials: true,
+    });
+  }
+
+  upload = async (fileIDs: string[]) => {
+    for (const id of fileIDs) {
+      const file = this.uppy.getFile(id);
+      if (!file || file.error || file.progress.uploadComplete) continue;
+      const controller = new AbortController();
+      this.requests.set(id, controller);
+      this.uppy.emit('upload-start', [file]);
+      try {
+        const onProgress = (bytesUploaded: number) => {
+          if (this.uppy.getFile(id))
+            this.uppy.emit('upload-progress', this.uppy.getFile(id), {
+              uploadStarted: file.progress.uploadStarted || Date.now(),
+              bytesUploaded,
+              bytesTotal: file.data.size,
+            });
+        };
+        let body: any;
+        let status = 200;
+        if (file.data.size <= CHUNKED_UPLOAD_THRESHOLD) {
+          const options = this.singleUpload.getOptions(file);
+          const response = await fetcher(options.endpoint as string, {
+            ...options,
+            onBeforeRequest: (xhr, retryCount) =>
+              options.onBeforeRequest?.(xhr, retryCount, [file]),
+            body: this.singleUpload.createFormDataUpload(file, options),
+            signal: controller.signal,
+            onUploadProgress: (event) => {
+              if (event.lengthComputable)
+                onProgress((event.loaded / event.total) * file.data.size);
+            },
+            onTimeout: () =>
+              this.uppy.emit('upload-stalled', new Error('Upload stalled'), [
+                file,
+              ]),
+          });
+          body = JSON.parse(response.responseText);
+          status = response.status;
+        } else {
+          body = await uploadMedia(this.opts.fetch, file.data, file.name, {
+            linkselfUrl: this.opts.linkselfUrl,
+            storageProvider: 'local',
+            endpoint: 'upload-server',
+            mimeType: file.type,
+            signal: controller.signal,
+            onProgress,
+          });
+        }
+        if (this.uppy.getFile(id)) {
+          this.uppy.emit('upload-success', this.uppy.getFile(id), {
+            status,
+            body,
+          });
+        }
+      } catch (err) {
+        if (this.uppy.getFile(id))
+          this.uppy.emit(
+            'upload-error',
+            this.uppy.getFile(id),
+            err instanceof Error ? err : new Error(String(err))
+          );
+      } finally {
+        this.requests.delete(id);
+      }
+    }
+  };
+
+  removed = (file: any) => this.requests.get(file.id)?.abort();
+  cancel = () => this.requests.forEach((request) => request.abort());
+
+  install() {
+    this.uppy.addUploader(this.upload);
+    this.uppy.on('file-removed', this.removed);
+    this.uppy.on('cancel-all', this.cancel);
+  }
+
+  uninstall() {
+    this.cancel();
+    this.uppy.removeUploader(this.upload);
+    this.uppy.off('file-removed', this.removed);
+    this.uppy.off('cancel-all', this.cancel);
+  }
+}
 
 // Keeps a file in the "processing" state after it reached the bucket until the
 // media normalization workflow marks the record ready, the same way
@@ -89,8 +266,14 @@ export class WaitForMediaProcessing extends BasePlugin<any, any, any> {
       // a file that only existed to be converted has nothing to fall back to
       const usable = /\.(png|jpe?g|gif|webp|mp4)$/i.test(media.name || '');
       if (!usable) {
-        this.uppy.info(media.processingError || this.opts.fallbackMessage, 'error', 5000);
-        this.uppy.setFileState(id, { error: media.processingError || 'failed' } as any);
+        this.uppy.info(
+          media.processingError || this.opts.fallbackMessage,
+          'error',
+          5000
+        );
+        this.uppy.setFileState(id, {
+          error: media.processingError || 'failed',
+        } as any);
         this.uppy.emit('postprocess-complete', this.uppy.getFile(id));
         return;
       }
@@ -132,7 +315,8 @@ export const getUppyUploadPlugin = (
   provider: string,
   fetch: any,
   backendUrl: string,
-  transloadit: string[] = []
+  transloadit: string[] = [],
+  linkselfUrl = ''
 ) => {
   switch (provider) {
     case 'transloadit':
@@ -202,6 +386,12 @@ export const getUppyUploadPlugin = (
         },
       };
     case 'local':
+      if (linkselfUrl) {
+        return {
+          plugin: LocalChunkedUpload,
+          options: { fetch, linkselfUrl, backendUrl },
+        };
+      }
       return {
         plugin: XHRUpload,
         options: {

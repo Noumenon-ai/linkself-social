@@ -8,8 +8,10 @@ function renderNginx(template, value = '', linkself = process.env.LINKSELF_URL) 
   }
   // Replace only our marker: nginx variables such as $host must stay intact.
   const uploads = template.match(/        location __LINKSELF_BASE_PATH__\/uploads\/ \{[\s\S]*?\n        \}/)?.[0];
+  const privateUploads = template.match(/        location (?:= |\^~ )__LINKSELF_BASE_PATH__\/uploads\/\.chunked\/? \{[\s\S]*?\n        \}/g) || [];
   const legacy = base && uploads
-    ? uploads.replace('__LINKSELF_BASE_PATH__', '').replace('            alias /uploads/;', '            alias /uploads/;\n            limit_except GET HEAD { deny all; }')
+    ? privateUploads.map((location) => location.replace('__LINKSELF_BASE_PATH__', '')).join('\n\n') + '\n\n' +
+      uploads.replace('__LINKSELF_BASE_PATH__', '').replace('            alias /uploads/;', '            alias /uploads/;\n            limit_except GET HEAD { deny all; }')
     : '';
   return template.replaceAll('__LINKSELF_BASE_PATH__', base)
     .replace('__LINKSELF_API_HEADERS__', linkself ? `proxy_hide_header X-Content-Type-Options;\n            proxy_hide_header Content-Security-Policy;\n            add_header X-Content-Type-Options "nosniff" always;\n            add_header Content-Security-Policy "default-src 'none'; sandbox" always;` : '')

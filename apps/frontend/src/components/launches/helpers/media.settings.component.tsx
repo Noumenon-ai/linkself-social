@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { TopTitle } from '@gitroom/frontend/components/launches/helpers/top.title.component';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
+import { uploadMedia } from '@gitroom/react/helpers/uppy.upload';
 import { hasExtension } from '@gitroom/helpers/utils/has.extension';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
@@ -313,6 +314,7 @@ export const MediaComponentInner: FC<{
   const { onClose, onSelect, media } = props;
   const setActivateExitButton = useLaunchStore((e) => e.setActivateExitButton);
   const newFetch = useFetch();
+  const { linkselfUrl, storageProvider } = useVariables();
   const modals = useModals();
   const [newThumbnail, setNewThumbnail] = useState<string | null>(null);
   const [isEditingThumbnail, setIsEditingThumbnail] = useState(false);
@@ -337,15 +339,9 @@ export const MediaComponentInner: FC<{
     let path = thumbnail || '';
     if (newThumbnail) {
       const blob = await (await fetch(newThumbnail)).blob();
-      const formData = new FormData();
-      formData.append('file', blob, 'media.jpg');
-      formData.append('preventSave', 'true');
-      const data = await (
-        await newFetch('/media/upload-simple', {
-          method: 'POST',
-          body: formData,
-        })
-      ).json();
+      const data = await uploadMedia(newFetch, blob, 'media.jpg', {
+        linkselfUrl, storageProvider, preventSave: true,
+      });
       path = data.path;
     }
 
@@ -363,7 +359,7 @@ export const MediaComponentInner: FC<{
 
     onSelect(media);
     onClose();
-  }, [altText, newThumbnail, thumbnail, thumbnailTimestamp]);
+  }, [altText, newThumbnail, thumbnail, thumbnailTimestamp, linkselfUrl, storageProvider, newFetch]);
 
   return (
     <div className="mt-[10px] flex flex-col gap-[20px]">

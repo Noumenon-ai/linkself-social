@@ -54,6 +54,7 @@ export function useUppyUploader(props: {
     disableImageCompression,
     transloadit,
     mediaProcessing,
+    linkselfUrl,
   } = useVariables();
   const { onUploadSuccess, allowedFileTypes } = props;
   const fetch = useFetch();
@@ -187,7 +188,8 @@ export function useUppyUploader(props: {
       useTransloadit ? 'transloadit' : storageProvider,
       fetch,
       backendUrl,
-      transloadit
+      transloadit,
+      linkselfUrl
     );
 
     uppy2.use(plugin, options);

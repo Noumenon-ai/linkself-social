@@ -27,6 +27,15 @@ export function getMaxSize(mimeType: string): number {
   }
 }
 
+export function uploadOriginalName(name: string, ext: string) {
+  const safeBase =
+    (name || 'upload')
+      .replace(/\.[^./\\]*$/, '')
+      .replace(/[\\/]/g, '_')
+      .slice(0, 100) || 'upload';
+  return `${safeBase}.${ext}`;
+}
+
 // Passes bytes through and fails once they exceed maxSize, so a body with a
 // missing or lying Content-Length cannot be streamed into storage unbounded
 export function maxSizeStream(maxSize: number) {

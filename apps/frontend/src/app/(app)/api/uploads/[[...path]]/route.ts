@@ -36,6 +36,10 @@ export const GET = async (
   if (filePath !== base && !filePath.startsWith(base + sep)) {
     return new NextResponse('Not found', { status: 404 });
   }
+  const temporary = resolve(base, '.chunked');
+  if (filePath === temporary || filePath.startsWith(temporary + sep)) {
+    return new NextResponse('Not found', { status: 404 });
+  }
   const fileStats = statSync(filePath);
   const contentType = mime.getType(filePath) || 'application/octet-stream';
 
