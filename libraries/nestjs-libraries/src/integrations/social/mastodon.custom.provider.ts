@@ -12,16 +12,16 @@ import { Integration } from '@prisma/client';
 
 export class MastodonCustomProvider extends MastodonProvider {
   override identifier = 'mastodon-custom';
-  override name = 'M. Instance';
+  override name = 'Mastodon';
   override maxConcurrentJob = 5; // Custom Mastodon instances typically have generous limits
   editor = 'normal' as const;
 
   async externalUrl(url: string) {
     const form = new FormData();
-    form.append('client_name', 'Postiz');
+    form.append('client_name', 'LinkSelf Social');
     form.append(
       'redirect_uris',
-      `${frontendUrl()}/integrations/social/mastodon`
+      `${frontendUrl()}/integrations/social/${this.identifier}`
     );
     form.append('scopes', this.scopes.join(' '));
     form.append('website', frontendUrl());
@@ -48,8 +48,7 @@ export class MastodonCustomProvider extends MastodonProvider {
       external?.instanceUrl!,
       state,
       external?.client_id!,
-      frontendUrl(),
-      refresh
+      frontendUrl()
     );
 
     return {

@@ -108,7 +108,7 @@ describe('MCP feature availability', () => {
   );
 
   it.each([undefined, '', 'test-key'])(
-    'registers ask_postiz only with a key: %s',
+    'registers ask_linkself only with a key: %s',
     async (key) => {
       if (key === undefined) delete process.env.OPENAI_API_KEY;
       else process.env.OPENAI_API_KEY = key;
@@ -130,9 +130,9 @@ describe('MCP feature availability', () => {
         ([config]) => config
       );
       expect(configs).toHaveLength(3);
-      // Mastra exposes agents.postiz as the catch-all ask_postiz tool.
+      // Mastra exposes agents.linkself as the catch-all ask_linkself tool.
       if (key) {
-        expect(configs[0].agents).toEqual({ postiz: agent });
+        expect(configs[0].agents).toEqual({ linkself: agent });
         expect(configs[0].tools).toHaveProperty('generateImageTool');
         expect(mastra.mastra).toHaveBeenCalledTimes(1);
       } else {

@@ -184,3 +184,14 @@ disable/re-enable operations likewise use ordinary repository calls, not an atom
 The `updateIntegration` return-shape audit searched the whole repository, including backend, orchestrator, public API
 and MCP tools. Its only production caller is `IntegrationService.saveProviderPage`, which ignores the write result and
 returns `{ success: true }`. The write therefore selects only the ID, following the existing credential-boundary pattern.
+
+## Mastodon on any server and the connector name (2026-11-08)
+
+- `mastodon-custom` (shown as "Mastodon" in Add Channel) now returns to its own callback,
+  `/integrations/social/mastodon-custom`, in the app it registers on the user's server, in the sign-in link and in the token
+  exchange. It used to reuse `/integrations/social/mastodon`, which the LinkSelf connection-provider check refuses. The fixed
+  `mastodon` provider still uses `/integrations/social/mastodon`; both read `this.identifier`.
+- Apps registered on a user's server are named "LinkSelf Social".
+- The MCP servers are named "LinkSelf Social", and the catch-all agent tool is `ask_linkself`.
+- The custom sign-in link call no longer passes an ignored fifth argument (a type error under ts-jest).
+- `oauth.path.spec.ts` covers the custom callback, the registration name and the token exchange in all three base-path setups.

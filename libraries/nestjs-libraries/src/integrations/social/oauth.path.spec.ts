@@ -11,6 +11,7 @@ import { KickProvider } from './kick.provider';
 import { LinkedinProvider } from './linkedin.provider';
 import { LinkedinPageProvider } from './linkedin.page.provider';
 import { MastodonProvider } from './mastodon.provider';
+import { MastodonCustomProvider } from './mastodon.custom.provider';
 import { MeweProvider } from './mewe.provider';
 import { PinterestProvider } from './pinterest.provider';
 import { RedditProvider } from './reddit.provider';
@@ -88,5 +89,24 @@ describe.each([
     const expected = new URL(frontend).origin + base + '/integrations/social/' + id;
     // TikTok Business retains its registered trailing slash in both modes.
     expect(callback).toBe(expected + (id === 'tiktok-business' ? '/' : ''));
+  });
+  it('keeps any-server Mastodon on its own callback in the link and the token exchange', async () => {
+    const callback = new URL(frontend).origin + base + '/integrations/social/mastodon-custom';
+    const external = { instanceUrl: 'https://social.example', client_id: 'cid', client_secret: 'secret' } as any;
+    const { url } = await new MastodonCustomProvider().generateAuthUrl(undefined, external);
+    expect(new URL(url).origin).toBe('https://social.example');
+    expect(new URL(url).searchParams.get('redirect_uri')).toBe(callback);
+    await expect(new MastodonCustomProvider().authenticate({ code: 'code', codeVerifier: 'verifier' }, external)).rejects.toThrow();
+    const [target, options] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(target).toBe('https://social.example/oauth/token');
+    expect(options.body.get('redirect_uri')).toBe(callback);
+  });
+  it('registers any-server Mastodon apps as LinkSelf Social with that callback', async () => {
+    (global.fetch as jest.Mock).mockImplementation(async () => ({ json: async () => ({ client_id: 'cid', client_secret: 'secret', id: '1' }) }));
+    await expect(new MastodonCustomProvider().externalUrl('https://social.example')).resolves.toEqual({ client_id: 'cid', client_secret: 'secret' });
+    const [target, options] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(target).toBe('https://social.example/api/v1/apps');
+    expect(options.body.get('client_name')).toBe('LinkSelf Social');
+    expect(options.body.get('redirect_uris')).toBe(new URL(frontend).origin + base + '/integrations/social/mastodon-custom');
   });
 });
