@@ -105,6 +105,14 @@ export class IntegrationManager {
       .includes(identifier);
   }
 
+  isSoonProvider(identifier: string) {
+    return (process.env.LINKSELF_SOON_PROVIDERS || '')
+      .split(',')
+      .map((provider) => provider.trim().toLowerCase())
+      .filter(Boolean)
+      .includes(identifier.trim().toLowerCase());
+  }
+
   // Note: a target provider that implements `reConnect` is not supported - the
   // connect callback would run reConnect with the old app-scoped id before the
   // migration is attempted.
@@ -150,6 +158,7 @@ export class IntegrationManager {
           .map(async (p) => ({
             name: p.name,
             identifier: p.identifier,
+            ...(this.isSoonProvider(p.identifier) ? { soon: true } : {}),
             toolTip: p.toolTip,
             editor: p.editor,
             isExternal: !!p.externalUrl,

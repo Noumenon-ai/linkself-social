@@ -249,7 +249,7 @@ export class IntegrationsController {
     @Req() req?: Request
   ) {
     if (process.env.LINKSELF_URL) this._integrationService.validateReturnPath(redirectUrl);
-    await this._integrationService.assertCanConnect(org.id, integration, refresh);
+    await this._integrationService.assertCanConnect(org.id, integration, refresh, true);
 
     if (
       !this._integrationManager

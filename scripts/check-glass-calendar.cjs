@@ -962,6 +962,19 @@ check(
 );
 linkselfUrl = 'https://example.test';
 
+for (const isMobile of [false, true]) {
+  const choices = providerChoices.map((item, index) => ({ ...item, soon: index === 1 }));
+  const picker = AddProviderComponent({ social: choices, article: [], invite: false, isMobile });
+  const tiles = nodes(picker).filter((n) => n.props.role === 'button');
+  check(tiles.length === choices.length, 'Soon tiles retain their grid position');
+  const soonTile = tiles[1];
+  check(soonTile.type === 'button' && soonTile.props.disabled === true, 'Soon tile is a disabled native button');
+  check(soonTile.props['aria-disabled'] === true && soonTile.props['aria-label'] === 'Network 1 (coming soon)', 'Soon tile has an accessible disabled name');
+  check(text(soonTile).includes('Soon'), 'Soon tile displays its badge');
+  check(soonTile.props.onClick === undefined && soonTile.props.onKeyDown === undefined, 'Soon tile has no mouse or keyboard click handlers');
+  check(tiles[0].props.disabled === false && typeof tiles[0].props.onClick === 'function', 'Available tiles retain their connect handler');
+}
+
 let requests = 0;
 let opened;
 const { NewPost } = component(

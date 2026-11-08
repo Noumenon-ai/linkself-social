@@ -35,6 +35,7 @@ import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import { ioRedis } from '@gitroom/nestjs-libraries/redis/redis.service';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
 import { ProviderNotEnabled } from '@gitroom/nestjs-libraries/integrations/provider.not.enabled';
+import { ProviderComingSoon } from '@gitroom/nestjs-libraries/integrations/provider.coming.soon';
 import { OrganizationService } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.service';
 import { IntegrationService } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.service';
 import { PostsService } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.service';
@@ -283,7 +284,8 @@ export class EnterpriseController {
       await this._integrationService.assertCanConnect(
         org.id,
         load.provider,
-        load.refreshId
+        load.refreshId,
+        true
       );
 
       if (
@@ -328,6 +330,7 @@ export class EnterpriseController {
     } catch (err) {
       if (
         err instanceof ProviderNotEnabled ||
+        err instanceof ProviderComingSoon ||
         err instanceof ForbiddenException
       ) {
         throw err;

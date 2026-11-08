@@ -210,3 +210,19 @@ with only `{ apiKey }` for the current live organization. LinkSelf can use this 
 key after rotation and retry its request. Requests use the existing shared secret, are short-lived and single-use,
 and identify the organization. Invalid requests and unavailable organizations receive the same generic 400 response.
 The route returns 404 outside LinkSelf mode. Existing key generation, rotation and other enterprise routes are unchanged.
+
+## Coming-soon networks (2026-11-08)
+
+`LINKSELF_SOON_PROVIDERS` is a comma-separated list of provider identifiers, trimmed and matched
+case-insensitively. For example, `facebook,instagram,instagram-standalone,threads` marks both Instagram
+connection options as well as Facebook and Threads as coming soon. No provider names are built into the policy.
+When unset or empty, the provider catalog and connection behavior are unchanged.
+
+Configured providers retain their existing catalog order and metadata, with `soon: true` added; existing enabled
+and hidden-provider filters still apply. Add Channel displays them as disabled buttons with muted opacity,
+grayscale icons and a Soon badge, retaining the glass frame styling and accessible coming-soon names.
+
+Starting a new connection through `GET /integrations/social/:integration` or `POST /enterprise/url` returns
+HTTP 400 with "This network is coming soon". Reconnects of existing channels remain available through `refresh`
+or enterprise `refreshId`, and existing channels can continue posting. Callbacks for previously issued connection
+states are unchanged. Removing an identifier from the variable makes its tile connectable again.

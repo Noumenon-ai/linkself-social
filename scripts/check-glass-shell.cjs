@@ -962,6 +962,7 @@ async function main() {
     return { identifier, variables, html: render(CustomVariables, {identifier, variables, gotoUrl() {}}) };
   });
   const channelChoices = [...ownKeyForms.map(({identifier}) => ({ identifier, name: identifier === 'wordpress' ? 'WordPress' : identifier })), ...Array.from({length: 14}, (_, index) => ({identifier: `network-${index}`, name: `Network ${index}`}))];
+  channelChoices[8].soon = true;
   const channelGrid = render(AddProviderComponent, {social: channelChoices, article: [], invite: false});
   const channelModal = html => `<div class="glass-modal" style="width:min(900px,calc(100vw - 32px));margin:16px auto;padding:16px">${html}</div>`;
   const config = require('../apps/frontend/tailwind.config.cjs');
@@ -1004,6 +1005,18 @@ async function main() {
         return grid.scrollWidth <= grid.clientWidth && tiles.every(tile => tile.left >= rect.left - 1 && tile.right <= rect.right + 1 && tile.height >= 44) && tiles.every((tile, index) => tiles.slice(index + 1).every(other => tile.right <= other.left + 1 || other.right <= tile.left + 1 || tile.bottom <= other.top + 1 || other.bottom <= tile.top + 1));
       });
       check(tilesFit, `${width}: Add Channel tiles fit without overlap`);
+      const soonTile = page.getByRole('button', {name: 'Network 1 (coming soon)', exact: true});
+      check(await soonTile.isDisabled() && await soonTile.getAttribute('aria-disabled') === 'true', `${width}: Soon tile is disabled with an accessible name`);
+      check(await soonTile.locator('.glass-provider-soon').textContent() === 'Soon', `${width}: Soon badge is visible`);
+      const soonStyle = await soonTile.evaluate(node => {
+        const style = getComputedStyle(node);
+        return {opacity: Number(style.opacity), cursor: style.cursor, transform: style.transform, filter: getComputedStyle(node.querySelector('img')).filter};
+      });
+      check(soonStyle.opacity < 1 && soonStyle.cursor === 'not-allowed' && soonStyle.filter === 'grayscale(1)', `${width}: Soon tile is muted with a grayscale icon`);
+      await soonTile.hover();
+      check(await soonTile.evaluate(node => getComputedStyle(node).transform) === 'none', `${width}: Soon tile does not lift on hover`);
+      await soonTile.evaluate(node => node.focus());
+      check(await soonTile.evaluate(node => document.activeElement !== node), `${width}: Disabled tile cannot receive keyboard focus`);
       for (const form of ownKeyForms) {
         await page.setContent(doc(channelModal(form.html)));
         check(await page.locator('input').count() === form.variables.length, `${width}: ${form.identifier} renders every field`);

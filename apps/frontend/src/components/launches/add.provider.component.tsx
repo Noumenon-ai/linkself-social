@@ -425,6 +425,7 @@ export const AddProviderComponent: FC<{
     identifier: string;
     name: string;
     toolTip?: string;
+    soon?: boolean;
     isExternal: boolean;
     isWeb3: boolean;
     isChromeExtension?: boolean;
@@ -780,18 +781,14 @@ export const AddProviderComponent: FC<{
               );
             })
             .map((item) => (
-              <div
+              <button
                 key={item.identifier}
+                type="button"
                 role="button"
-                tabIndex={0}
-                aria-label={item.name}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    event.currentTarget.click();
-                  }
-                }}
-                onClick={getSocialLink(
+                disabled={item.soon}
+                aria-disabled={item.soon || undefined}
+                aria-label={item.soon ? `${item.name} (coming soon)` : item.name}
+                onClick={item.soon ? undefined : getSocialLink(
                   props.invite,
                   item.identifier,
                   item.isExternal,
@@ -812,10 +809,11 @@ export const AddProviderComponent: FC<{
                   isMobile
                     ? 'flex-row h-[72px] p-[16px]'
                     : 'flex-col p-[10px] h-[100px] justify-center mobile:text-[13px] mobile:leading-[1.2]',
-                  'w-full text-[14px] rounded-[8px] bg-newTableHeader text-textColor relative items-center flex gap-[10px] cursor-pointer'
+                  'w-full text-[14px] rounded-[8px] bg-newTableHeader text-textColor relative items-center flex gap-[10px]',
+                  item.soon ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
                 )}
               >
-                <div>
+                <div className={item.soon ? 'grayscale' : undefined}>
                   {item.identifier === 'youtube' ? (
                     <img src={withBasePath(`/icons/platforms/youtube.svg`)} />
                   ) : (
@@ -838,7 +836,7 @@ export const AddProviderComponent: FC<{
                   {linkselfUrl && item.toolTip
                     ? item.name.replace(/\s*\([^)]*\)\s*$/, '')
                     : item.name}
-                  {!!item.toolTip && !isMobile && (
+                  {!!item.toolTip && !isMobile && !item.soon && (
                     <svg
                       width="15"
                       height="15"
@@ -854,7 +852,12 @@ export const AddProviderComponent: FC<{
                     </svg>
                   )}
                 </div>
-              </div>
+                {item.soon && (
+                  <span className="glass-provider-soon absolute top-[4px] end-[4px] rounded-full px-[6px] text-[10px] leading-[16px] border border-current">
+                    {t('soon', 'Soon')}
+                  </span>
+                )}
+              </button>
             ))}
         </div>
       </div>

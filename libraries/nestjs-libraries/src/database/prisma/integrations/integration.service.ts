@@ -12,6 +12,7 @@ import {
 import { IntegrationRepository } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.repository';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
 import { ProviderNotEnabled } from '@gitroom/nestjs-libraries/integrations/provider.not.enabled';
+import { ProviderComingSoon } from '@gitroom/nestjs-libraries/integrations/provider.coming.soon';
 import {
   AnalyticsData,
   SocialProvider,
@@ -216,7 +217,12 @@ export class IntegrationService {
 
   // Only connection entry points use this policy. Provider lookup stays
   // unrestricted for posting, analytics, deletion and token refresh.
-  async assertCanConnect(org: string, identifier: string, refresh?: string) {
+  async assertCanConnect(
+    org: string,
+    identifier: string,
+    refresh?: string,
+    startingConnection = false
+  ) {
     if (refresh) {
       const existing =
         await this._integrationRepository.getIntegrationByInternalId(
@@ -235,6 +241,10 @@ export class IntegrationService {
       }
     }
 
+    // Only URL entry points opt in; previously issued callbacks remain valid.
+    if (startingConnection && this._integrationManager.isSoonProvider(identifier)) {
+      throw new ProviderComingSoon();
+    }
     if (!this._integrationManager.isEnabledProvider(identifier)) {
       throw new ProviderNotEnabled(identifier);
     }

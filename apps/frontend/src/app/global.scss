@@ -2378,6 +2378,19 @@ html[data-linkself-theme='glass-frame'] {
     align-items: center;
     justify-content: center;
   }
+  body .glass-provider-tile:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .glass-provider-tile:disabled img {
+    filter: grayscale(1);
+  }
+  .glass-provider-soon {
+    border-color: var(--input-border);
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+  }
   .glass-provider-tile img {
     width: 28px;
     height: 28px;
