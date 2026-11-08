@@ -90,6 +90,11 @@ export class OrganizationService {
     return this._organizationRepository.updateApiKey(orgId);
   }
 
+  async getCurrentApiKey(orgId: string) {
+    const organization = await this._organizationRepository.getCurrentApiKey(orgId);
+    return organization?.apiKey ?? null;
+  }
+
   getTeam(orgId: string) {
     return this._organizationRepository.getTeam(orgId);
   }

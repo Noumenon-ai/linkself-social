@@ -187,7 +187,8 @@ returns `{ success: true }`. The write therefore selects only the ID, following 
 
 ## Mastodon on any server and the connector name (2026-11-08)
 
-- `mastodon-custom` (shown as "Mastodon" in Add Channel) now returns to its own callback,
+- `mastodon-custom` is not registered in the provider list (upstream has kept it commented out since 2024-10-05), so it
+  does not appear in Add Channel. If it is ever enabled, it now returns to its own callback,
   `/integrations/social/mastodon-custom`, in the app it registers on the user's server, in the sign-in link and in the token
   exchange. It used to reuse `/integrations/social/mastodon`, which the LinkSelf connection-provider check refuses. The fixed
   `mastodon` provider still uses `/integrations/social/mastodon`; both read `this.identifier`.
@@ -195,3 +196,17 @@ returns `{ success: true }`. The write therefore selects only the ID, following 
 - The MCP servers are named "LinkSelf Social", and the catch-all agent tool is `ask_linkself`.
 - The custom sign-in link call no longer passes an ignored fifth argument (a type error under ts-jest).
 - `oauth.path.spec.ts` covers the custom callback, the registration name and the token exchange in all three base-path setups.
+
+## LinkSelf Agents setup and API key synchronization (2026-11-08)
+
+In LinkSelf mode, Settings > Agents uses LinkSelf Social wording and the existing glass frame. It offers client
+configuration with `linkself` server names, plus Setup guides at the LinkSelf `/ai-agents` page. Official directory
+connectors, upstream CLI and skills instructions, and the n8n node link are hidden. The public API section retains
+key reveal, copy and rotation, and links to the Postiz API reference with open-source attribution. Upstream mode
+keeps its existing content and behavior.
+
+With `LINKSELF_URL` configured, `POST /enterprise/api-key` accepts a signed `{ params }` request and returns HTTP 200
+with only `{ apiKey }` for the current live organization. LinkSelf can use this to synchronize its stored workspace
+key after rotation and retry its request. Requests use the existing shared secret, are short-lived and single-use,
+and identify the organization. Invalid requests and unavailable organizations receive the same generic 400 response.
+The route returns 404 outside LinkSelf mode. Existing key generation, rotation and other enterprise routes are unchanged.

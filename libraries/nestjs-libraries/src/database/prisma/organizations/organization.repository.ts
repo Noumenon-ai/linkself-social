@@ -259,6 +259,13 @@ export class OrganizationRepository {
     });
   }
 
+  getCurrentApiKey(orgId: string) {
+    return this._organization.model.organization.findFirst({
+      where: { id: orgId, deletedAt: null },
+      select: { apiKey: true },
+    });
+  }
+
   async getOrgsByUserId(userId: string) {
     return this._organization.model.organization.findMany({
       where: {

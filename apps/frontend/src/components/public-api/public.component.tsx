@@ -92,7 +92,8 @@ export const getMcpConfig = (
   auth: McpAuth,
   mcpBase: string,
   apiKey: string,
-  headerOnly = false
+  headerOnly = false,
+  appName = APP_NAME
 ): { config: string; hint: string } => {
   if (headerOnly && (isRemoteMcpClient(client) || client === 'NanoClaw')) {
     return {
@@ -179,7 +180,7 @@ export const getMcpConfig = (
       case 'NanoClaw':
         return {
           config: `ncl groups config add-mcp-server --id <group-id> --name linkself --url ${oauthUrl}`,
-          hint: `Run this in your terminal, replace <group-id> with the agent group that should get ${APP_NAME}.`,
+          hint: `Run this in your terminal, replace <group-id> with the agent group that should get ${appName}.`,
         };
     }
   }
@@ -278,7 +279,7 @@ export const getMcpConfig = (
       // No headers flag, the key travels inside the URL like remote clients
       return {
         config: `ncl groups config add-mcp-server --id <group-id> --name linkself --url ${mcpBase}/mcp/${apiKey}`,
-        hint: `Run this in your terminal, replace <group-id> with the agent group that should get ${APP_NAME}.`,
+        hint: `Run this in your terminal, replace <group-id> with the agent group that should get ${appName}.`,
       };
   }
 };
@@ -330,7 +331,7 @@ const McpSection = ({
   const apiKeyOnly = requiresMcpApiKey(backendUrl, mcpUrl);
   const hideUpstream = !!linkselfUrl || apiKeyOnly;
   const [activeClient, setActiveClient] = useState<AnyMcpClient>('Claude');
-  const officialConnectors = !apiKeyOnly && (billingEnabled || isSelfHosted);
+  const officialConnectors = !hideUpstream && (billingEnabled || isSelfHosted);
   // the directory connectors come first wherever they work
   const tabs: Array<'official' | McpAuth> = apiKeyOnly ? ['apikey'] : officialConnectors
     ? ['official', 'oauth', 'apikey']
@@ -344,7 +345,8 @@ const McpSection = ({
     auth,
     mcpBase,
     user.publicApi,
-    apiKeyOnly
+    apiKeyOnly,
+    linkselfUrl ? 'LinkSelf Social' : APP_NAME
   );
 
   const baseUrl = auth === 'oauth' ? getMcpOauthUrl(mcpBase) : `${mcpBase}/mcp`;
@@ -367,7 +369,10 @@ const McpSection = ({
             {t('mcp_client_configuration', 'MCP Client Configuration')}
           </div>
           <div className="text-[13px] text-customColor18 mt-[2px]">
-            {t(
+            {linkselfUrl ? t(
+              'linkself_mcp_description',
+              'Connect your AI tool to LinkSelf Social to schedule posts faster'
+            ) : t(
               'connect_your_mcp_client_to_postiz_to_schedule_your_posts_faster',
               `Connect ${APP_NAME} MCP server to your client (Http streaming) to schedule your posts faster.`
             )}
@@ -394,14 +399,14 @@ const McpSection = ({
               </a>
             </>
           )}
-          {!hideUpstream && (
+          {(linkselfUrl || !hideUpstream) && (
             <a
               className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
-              href="https://docs.postiz.com/mcp/introduction"
+              href={linkselfUrl ? `${linkselfUrl.replace(/\/+$/, '')}/ai-agents` : 'https://docs.postiz.com/mcp/introduction'}
               target="_blank"
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-              {t('read_the_docs', 'Docs')}
+              {linkselfUrl ? t('linkself_setup_guides', 'Setup guides') : t('read_the_docs', 'Docs')}
             </a>
           )}
         </div>
@@ -428,7 +433,9 @@ const McpSection = ({
                   {m === 'official'
                     ? t('official_connector', 'Official connector')
                     : m === 'oauth'
-                    ? t('sign_in_no_api_key', `Sign in with ${APP_NAME} (no API key)`)
+                    ? linkselfUrl
+                      ? t('linkself_sign_in_no_api_key', 'Sign in with LinkSelf Social (no API key)')
+                      : t('sign_in_no_api_key', `Sign in with ${APP_NAME} (no API key)`)
                     : t('api_key', 'API Key')}
                 </button>
               ))}
@@ -505,7 +512,10 @@ const McpSection = ({
             {hint}
             {auth === 'oauth' &&
               !chatOnly &&
-              ` ${t(
+              ` ${linkselfUrl ? t(
+                'linkself_oauth_sign_in_hint',
+                'Your agent will open a browser window to sign in to LinkSelf Social.'
+              ) : t(
                 'oauth_sign_in_hint',
                 `Your agent will open a browser window to sign in to ${APP_NAME}.`
               )}`}
@@ -786,7 +796,10 @@ const PublicApiContent = () => {
           'Use your API Key to automate your own account.'
         )}
         <br />
-        {t(
+        {linkselfUrl ? t(
+          'linkself_api_auth_note_line2',
+          'If you are building a product that schedules posts on behalf of other LinkSelf Social users,'
+        ) : t(
           'api_auth_note_line2',
           `If you are building a product that schedules posts on behalf of other ${APP_NAME} users,`
         )}
@@ -805,24 +818,27 @@ const PublicApiContent = () => {
         <div className="bg-newBgColorInner px-[20px] mobile:px-[14px] py-[14px] border-b border-newBorder flex items-start justify-between gap-[12px] mobile:flex-col">
           <div>
             <div className="text-[15px] font-[600]">
-              {t('api_key', 'API Key')}
+              {linkselfUrl ? t('linkself_api_heading', 'Use the LinkSelf Social API with your tools') : t('api_key', 'API Key')}
             </div>
             <div className="text-[13px] text-customColor18 mt-[2px]">
-              {t(
+              {linkselfUrl ? t(
+                'linkself_api_description',
+                'Copy your API key to connect your tools.'
+              ) : t(
                 'use_postiz_api_to_integrate_with_your_tools',
                 `Use ${APP_NAME} API to integrate with your tools.`
               )}
             </div>
           </div>
-          <div className="flex flex-wrap gap-[6px] shrink-0 pt-[2px]">
-            {!hideUpstream && (
+          <div className={linkselfUrl ? "flex flex-wrap gap-[6px] pt-[2px]" : "flex flex-wrap gap-[6px] shrink-0 pt-[2px]"}>
+            {(linkselfUrl || !hideUpstream) && (
               <a
-                className="cursor-pointer px-[16px] h-[36px] glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]"
+                className={`cursor-pointer px-[16px] ${linkselfUrl ? 'min-h-[36px] py-[8px]' : 'h-[36px]'} glass-accent bg-[var(--studio-accent,#612BD3)] hover:bg-[var(--studio-hover,#5520CB)] text-white transition-colors rounded-[8px] text-[13px] font-[600] flex items-center gap-[6px]`}
                 href="https://docs.postiz.com/public-api"
                 target="_blank"
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-              {t('read_the_docs', 'Docs')}
+                {linkselfUrl ? t('linkself_api_reference', 'API reference (LinkSelf Social is built on the open-source Postiz)') : t('read_the_docs', 'Docs')}
               </a>
             )}
             {!hideUpstream && (
@@ -902,7 +918,7 @@ const PublicApiContent = () => {
                 <path d="M21.5 2v6h-6" />
                 <path d="M21.34 15.57a10 10 0 11-.57-8.38L21.5 8" />
               </svg>
-              {t('rotate_key', 'Rotate Key')}
+              {linkselfUrl ? t('linkself_rotate_api_key', 'Rotate API Key') : t('rotate_key', 'Rotate Key')}
             </button>
             <button
               type="button"

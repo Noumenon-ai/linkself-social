@@ -2,6 +2,10 @@ import { randomUUID } from 'crypto';
 import { frontendUrl, publicApiUrl } from '@gitroom/helpers/utils/base-path';
 import { OrganizationLimitsService } from '@gitroom/nestjs-libraries/database/prisma/organization-limits/organization.limits.service';
 import {
+  EnterpriseApiKeyClaims,
+  EnterpriseApiKeyRequestDto,
+} from '@gitroom/nestjs-libraries/dtos/enterprise/enterprise.api-key.dto';
+import {
   EnterpriseLimitsRequestDto,
   OrganizationLimitsDto,
 } from '@gitroom/nestjs-libraries/dtos/enterprise/organization.limits.dto';
@@ -9,6 +13,8 @@ import {
   BadRequestException,
   ForbiddenException,
   HttpCode,
+  NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -155,6 +161,66 @@ export class EnterpriseController {
       throw new BadRequestException('Invalid limits token');
     }
     return this._limitsService.set(payload);
+  }
+
+  @Post('/api-key')
+  @HttpCode(200)
+  @UseGuards({
+    canActivate: () => {
+      if (!process.env.LINKSELF_URL) throw new NotFoundException();
+      return true;
+    },
+  })
+  async getApiKey(@Body() body: EnterpriseApiKeyRequestDto) {
+    if (!process.env.LINKSELF_URL) throw new NotFoundException();
+
+    let reason = 'invalid token';
+    try {
+      const payload = this.verifyEnterpriseToken<EnterpriseApiKeyClaims>(
+        body.params
+      );
+      reason = 'invalid claims';
+      const now = Math.floor(Date.now() / 1000);
+      const claims = ['organizationId', 'iat', 'exp', 'jti'];
+      if (
+        Object.keys(payload).some((key) => !claims.includes(key)) ||
+        typeof payload.organizationId !== 'string' ||
+        !payload.organizationId ||
+        typeof payload.jti !== 'string' ||
+        !payload.jti ||
+        !Number.isInteger(payload.iat) ||
+        !Number.isInteger(payload.exp) ||
+        payload.exp <= now ||
+        payload.exp <= payload.iat ||
+        payload.iat > now + 30 || // allows a small clock difference with LinkSelf
+        payload.exp - payload.iat > 60
+      ) {
+        throw new Error();
+      }
+
+      reason = 'replayed token or replay store unavailable';
+      if (
+        (await ioRedis.set(
+          `enterprise-api-key:${payload.jti}`,
+          '1',
+          'EX',
+          120,
+          'NX'
+        )) !== 'OK'
+      ) {
+        throw new Error();
+      }
+
+      reason = 'organization unavailable';
+      const apiKey = await this._organizationService.getCurrentApiKey(
+        payload.organizationId
+      );
+      if (!apiKey) throw new Error();
+      return { apiKey };
+    } catch {
+      this.logger.warn(`Enterprise API key request rejected: ${reason}`);
+      throw new BadRequestException('Invalid API key token');
+    }
   }
 
   @Post('/create-user')
