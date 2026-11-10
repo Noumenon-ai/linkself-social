@@ -578,7 +578,9 @@ describe.each(['', '/dashboard/studio'])('Studio connection sessions %s', (base)
   const env = { ...process.env };
   let service: IntegrationService;
   const data = new Map<string, string>();
-  const session = (id: string) => sign({ id, providerName: 'LOCAL' }, process.env.JWT_SECRET!);
+  // One member's cookie is the same text every time it is presented, so the issue time is fixed.
+  // Signed twice without it, the two texts differ whenever the clock passes a full second in between.
+  const session = (id: string) => sign({ id, providerName: 'LOCAL', iat: 1767225600 }, process.env.JWT_SECRET!);
   beforeEach(() => {
     process.env.LINKSELF_URL = 'https://linkself.test';
     process.env.LINKSELF_BASE_PATH = base;
